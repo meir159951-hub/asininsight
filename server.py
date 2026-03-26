@@ -78,6 +78,33 @@ def checkout_pro():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/checkout/agency", methods=["POST"])
+def checkout_agency():
+    try:
+        base_url = request.host_url.rstrip("/")
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            line_items=[{
+                "price_data": {
+                    "currency": "usd",
+                    "product_data": {
+                        "name": "ASINInsight Agency",
+                        "description": "Unlimited ASINs, white-label reports, API access, priority support"
+                    },
+                    "unit_amount": 19900,  # $199.00
+                    "recurring": {"interval": "month"},
+                },
+                "quantity": 1,
+            }],
+            success_url=f"{base_url}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{base_url}/cancel",
+        )
+        return redirect(checkout_session.url, code=303)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/checkout/free", methods=["POST"])
 def checkout_free():
     session["plan"] = "free"
