@@ -1,0 +1,788 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASINInsight — Find out why your Amazon sales stalled</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0f172a;
+      --navy2: #1e293b;
+      --blue: #2563eb;
+      --blue2: #1d4ed8;
+      --blue-light: #eff6ff;
+      --blue-border: #bfdbfe;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --white: #ffffff;
+      --green: #059669;
+      --green-bg: #ecfdf5;
+      --red: #dc2626;
+      --yellow: #d97706;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(15,23,42,0.10);
+      --shadow-lg: 0 16px 48px rgba(15,23,42,0.16);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--navy);
+    }
+    .logo span { color: var(--blue); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--blue);
+      color: var(--white) !important;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-weight: 600 !important;
+      font-size: 14px !important;
+      transition: background 0.15s, transform 0.1s !important;
+    }
+    .nav-cta:hover { background: var(--blue2) !important; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, var(--navy) 0%, #1e3a8a 55%, #1d4ed8 100%);
+      color: var(--white);
+      padding: 96px 24px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.25), transparent 60%);
+    }
+    .hero-inner { max-width: 760px; margin: 0 auto; position: relative; }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 900;
+      line-height: 1.07;
+      letter-spacing: -0.04em;
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, #93c5fd, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      font-size: 18px;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.72);
+      max-width: 580px;
+      margin: 0 auto 36px;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 56px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--white);
+      color: var(--navy);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.25); }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: rgba(255,255,255,0.85);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      border: 1px solid rgba(255,255,255,0.25);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .hero-stat strong {
+      display: block;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+    .hero-stat span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* ── SECTION SHELL ── */
+    .section { padding: 88px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+    .section-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--blue);
+      background: var(--blue-light);
+      border: 1px solid var(--blue-border);
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 14px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.65;
+    }
+    .section-head { margin-bottom: 56px; }
+    .section-head.center { text-align: center; }
+    .section-head.center .section-sub { margin: 0 auto; }
+
+    /* ── HOW IT WORKS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--blue);
+      color: var(--white);
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .step h3 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .step p { font-size: 15px; color: var(--muted); line-height: 1.65; }
+
+    /* ── FEATURES ── */
+    .features-bg { background: #f8fafc; }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .feature-icon {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+    .feature-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── BLOCKERS PREVIEW ── */
+    .blockers-demo {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .blockers-demo-header {
+      background: var(--navy);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .demo-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .demo-dot.red { background: #ef4444; }
+    .demo-dot.yellow { background: #f59e0b; }
+    .demo-dot.green { background: #10b981; }
+    .demo-url {
+      flex: 1;
+      background: rgba(255,255,255,0.1);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+    .demo-body { padding: 24px; display: grid; gap: 12px; }
+    .demo-blocker {
+      padding: 14px 16px;
+      border-radius: 10px;
+      border-left: 4px solid;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .demo-blocker.critical { border-left-color: var(--red); background: #fff5f5; }
+    .demo-blocker.high { border-left-color: var(--yellow); background: #fffbeb; }
+    .demo-blocker.medium { border-left-color: var(--blue); background: var(--blue-light); }
+    .demo-blocker-title { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+    .demo-blocker-desc { font-size: 13px; color: var(--muted); }
+    .demo-sev {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+    .demo-sev.critical { background: #fee2e2; color: var(--red); }
+    .demo-sev.high { background: #fef3c7; color: var(--yellow); }
+    .demo-sev.medium { background: var(--blue-light); color: var(--blue); }
+
+    /* ── PRICING ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+    .price-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 32px 28px;
+      background: var(--white);
+      position: relative;
+    }
+    .price-card.featured {
+      border-color: var(--blue);
+      border-width: 2px;
+      background: var(--navy);
+      color: var(--white);
+    }
+    .price-card.featured .price-sub,
+    .price-card.featured .price-feature { color: rgba(255,255,255,0.65); }
+    .price-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--blue);
+      color: var(--white);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .price-name {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+    .price-card.featured .price-name { color: #93c5fd; }
+    .price-amount {
+      font-size: 44px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .price-features { list-style: none; display: grid; gap: 10px; margin-bottom: 28px; }
+    .price-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .price-card.featured .price-feature { color: rgba(255,255,255,0.75); }
+    .price-check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .price-card.featured .price-check { color: #6ee7b7; }
+    .btn-plan {
+      display: block;
+      text-align: center;
+      padding: 13px 20px;
+      border-radius: 9px;
+      font-weight: 700;
+      font-size: 15px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 2px solid var(--blue);
+      color: var(--blue);
+      background: transparent;
+    }
+    .btn-plan:hover { background: var(--blue-light); transform: translateY(-1px); }
+    .btn-plan.filled {
+      background: var(--blue);
+      color: var(--white);
+      border-color: var(--blue);
+    }
+    .btn-plan.filled:hover { background: var(--blue2); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+    .price-card.featured .btn-plan {
+      background: var(--white);
+      color: var(--navy);
+      border-color: var(--white);
+    }
+    .price-card.featured .btn-plan:hover { background: #f1f5f9; }
+
+    /* ── SOCIAL PROOF ── */
+    .testimonials-bg { background: #f8fafc; }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .testimonial {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .testimonial-stars { color: #f59e0b; font-size: 16px; margin-bottom: 14px; }
+    .testimonial-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 20px;
+      font-style: italic;
+    }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .testimonial-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--blue), #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+    }
+    .testimonial-name { font-size: 14px; font-weight: 700; }
+    .testimonial-role { font-size: 12px; color: var(--muted); }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+      background: linear-gradient(135deg, var(--navy), #1e3a8a);
+      padding: 88px 24px;
+      text-align: center;
+      color: var(--white);
+    }
+    .cta-band h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      margin-bottom: 16px;
+    }
+    .cta-band p { font-size: 17px; color: rgba(255,255,255,0.65); margin-bottom: 36px; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.5);
+      padding: 40px 24px;
+    }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .footer-logo { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: -0.03em; }
+    .footer-logo span { color: #60a5fa; }
+    footer p { font-size: 13px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .steps, .features-grid, .pricing-grid, .testimonials-grid {
+        grid-template-columns: 1fr;
+      }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <div class="logo">ASIN<span>Insight</span></div>
+      <ul class="nav-links">
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="/tool" class="nav-cta">Try for Free →</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-tag">⚡ Instant ASIN Diagnosis</div>
+      <h1>Find out <em>exactly</em> why your<br>Amazon sales stalled</h1>
+      <p class="hero-sub">Upload your seller data and get a prioritized list of growth blockers in seconds. No spreadsheets, no guesswork — just the fix.</p>
+      <div class="hero-actions">
+        <a href="/tool" class="btn-primary">▶ Start Free Analysis</a>
+        <a href="#how" class="btn-ghost">See how it works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><strong>60s</strong><span>Time to first insight</span></div>
+        <div class="hero-stat"><strong>9+</strong><span>Metrics analyzed</span></div>
+        <div class="hero-stat"><strong>100%</strong><span>Private — runs in your browser</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag">How it works</div>
+        <h2 class="section-title">Three steps to your growth plan</h2>
+        <p class="section-sub">No setup required. Upload, analyze, and leave with a clear order of work.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Export your data</h3>
+          <p>Download your Business Report from Amazon Seller Central as a CSV. Takes less than a minute.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Upload and analyze</h3>
+          <p>Drop the file into ASINInsight. The tool reads your metrics and scores every ASIN automatically.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Fix the right thing first</h3>
+          <p>Get a ranked list of blockers with specific next actions. Know exactly what to fix this week.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEMO PREVIEW -->
+  <section class="section" style="padding-top:0; background:#f8fafc;">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag">Live example</div>
+        <h2 class="section-title">What your diagnosis looks like</h2>
+        <p class="section-sub">Real blockers, real severity, real next steps — ranked so you know where to start.</p>
+      </div>
+      <div class="blockers-demo">
+        <div class="blockers-demo-header">
+          <div class="demo-dot red"></div>
+          <div class="demo-dot yellow"></div>
+          <div class="demo-dot green"></div>
+          <div class="demo-url">ASINInsight — Cord Organizer 6 Pack · Score: 13/100</div>
+        </div>
+        <div class="demo-body">
+          <div class="demo-blocker critical">
+            <div>
+              <div class="demo-blocker-title">CTR Weakness</div>
+              <div class="demo-blocker-desc">CTR is 0.24% — this product is not winning enough clicks from search.</div>
+              <div style="margin-top:8px; font-size:13px; color:#374151;"><strong>Next action:</strong> Improve the hero image and tighten the title around buying intent.</div>
+            </div>
+            <div class="demo-sev critical">Critical</div>
+          </div>
+          <div class="demo-blocker high">
+            <div>
+              <div class="demo-blocker-title">Conversion Weakness</div>
+              <div class="demo-blocker-desc">Conversion is 1.43% — traffic is not turning into enough orders.</div>
+              <div style="margin-top:8px; font-size:13px; color:#374151;"><strong>Next action:</strong> Review pricing, listing clarity, review quality, and merchandising assets.</div>
+            </div>
+            <div class="demo-sev high">High</div>
+          </div>
+          <div class="demo-blocker medium">
+            <div>
+              <div class="demo-blocker-title">Ad Waste</div>
+              <div class="demo-blocker-desc">ACOS is 94% — spend is inefficient relative to attributed sales.</div>
+              <div style="margin-top:8px; font-size:13px; color:#374151;"><strong>Next action:</strong> Cut weak search terms and fix conversion before scaling ads.</div>
+            </div>
+            <div class="demo-sev medium">Medium</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section features-bg" id="features">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag">Features</div>
+        <h2 class="section-title">Everything you need to diagnose and fix</h2>
+        <p class="section-sub">Built specifically for Amazon sellers who want answers, not more dashboards.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Prioritized blockers</h3>
+          <p>Every issue is ranked by severity and business impact. You always know what to fix first.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>9+ metrics analyzed</h3>
+          <p>CTR, conversion, reviews, ACOS, inventory, listing quality — all in one pass.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Results in 60 seconds</h3>
+          <p>Upload your CSV and get a full diagnosis instantly. No waiting, no setup, no account required.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>100% private</h3>
+          <p>Your data never leaves your browser. Everything is processed locally — nothing is stored or sent.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📁</div>
+          <h3>Portfolio view</h3>
+          <p>Analyze your full ASIN catalog at once. See which products need fixing and which are ready to scale.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📤</div>
+          <h3>Export your report</h3>
+          <p>Download your diagnosis as CSV, JSON, or a plain text summary to share with your team.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section testimonials-bg">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag">Social proof</div>
+        <h2 class="section-title">Sellers who stopped guessing</h2>
+      </div>
+      <div class="testimonials-grid">
+        <div class="testimonial">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"I spent weeks trying to figure out why one of my top ASINs stopped converting. ASINInsight found the issue in 30 seconds — my hero image was killing my CTR."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">DK</div>
+            <div>
+              <div class="testimonial-name">David K.</div>
+              <div class="testimonial-role">Amazon seller · Home & Kitchen</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"The action plan was exactly what I needed. Not just 'your conversion is low' — but a specific order of what to fix first. Saved me hours of guesswork."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">SR</div>
+            <div>
+              <div class="testimonial-name">Sarah R.</div>
+              <div class="testimonial-role">Amazon seller · Sports & Outdoors</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"I use it every week to check my portfolio before adjusting ad spend. Knowing which ASINs are actually ready to scale has completely changed how I allocate budget."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MH</div>
+            <div>
+              <div class="testimonial-name">Michael H.</div>
+              <div class="testimonial-role">Amazon seller · 8-figure store</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="section-inner">
+      <div class="section-head center">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-title">Simple, honest pricing</h2>
+        <p class="section-sub">Start free. Upgrade when you need more.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-name">Free</div>
+          <div class="price-amount">$0</div>
+          <div class="price-sub">Forever free</div>
+          <ul class="price-features">
+            <li class="price-feature"><span class="price-check">✓</span> Up to 5 ASINs per upload</li>
+            <li class="price-feature"><span class="price-check">✓</span> Full blocker diagnosis</li>
+            <li class="price-feature"><span class="price-check">✓</span> Action plan</li>
+            <li class="price-feature"><span class="price-check">✓</span> CSV export</li>
+          </ul>
+          <form method="POST" action="/checkout/free" style="display:block;margin:0;">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Start for free</button>
+          </form>
+        </div>
+
+        <div class="price-card featured">
+          <div class="price-badge">Most popular</div>
+          <div class="price-name">Pro</div>
+          <div class="price-amount">$49</div>
+          <div class="price-sub">per month</div>
+          <ul class="price-features">
+            <li class="price-feature"><span class="price-check">✓</span> Unlimited ASINs</li>
+            <li class="price-feature"><span class="price-check">✓</span> Portfolio-level analysis</li>
+            <li class="price-feature"><span class="price-check">✓</span> Category benchmarking</li>
+            <li class="price-feature"><span class="price-check">✓</span> JSON + CSV exports</li>
+            <li class="price-feature"><span class="price-check">✓</span> Weekly diagnosis history</li>
+          </ul>
+          <form method="POST" action="/checkout/pro" style="display:block;margin:0;">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Get started — $49/mo</button>
+          </form>
+        </div>
+
+        <div class="price-card">
+          <div class="price-name">Agency</div>
+          <div class="price-amount">$199</div>
+          <div class="price-sub">per month</div>
+          <ul class="price-features">
+            <li class="price-feature"><span class="price-check">✓</span> Everything in Pro</li>
+            <li class="price-feature"><span class="price-check">✓</span> Multi-seller accounts</li>
+            <li class="price-feature"><span class="price-check">✓</span> White-label reports</li>
+            <li class="price-feature"><span class="price-check">✓</span> Priority support</li>
+            <li class="price-feature"><span class="price-check">✓</span> API access</li>
+          </ul>
+          <form method="POST" action="/checkout/agency" style="display:block;margin:0;">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Contact us</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA BAND -->
+  <section class="cta-band">
+    <div style="max-width:600px; margin:0 auto;">
+      <h2>Stop guessing. Start fixing.</h2>
+      <p>Upload your CSV and get your first ASIN diagnosis in under 60 seconds. Free, private, instant.</p>
+      <a href="/tool" class="btn-primary" style="display:inline-flex;">▶ Run Free Diagnosis Now</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">ASIN<span>Insight</span></div>
+      <p>© 2026 ASINInsight. Built for Amazon sellers.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

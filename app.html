@@ -1,0 +1,3388 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Sales Stalled MVP</title>
+  <style>
+    :root {
+      --bg: #f7f5f2;
+      --paper: #ffffff;
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #1d4ed8;
+      --accent-soft: #eff6ff;
+      --accent-hover: #1e40af;
+      --critical: #991b1b;
+      --critical-bg: #fef2f2;
+      --critical-border: #fecaca;
+      --high: #92400e;
+      --high-bg: #fffbeb;
+      --high-border: #fde68a;
+      --medium: #1e40af;
+      --medium-bg: #eff6ff;
+      --medium-border: #bfdbfe;
+      --low: #374151;
+      --ok: #065f46;
+      --ok-bg: #ecfdf5;
+      --ok-border: #a7f3d0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* ── TOP NAV ── */
+    .topnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      margin-bottom: 8px;
+    }
+    .topnav-logo {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+    .topnav-logo span { color: var(--accent); }
+    .topnav-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--medium-border);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
+      border-radius: 20px;
+      padding: 52px 48px;
+      margin-bottom: 24px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.25);
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 20px;
+      letter-spacing: 0.02em;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 16px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      color: #fff;
+    }
+    .hero-sub {
+      font-size: 18px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.8);
+      max-width: 560px;
+      margin-bottom: 28px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .hero-stat {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-stat strong {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+    .hero-stat span {
+      font-size: 13px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 2px;
+    }
+
+    .muted { color: var(--muted); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+      padding: 24px;
+    }
+    .panel h2 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+
+    /* ── UPLOAD BOX ── */
+    .upload-box {
+      border: 2px dashed var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      background: #fafafa;
+      transition: border-color 0.18s ease, background 0.18s ease;
+      text-align: center;
+    }
+    .upload-box.dragover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .upload-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .upload-box p {
+      margin: 0 0 12px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    input[type="file"] {
+      display: block;
+      width: 100%;
+      font: inherit;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button, .link-btn {
+      appearance: none;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button:hover, .link-btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    button.secondary, .link-btn.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--medium-border);
+    }
+    button.secondary:hover, .link-btn.secondary:hover {
+      background: var(--accent-soft);
+    }
+    .asin-filter.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #f9fafb;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .status {
+      margin-top: 12px;
+      min-height: 24px;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .source-meta {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .selector-wrap {
+      margin-top: 20px;
+    }
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+    }
+
+    /* ── STATS GRID ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fafafa;
+    }
+    .stat strong {
+      display: block;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+      letter-spacing: -0.03em;
+    }
+    .stat > div:not(.muted) {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .stat .muted {
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* ── SEVERITY ── */
+    .severity {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .severity.critical { background: var(--critical-bg); color: var(--critical); border: 1px solid var(--critical-border); }
+    .severity.high { background: var(--high-bg); color: var(--high); border: 1px solid var(--high-border); }
+    .severity.medium { background: var(--medium-bg); color: var(--medium); border: 1px solid var(--medium-border); }
+    .severity.low { background: #f9fafb; color: var(--low); border: 1px solid var(--line); }
+    .confidence {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #f3f4f6;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #efe7db;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+      border: 1px solid var(--line);
+    }
+    .badge strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .badge.priority-1 { background: #fdf0f0; color: #7d1d1d; border-color: #f0c4c4; }
+    .badge.priority-2 { background: #fdf5ec; color: #8a4b10; border-color: #f0d9bf; }
+    .badge.priority-3 { background: #eff4fd; color: #1f4fb0; border-color: #c5d7f5; }
+    .badge.priority-4 { background: #f5f3f0; color: #5d544c; border-color: var(--line); }
+    .badge.stable { background: #f0faf5; color: #1f6b4f; border-color: #bde5d0; }
+    .badge.health-critical { background: #fdf0f0; color: #7d1d1d; border-color: #f0c4c4; }
+    .badge.health-watch { background: #fdf5ec; color: #8a4b10; border-color: #f0d9bf; }
+    .badge.health-strong { background: #f0faf5; color: #1f6b4f; border-color: #bde5d0; }
+    .badge.readiness-not-ready { background: #fdf0f0; color: #7d1d1d; border-color: #f0c4c4; }
+    .badge.readiness-ready { background: #f0faf5; color: #1f6b4f; border-color: #bde5d0; }
+    .issue-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .issue {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--line);
+      border-radius: 12px;
+      padding: 18px 20px;
+      background: var(--paper);
+      transition: box-shadow 0.15s ease;
+    }
+    .issue:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+    .issue.sev-critical { border-left-color: var(--critical); background: #fffafa; }
+    .issue.sev-high { border-left-color: var(--high); background: #fffdf8; }
+    .issue.sev-medium { border-left-color: var(--medium); }
+    .issue.sev-low { border-left-color: #9ca3af; }
+    .issue-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .issue h3 {
+      margin-bottom: 4px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .issue p { font-size: 14px; color: var(--muted); }
+    .issue p:last-child { margin-bottom: 0; }
+    .issue p strong { color: var(--ink); }
+    .action-plan {
+      margin-top: 16px;
+      border: 1px solid var(--ok-border);
+      border-radius: 12px;
+      padding: 20px;
+      background: var(--ok-bg);
+    }
+    .action-plan h2 { font-size: 16px; font-weight: 700; color: var(--ok); }
+    .action-plan ol {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--ink);
+    }
+    .action-plan ol li { margin-bottom: 8px; line-height: 1.55; }
+    .share-box {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      background: var(--paper);
+    }
+    .warning-box {
+      margin-top: 16px;
+      border: 1px solid var(--high-border);
+      border-radius: 12px;
+      padding: 20px;
+      background: var(--high-bg);
+    }
+    .warning-box ul {
+      margin: 10px 0 0;
+      padding-left: 20px;
+      font-size: 14px;
+    }
+    .mini-note {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .section-anchor {
+      scroll-margin-top: 20px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 160px;
+      margin-top: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f9fafb;
+      color: var(--ink);
+      font: 13px/1.5 "SF Mono", "Consolas", monospace;
+      resize: vertical;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .hidden { display: none; }
+    .ok { color: var(--ok); }
+    .warn { color: var(--high); }
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--muted);
+      background: #fffaf5;
+    }
+    code {
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+    }
+    details {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fffaf5;
+      overflow: hidden;
+    }
+    summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      font-weight: 700;
+      background: #f7efe5;
+    }
+    .details-body {
+      padding: 12px 14px 16px;
+    }
+    .schema-list {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .legend {
+      margin-top: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: #fffaf5;
+    }
+    .legend p {
+      margin-bottom: 10px;
+    }
+    .hero ul {
+      margin: 12px 0 0;
+      padding-left: 20px;
+      color: var(--muted);
+    }
+    .sticky-panel {
+      position: sticky;
+      top: 16px;
+    }
+    .row-link {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font: inherit;
+      padding: 0;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    tr.flagged-row td {
+      background: #fff3ef;
+    }
+    tr.ready-row td {
+      background: #f4fbf7;
+    }
+    .back-to-top {
+      margin-top: 16px;
+    }
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .sticky-panel { position: static; }
+    }
+  </style>
+</head>
+<body id="top">
+  <div class="wrap">
+    <nav class="topnav">
+      <div class="topnav-logo">ASIN<span>Insight</span></div>
+      <div class="topnav-badge">Amazon Seller Tool</div>
+    </nav>
+
+    <section class="hero">
+      <div class="hero-tag">&#9889; Instant ASIN Diagnosis</div>
+      <h1>Find out exactly why your<br>Amazon sales stalled</h1>
+      <p class="hero-sub">Upload your seller data and get a ranked list of growth blockers in seconds — no spreadsheets, no guesswork.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong>60s</strong>
+          <span>Time to first insight</span>
+        </div>
+        <div class="hero-stat">
+          <strong>9+</strong>
+          <span>Metrics analyzed</span>
+        </div>
+        <div class="hero-stat">
+          <strong>#1</strong>
+          <span>Fix identified instantly</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="panel sticky-panel">
+        <h2>Run Diagnosis</h2>
+        <div id="uploadBox" class="upload-box">
+          <div class="upload-icon">📂</div>
+          <p>Drag & drop your CSV here, or click to browse</p>
+          <input id="csvFile" type="file" accept=".csv,text/csv">
+        </div>
+        <div class="button-row" style="margin-top:14px;">
+          <button id="analyzeButton" disabled>▶ Analyze</button>
+          <button id="resetButton" class="secondary" type="button">Reset</button>
+        </div>
+        <div class="button-row" style="margin-top:8px;">
+          <button id="loadSampleButton" class="secondary" type="button">Try Sample Data</button>
+          <a class="link-btn secondary" href="sample_data/asin_template.csv">⬇ CSV Template</a>
+        </div>
+
+        <div id="status" class="status muted" style="margin-top:14px;">Upload a CSV or try the sample to begin.</div>
+        <div id="sourceMeta" class="source-meta">No dataset loaded.</div>
+
+        <div class="note" style="margin-top:16px;">
+          <strong>What to upload</strong><br>
+          Export your Business Report from Seller Central and upload it here. The tool reads conversion rate, CTR, reviews, ads, inventory, and listing data automatically.
+        </div>
+
+        <details style="margin-top:12px;">
+          <summary>Required columns</summary>
+          <div class="details-body">
+            <ul class="schema-list">
+              <li><strong>ASIN</strong>, <strong>title</strong>, <strong>category</strong></li>
+              <li><strong>sessions_30d</strong>, <strong>units_ordered_30d</strong></li>
+              <li><strong>conversion_rate</strong>, <strong>ctr</strong></li>
+              <li><strong>review_count</strong>, <strong>rating</strong></li>
+              <li><strong>days_of_cover</strong></li>
+              <li><strong>ad_spend_30d</strong>, <strong>ad_sales_30d</strong>, <strong>acos</strong></li>
+              <li><strong>images_count</strong>, <strong>bullet_count</strong>, <strong>has_a_plus</strong></li>
+            </ul>
+          </div>
+        </details>
+
+        <!-- hidden button kept for JS compatibility -->
+        <button id="loadMessySampleButton" class="secondary" type="button" style="display:none;">Load Realistic Sample</button>
+        <div id="asinSelectorWrap" class="selector-wrap hidden">
+          <h3>Inspect ASIN</h3>
+          <div id="asinQuickFilters" class="button-row" style="margin-top:10px;">
+            <button class="secondary asin-filter active" data-filter="all" type="button">All</button>
+            <button class="secondary asin-filter" data-filter="Fix first" type="button">Fix first</button>
+            <button class="secondary asin-filter" data-filter="Improve before scaling" type="button">Improve before scaling</button>
+            <button class="secondary asin-filter" data-filter="Test carefully" type="button">Test carefully</button>
+            <button class="secondary asin-filter" data-filter="Can support growth" type="button">Can support growth</button>
+          </div>
+          <div id="asinFilterMeta" class="mini-note" style="margin-top:8px;"></div>
+          <select id="asinSelector"></select>
+          <div class="note">The first view opens on the weakest ASIN in the file. You can switch to any ASIN here.</div>
+        </div>
+        <div class="legend">
+          <p><strong>Reading the diagnosis</strong></p>
+          <p class="muted">Use `Category` for the main business problem, `Priority` for urgency, `Confidence` for how strongly the current data supports the read, and `Data quality` for how much trust to place in the input itself.</p>
+        </div>
+      </aside>
+
+      <main class="panel">
+        <div id="emptyState" class="empty-state">
+          <h2>No diagnosis yet</h2>
+          <p>Load data to generate the first ASIN growth diagnosis.</p>
+        </div>
+
+        <div id="results" class="hidden">
+          <div id="reportHeader"></div>
+          <div id="executiveSummary"></div>
+          <div id="summaryGrid" class="summary-grid"></div>
+          <div id="topBlockers" class="issue-list section-anchor"></div>
+          <div id="actionPlan" class="section-anchor"></div>
+        <div id="shareSummary" class="section-anchor"></div>
+        <div id="exportPreview" class="section-anchor"></div>
+        <div id="dataQuality" class="section-anchor"></div>
+        <div id="sanityPanel" class="section-anchor"></div>
+        <div id="calibrationOverview" class="section-anchor"></div>
+        <div id="calibrationPanel" class="section-anchor"></div>
+        <div id="metricTable" class="section-anchor"></div>
+        </div>
+      </main>
+    </section>
+  </div>
+
+  <script>
+    const requiredColumns = [
+      "ASIN", "title", "sessions_30d", "units_ordered_30d", "conversion_rate", "ctr",
+      "review_count", "rating", "days_of_cover", "ad_spend_30d", "ad_sales_30d",
+      "acos", "images_count", "bullet_count", "has_a_plus"
+    ];
+
+    const columnAliases = {
+      ASIN: ["asin", "sku_asin"],
+      title: ["product_title", "name", "product_name"],
+      category: ["product_category"],
+      sessions_30d: ["sessions", "traffic_30d", "sessions30d"],
+      units_ordered_30d: ["units_ordered", "units", "orders_30d", "units30d"],
+      conversion_rate: ["conversion", "cvr", "unit_session_percentage"],
+      ctr: ["click_through_rate", "clickthroughrate"],
+      review_count: ["reviews", "ratings_total", "reviewcount"],
+      rating: ["avg_rating", "star_rating"],
+      days_of_cover: ["inventory_days_of_cover", "days_of_inventory", "cover_days"],
+      ad_spend_30d: ["ad_spend", "spend_30d", "spend"],
+      ad_sales_30d: ["ad_sales", "sales_from_ads", "ad_revenue_30d"],
+      acos: ["acos_30d", "ad_acos"],
+      images_count: ["images", "image_count"],
+      bullet_count: ["bullets", "bullet_points", "bulletpoints"],
+      has_a_plus: ["a_plus", "a_plus_content", "has_aplus"],
+      organic_rank_top_keyword: ["organic_rank", "top_keyword_rank"],
+      price: ["current_price", "listing_price"]
+    };
+
+    let parsedRows = [];
+    let currentReport = null;
+    let currentHeaderMap = null;
+    let currentLoadStats = null;
+    let currentAsinFilter = "all";
+    const storageKey = "amazon_seller_audit_mvp_session_v1";
+
+    const csvFile = document.getElementById("csvFile");
+    const uploadBox = document.getElementById("uploadBox");
+    const analyzeButton = document.getElementById("analyzeButton");
+    const resetButton = document.getElementById("resetButton");
+    const loadSampleButton = document.getElementById("loadSampleButton");
+    const loadMessySampleButton = document.getElementById("loadMessySampleButton");
+    const status = document.getElementById("status");
+    const sourceMeta = document.getElementById("sourceMeta");
+    const emptyState = document.getElementById("emptyState");
+    const results = document.getElementById("results");
+    const asinSelectorWrap = document.getElementById("asinSelectorWrap");
+    const asinQuickFilters = document.getElementById("asinQuickFilters");
+    const asinFilterMeta = document.getElementById("asinFilterMeta");
+    const asinSelector = document.getElementById("asinSelector");
+    const reportHeader = document.getElementById("reportHeader");
+    const executiveSummary = document.getElementById("executiveSummary");
+    const summaryGrid = document.getElementById("summaryGrid");
+    const topBlockers = document.getElementById("topBlockers");
+    const actionPlan = document.getElementById("actionPlan");
+    const shareSummary = document.getElementById("shareSummary");
+    const exportPreview = document.getElementById("exportPreview");
+    const dataQuality = document.getElementById("dataQuality");
+    const sanityPanel = document.getElementById("sanityPanel");
+    const calibrationOverview = document.getElementById("calibrationOverview");
+    const calibrationPanel = document.getElementById("calibrationPanel");
+    const metricTable = document.getElementById("metricTable");
+
+    const scenarioExpectations = {
+      B0DEMO001: { categories: ["Offer", "Ops"], readiness: ["Needs Work", "Not Ready"], story: "Moderate traffic, listing weakness, rising inventory risk, and inefficient ads." },
+      B0DEMO002: { categories: ["Stable"], readiness: ["Ready"], story: "Healthy baseline product with good conversion and trust." },
+      B0DEMO003: { categories: ["Offer"], readiness: ["Not Ready"], story: "Broad failure across CTR, conversion, trust, stock risk, and ads." },
+      B0DEMO004: { categories: ["Offer"], readiness: ["Needs Work"], story: "Product gets clicks but fails after the click." },
+      B0DEMO005: { categories: ["Traffic"], readiness: ["Conditional", "Needs Work"], story: "Conversion is acceptable, but click-through is weak relative to the portfolio." },
+      B0DEMO006: { categories: ["Trust"], readiness: ["Needs Work"], story: "Trust weakness driven by review depth and rating quality." },
+      B0DEMO007: { categories: ["Stable"], readiness: ["Ready"], story: "Strong product used as a healthy comparison anchor." },
+      B0DEMO008: { categories: ["Ops", "Offer"], readiness: ["Not Ready"], story: "Paid spend and stock pressure are both constraining growth." }
+    };
+
+    csvFile.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      await handleCsvFile(file);
+    });
+
+    ["dragenter", "dragover"].forEach(eventName => {
+      uploadBox.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        uploadBox.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "dragend", "drop"].forEach(eventName => {
+      uploadBox.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        uploadBox.classList.remove("dragover");
+      });
+    });
+
+    uploadBox.addEventListener("drop", async (event) => {
+      const file = event.dataTransfer && event.dataTransfer.files
+        ? event.dataTransfer.files[0]
+        : null;
+      await handleCsvFile(file);
+    });
+
+    resetButton.addEventListener("click", () => {
+      resetLoadedState();
+      clearPersistedState();
+      csvFile.value = "";
+      status.textContent = "Choose a CSV or load the sample dataset to begin.";
+      status.className = "status muted";
+      sourceMeta.textContent = "No dataset loaded.";
+    });
+
+    async function handleCsvFile(file) {
+      resetLoadedState();
+
+      if (!file) {
+        status.textContent = "Choose a CSV or load the sample dataset to begin.";
+        status.className = "status muted";
+        sourceMeta.textContent = "No dataset loaded.";
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        const rows = parseCsv(text);
+        validateColumns(rows.headers);
+        currentHeaderMap = resolveHeaders(rows.headers);
+        const normalized = normalizeRows(rows.records);
+        parsedRows = normalized.rows;
+        currentLoadStats = normalized.stats;
+        status.textContent = `Loaded ${parsedRows.length} valid row(s). Ready to diagnose.`;
+        status.className = "status ok";
+        analyzeButton.disabled = parsedRows.length === 0;
+        sourceMeta.textContent = buildSourceMeta(`Loaded file: ${file.name}`, currentLoadStats);
+        persistSessionState();
+      } catch (error) {
+        status.textContent = error.message;
+        status.className = "status warn";
+        sourceMeta.textContent = "No valid dataset loaded.";
+        clearPersistedState();
+      }
+    }
+
+    analyzeButton.addEventListener("click", () => {
+      if (!parsedRows.length) {
+        return;
+      }
+      currentReport = buildReport(parsedRows, currentLoadStats);
+      populateAsinSelector(currentReport);
+      asinSelectorWrap.classList.remove("hidden");
+      renderReport(currentReport, currentReport.weakest.row.ASIN);
+    });
+
+    loadSampleButton.addEventListener("click", async () => {
+      await loadDatasetFromPath("sample_data/sample_asin_data.csv", "sample_asin_data.csv", true);
+    });
+
+    loadMessySampleButton.addEventListener("click", async () => {
+      await loadDatasetFromPath("sample_data/realistic_messy_portfolio.csv", "realistic_messy_portfolio.csv", false);
+    });
+
+    async function loadDatasetFromPath(path, label, autoRender) {
+      try {
+        resetLoadedState();
+        const response = await fetch(path);
+        if (!response.ok) {
+          throw new Error("Could not load sample CSV.");
+        }
+        const text = await response.text();
+        const rows = parseCsv(text);
+        validateColumns(rows.headers);
+        currentHeaderMap = resolveHeaders(rows.headers);
+        const normalized = normalizeRows(rows.records);
+        parsedRows = normalized.rows;
+        currentLoadStats = normalized.stats;
+        status.textContent = `Loaded ${parsedRows.length} valid sample row(s). Ready to diagnose.`;
+        status.className = "status ok";
+        analyzeButton.disabled = parsedRows.length === 0;
+        sourceMeta.textContent = buildSourceMeta(`Loaded dataset: ${label}`, currentLoadStats);
+        persistSessionState();
+        if (autoRender) {
+          currentReport = buildReport(parsedRows, currentLoadStats);
+          populateAsinSelector(currentReport);
+          asinSelectorWrap.classList.remove("hidden");
+          renderReport(currentReport, currentReport.weakest.row.ASIN);
+        }
+      } catch (error) {
+        status.textContent = "Sample loading may be blocked when opening a local HTML file directly. If that happens, use Open Sample CSV and upload it manually.";
+        status.className = "status warn";
+        sourceMeta.textContent = "Sample dataset unavailable in direct local fetch mode.";
+        clearPersistedState();
+      }
+    }
+
+    function resetLoadedState() {
+      parsedRows = [];
+      currentReport = null;
+      currentHeaderMap = null;
+      currentLoadStats = null;
+      currentAsinFilter = "all";
+      analyzeButton.disabled = true;
+      results.classList.add("hidden");
+      emptyState.classList.remove("hidden");
+      asinSelectorWrap.classList.add("hidden");
+      asinFilterMeta.textContent = "";
+      asinQuickFilters.querySelectorAll(".asin-filter").forEach(item => {
+        item.classList.toggle("active", item.getAttribute("data-filter") === "all");
+      });
+    }
+
+    asinSelector.addEventListener("change", () => {
+      if (!currentReport) return;
+      renderReport(currentReport, asinSelector.value);
+    });
+
+    asinQuickFilters.querySelectorAll(".asin-filter").forEach(button => {
+      button.addEventListener("click", () => {
+        currentAsinFilter = button.getAttribute("data-filter");
+        asinQuickFilters.querySelectorAll(".asin-filter").forEach(item => item.classList.remove("active"));
+        button.classList.add("active");
+        if (!currentReport) return;
+        populateAsinSelector(currentReport);
+        if (asinSelector.value) {
+          renderReport(currentReport, asinSelector.value);
+        } else {
+          persistSessionState();
+        }
+      });
+    });
+
+    restorePersistedSession();
+
+    function parseCsv(text) {
+      const lines = text.trim().split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) {
+        throw new Error("CSV must contain a header row and at least one data row.");
+      }
+
+      const delimiter = detectDelimiter(lines[0]);
+      const headers = splitCsvLine(lines[0], delimiter).map(item => item.trim());
+      const records = lines.slice(1).map(line => {
+        const values = splitCsvLine(line, delimiter);
+        const row = {};
+        headers.forEach((header, index) => {
+          row[header] = (values[index] || "").trim();
+        });
+        return row;
+      });
+
+      return { headers, records };
+    }
+
+    function detectDelimiter(line) {
+      const commaCount = (line.match(/,/g) || []).length;
+      const semicolonCount = (line.match(/;/g) || []).length;
+      return semicolonCount > commaCount ? ";" : ",";
+    }
+
+    function splitCsvLine(line, delimiter = ",") {
+      const values = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i += 1) {
+        const char = line[i];
+        const next = line[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          current += '"';
+          i += 1;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === delimiter && !inQuotes) {
+          values.push(current);
+          current = "";
+        } else {
+          current += char;
+        }
+      }
+
+      values.push(current);
+      return values;
+    }
+
+    function validateColumns(headers) {
+      const resolvedHeaders = resolveHeaders(headers);
+      const missing = requiredColumns.filter(column => !resolvedHeaders[column]);
+      if (missing.length) {
+        throw new Error(`Missing required columns: ${missing.join(", ")}`);
+      }
+    }
+
+    function normalizeRows(rows) {
+      const headerMap = resolveHeaders(Object.keys(rows[0] || {}));
+      const rejected = [];
+      const normalizedRows = rows
+        .map((row, index) => ({
+        _rowNumber: index + 2,
+        ASIN: readField(row, headerMap, "ASIN"),
+        title: readField(row, headerMap, "title"),
+        category: readField(row, headerMap, "category") || "Unknown",
+        sessions_30d: parseNumber(readField(row, headerMap, "sessions_30d")),
+        units_ordered_30d: parseNumber(readField(row, headerMap, "units_ordered_30d")),
+        conversion_rate: normalizeRatio(readField(row, headerMap, "conversion_rate")),
+        ctr: normalizeRatio(readField(row, headerMap, "ctr")),
+        review_count: parseNumber(readField(row, headerMap, "review_count")),
+        rating: parseNumber(readField(row, headerMap, "rating")),
+        days_of_cover: parseNumber(readField(row, headerMap, "days_of_cover")),
+        ad_spend_30d: parseNumber(readField(row, headerMap, "ad_spend_30d")),
+        ad_sales_30d: parseNumber(readField(row, headerMap, "ad_sales_30d")),
+        acos: normalizeRatio(readField(row, headerMap, "acos")),
+        images_count: parseNumber(readField(row, headerMap, "images_count")),
+        bullet_count: parseNumber(readField(row, headerMap, "bullet_count")),
+        has_a_plus: normalizeBoolean(readField(row, headerMap, "has_a_plus")),
+        organic_rank_top_keyword: parseNumber(readField(row, headerMap, "organic_rank_top_keyword")),
+        price: parseNumber(readField(row, headerMap, "price"))
+      }))
+        .filter(row => {
+          if (row.ASIN && row.title) {
+            return true;
+          }
+          rejected.push({
+            rowNumber: row._rowNumber,
+            reason: !row.ASIN && !row.title
+              ? "missing ASIN and title"
+              : !row.ASIN
+                ? "missing ASIN"
+                : "missing title"
+          });
+          return false;
+        })
+        .map(({ _rowNumber, ...row }) => row);
+
+      return {
+        rows: normalizedRows,
+        stats: {
+          totalRows: rows.length,
+          validRows: normalizedRows.length,
+          rejectedRows: rejected.length,
+          rejectedPreview: rejected.slice(0, 3)
+        }
+      };
+    }
+
+    function resolveHeaders(headers) {
+      const normalizedHeaders = new Map(headers.map(header => [normalizeHeaderName(header), header]));
+      const resolved = {};
+
+      Object.keys(columnAliases).forEach((canonical) => {
+        const candidates = [canonical, ...(columnAliases[canonical] || [])];
+        const match = candidates
+          .map(candidate => normalizedHeaders.get(normalizeHeaderName(candidate)))
+          .find(Boolean);
+        if (match) {
+          resolved[canonical] = match;
+        }
+      });
+
+      return resolved;
+    }
+
+    function normalizeHeaderName(value) {
+      return String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "");
+    }
+
+    function readField(row, headerMap, canonicalName) {
+      const key = headerMap[canonicalName] || canonicalName;
+      return row[key];
+    }
+
+    function buildSourceMeta(label, stats) {
+      if (!stats) return label;
+      const rejectedPart = stats.rejectedRows ? ` | Rejected: ${stats.rejectedRows}` : "";
+      return `${label} | Raw rows: ${stats.totalRows} | Valid: ${stats.validRows}${rejectedPart}`;
+    }
+
+    function canUseLocalStorage() {
+      try {
+        const probeKey = "__amazon_seller_audit_probe__";
+        window.localStorage.setItem(probeKey, "1");
+        window.localStorage.removeItem(probeKey);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function persistSessionState(selectedAsin = asinSelector.value) {
+      if (!canUseLocalStorage()) {
+        return;
+      }
+
+      const payload = {
+        parsedRows,
+        currentHeaderMap,
+        currentLoadStats,
+        currentAsinFilter,
+        selectedAsin: selectedAsin || "",
+        sourceMetaText: sourceMeta.textContent,
+        statusText: status.textContent,
+        statusClass: status.className
+      };
+
+      window.localStorage.setItem(storageKey, JSON.stringify(payload));
+    }
+
+    function restorePersistedSession() {
+      if (!canUseLocalStorage()) {
+        return;
+      }
+
+      const saved = window.localStorage.getItem(storageKey);
+      if (!saved) {
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(saved);
+        if (!Array.isArray(payload.parsedRows) || !payload.parsedRows.length) {
+          clearPersistedState();
+          return;
+        }
+
+        parsedRows = payload.parsedRows;
+        currentHeaderMap = payload.currentHeaderMap || null;
+        currentLoadStats = payload.currentLoadStats || null;
+        currentAsinFilter = payload.currentAsinFilter || "all";
+
+        analyzeButton.disabled = false;
+        status.textContent = "Restored the last diagnosis session from this browser.";
+        status.className = "status ok";
+        sourceMeta.textContent = payload.sourceMetaText || buildSourceMeta("Restored dataset", currentLoadStats);
+
+        asinQuickFilters.querySelectorAll(".asin-filter").forEach(button => {
+          button.classList.toggle("active", button.getAttribute("data-filter") === currentAsinFilter);
+        });
+
+        currentReport = buildReport(parsedRows, currentLoadStats);
+        populateAsinSelector(currentReport);
+        asinSelectorWrap.classList.remove("hidden");
+        const selectedAsin = currentReport.asinReports.some(item => item.row.ASIN === payload.selectedAsin)
+          ? payload.selectedAsin
+          : currentReport.weakest.row.ASIN;
+        renderReport(currentReport, selectedAsin);
+      } catch (error) {
+        clearPersistedState();
+      }
+    }
+
+    function clearPersistedState() {
+      if (!canUseLocalStorage()) {
+        return;
+      }
+      window.localStorage.removeItem(storageKey);
+    }
+
+    function parseNumber(value) {
+      if (value === undefined || value === null || value === "") {
+        return null;
+      }
+      const cleaned = normalizeNumberStringSafe(value);
+      const parsed = Number(cleaned);
+      return Number.isNaN(parsed) ? null : parsed;
+    }
+
+    function normalizeNumberStringSafe(value) {
+      let cleaned = String(value).trim();
+      const isNegativeByParentheses = /^\(.*\)$/.test(cleaned);
+
+      cleaned = cleaned
+        .replace(/^\(|\)$/g, "")
+        .replace(/[\u20AC$\u00A3\u00A5\s]/g, "")
+        .replace(/%$/, "");
+
+      if (cleaned.includes(",") && cleaned.includes(".")) {
+        cleaned = cleaned.replace(/,/g, "");
+      } else if (cleaned.includes(",")) {
+        const parts = cleaned.split(",");
+        const looksLikeThousands = parts.length > 1 && parts.slice(1).every(part => part.length === 3);
+        cleaned = looksLikeThousands ? cleaned.replace(/,/g, "") : cleaned.replace(/,/g, ".");
+      }
+
+      if (isNegativeByParentheses) {
+        cleaned = `-${cleaned}`;
+      }
+
+      return cleaned;
+    }
+
+    function normalizeNumberString(value) {
+      let cleaned = String(value).trim();
+      const isNegativeByParentheses = /^\(.*\)$/.test(cleaned);
+
+      cleaned = cleaned
+        .replace(/[€$£¥\s]/g, "")
+        .replace(/%$/, "");
+
+      if (isNegativeByParentheses) {
+        cleaned = cleaned.replace(/^\(|\)$/g, "");
+      }
+
+      if (cleaned.includes(",") && cleaned.includes(".")) {
+        cleaned = cleaned.replace(/,/g, "");
+      } else if (cleaned.includes(",")) {
+        const parts = cleaned.split(",");
+        const looksLikeThousands = parts.length > 1 && parts.slice(1).every(part => part.length === 3);
+        cleaned = looksLikeThousands ? cleaned.replace(/,/g, "") : cleaned.replace(/,/g, ".");
+      }
+
+      if (isNegativeByParentheses) {
+        cleaned = `-${cleaned}`;
+      }
+
+      return cleaned;
+    }
+
+    function normalizeRatio(value) {
+      if (value === undefined || value === null || value === "") {
+        return null;
+      }
+
+      const raw = String(value).trim();
+      const hadPercentSign = raw.includes("%");
+      const parsed = parseNumber(raw);
+      if (parsed === null) {
+        return null;
+      }
+
+      if (hadPercentSign) {
+        return parsed / 100;
+      }
+
+      if (parsed > 1 && parsed <= 100) {
+        return parsed / 100;
+      }
+
+      return parsed;
+    }
+
+    function normalizeBoolean(value) {
+      const normalized = String(value).trim().toLowerCase();
+      return ["true", "yes", "1", "y"].includes(normalized);
+    }
+
+    function buildReport(rows, loadStats = null) {
+      if (!rows.length) {
+        throw new Error("No valid ASIN rows were found in the uploaded CSV.");
+      }
+      const benchmarks = buildBenchmarks(rows);
+      const intakeProfile = summarizeIntakeProfile(rows);
+      const asinReports = rows.map(row => analyzeAsin(row, benchmarks, intakeProfile));
+      const weakest = [...asinReports].sort((a, b) => a.score - b.score)[0];
+      return {
+        totalAsins: asinReports.length,
+        weakest,
+        loadStats,
+        portfolioSummary: summarizePortfolio(asinReports),
+        intakeProfile,
+        benchmarks,
+        asinReports
+      };
+    }
+
+    function buildBenchmarks(rows) {
+      const categoryBenchmarks = {};
+      const groupedRows = {};
+
+      rows.forEach(row => {
+        const category = row.category || "Unknown";
+        if (!groupedRows[category]) groupedRows[category] = [];
+        groupedRows[category].push(row);
+      });
+
+      Object.entries(groupedRows).forEach(([category, categoryRows]) => {
+        categoryBenchmarks[category] = {
+          count: categoryRows.length,
+          avgCtr: average(categoryRows.map(row => row.ctr)),
+          avgConversion: average(categoryRows.map(row => row.conversion_rate)),
+          avgRating: average(categoryRows.map(row => row.rating)),
+          avgReviewCount: average(categoryRows.map(row => row.review_count)),
+          avgAcos: average(categoryRows.map(row => row.acos))
+        };
+      });
+
+      return {
+        avgCtr: average(rows.map(row => row.ctr)),
+        avgConversion: average(rows.map(row => row.conversion_rate)),
+        avgRating: average(rows.map(row => row.rating)),
+        avgReviewCount: average(rows.map(row => row.review_count)),
+        avgAcos: average(rows.map(row => row.acos)),
+        count: rows.length,
+        categoryBenchmarks
+      };
+    }
+
+    function summarizeIntakeProfile(rows) {
+      const categoryCounts = {};
+      rows.forEach(row => {
+        const category = row.category || "Unknown";
+        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+      });
+
+      const categories = Object.keys(categoryCounts);
+      const categoryCount = categories.length;
+      const maxCategoryShare = Math.max(
+        ...Object.values(categoryCounts).map(count => count / rows.length),
+        0
+      );
+
+      let benchmarkReliability = "high";
+      if (categoryCount >= 5 || maxCategoryShare < 0.4) {
+        benchmarkReliability = "low";
+      } else if (categoryCount >= 3 || maxCategoryShare < 0.7) {
+        benchmarkReliability = "medium";
+      }
+
+      return {
+        categoryCount,
+        benchmarkReliability,
+        maxCategoryShare,
+        topCategories: Object.entries(categoryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([category, count]) => ({ category, count }))
+      };
+    }
+
+    function analyzeAsin(row, benchmarks, intakeProfile) {
+      const blockers = [];
+      const applicableBenchmarks = getApplicableBenchmarks(row, benchmarks);
+      const healthyAnchor = isHealthyAnchor(row, applicableBenchmarks);
+      const mixedCategoryPortfolio = (intakeProfile?.categoryCount || 0) > 3;
+      const usingCategoryBenchmarks = applicableBenchmarks.scope === "category";
+      const relativeConfidence = applicableBenchmarks.confidence;
+
+      pushBlockerIf(blockers, row.ctr !== null && row.ctr < 0.0035, {
+        type: "CTR weakness",
+        severity: row.ctr < 0.0025 ? "critical" : "high",
+        area: "Traffic",
+        confidence: row.sessions_30d !== null && row.sessions_30d > 3000 ? "high" : "medium",
+        why: `CTR is ${formatPercent(row.ctr)}, which suggests this product is not winning enough clicks.`,
+        action: "Improve the hero image and tighten title positioning around the core buying intent."
+      });
+
+      pushBlockerIf(blockers, row.conversion_rate !== null && row.conversion_rate < 0.025, {
+        type: "Conversion weakness",
+        severity: row.conversion_rate < 0.018 ? "critical" : "high",
+        area: "Conversion",
+        confidence: row.sessions_30d !== null && row.sessions_30d > 2000 ? "high" : "medium",
+        why: `Conversion is ${formatPercent(row.conversion_rate)}, which means traffic is not turning into enough orders.`,
+        action: "Review price positioning, listing clarity, review quality, and merchandising assets."
+      });
+
+      pushBlockerIf(blockers, row.rating !== null && row.rating < 4.0, {
+        type: "Trust problem",
+        severity: "high",
+        area: "Trust",
+        confidence: row.review_count !== null && row.review_count >= 10 ? "high" : "medium",
+        why: `Rating is ${row.rating.toFixed(1)}, which can directly hurt conversion and ad efficiency.`,
+        action: "Inspect negative review themes and resolve the strongest product complaints."
+      });
+
+      pushBlockerIf(blockers, row.review_count !== null && row.review_count < 25, {
+        type: "Low review count",
+        severity: "medium",
+        area: "Trust",
+        confidence: "medium",
+        why: `Only ${row.review_count} reviews are available, which weakens trust against stronger listings.`,
+        action: "Improve compliant review generation and post-purchase follow-up."
+      });
+
+      pushBlockerIf(blockers, row.acos !== null && row.acos > 0.45, {
+        type: "Ad waste",
+        severity: row.acos > 0.8 ? "critical" : "high",
+        area: "Ads",
+        confidence: row.ad_spend_30d !== null && row.ad_spend_30d > 300 ? "high" : "medium",
+        why: `ACOS is ${formatPercent(row.acos)}, which suggests spend is inefficient relative to sales.`,
+        action: "Reduce weak spend, trim poor search terms, and improve conversion before scaling ads."
+      });
+
+      pushBlockerIf(blockers, row.days_of_cover !== null && row.days_of_cover < 14, {
+        type: "Inventory risk",
+        severity: row.days_of_cover < 8 ? "critical" : "high",
+        area: "Inventory",
+        confidence: "high",
+        why: `Days of cover is ${row.days_of_cover}, which creates risk of stockout and rank loss.`,
+        action: "Replenish inventory or reduce demand pressure until stock cover stabilizes."
+      });
+
+      const listingGaps = [];
+      if (row.images_count !== null && row.images_count < 6) listingGaps.push(`${row.images_count} images`);
+      if (row.bullet_count !== null && row.bullet_count < 5) listingGaps.push(`${row.bullet_count} bullets`);
+      if (!row.has_a_plus) listingGaps.push("no A+ content");
+
+      pushBlockerIf(blockers, listingGaps.length > 0, {
+        type: "Listing quality gap",
+        severity: listingGaps.length >= 2 ? "high" : "medium",
+        area: "Listing",
+        confidence: "medium",
+        why: `Listing merchandising is incomplete: ${listingGaps.join(", ")}.`,
+        action: "Improve image coverage, bullet completeness, and A+ content depth."
+      });
+
+      pushBlockerIf(blockers, row.organic_rank_top_keyword !== null && row.organic_rank_top_keyword > 30, {
+        type: "Organic visibility weakness",
+        severity: "medium",
+        area: "SEO",
+        confidence: "medium",
+        why: `Top keyword rank is ${row.organic_rank_top_keyword}, which limits lower-cost traffic growth.`,
+        action: "Strengthen keyword targeting across title, bullets, backend terms, and relevance cues."
+      });
+
+      pushBlockerIf(
+        blockers,
+        !healthyAnchor &&
+        row.ctr !== null && applicableBenchmarks.avgCtr !== null && row.ctr < applicableBenchmarks.avgCtr * 0.75,
+        {
+          type: usingCategoryBenchmarks ? "Below-category CTR" : "Below-portfolio CTR",
+          severity: "medium",
+          area: "Traffic",
+          confidence: relativeConfidence,
+          why: `CTR is ${formatPercent(row.ctr)}, which is materially below the ${usingCategoryBenchmarks ? "category" : "uploaded portfolio"} average of ${formatPercent(applicableBenchmarks.avgCtr)}.`,
+          action: `Compare this ASIN's main image and title against the stronger click-winning ASINs in the same ${usingCategoryBenchmarks ? "category" : "portfolio"}.`
+        }
+      );
+
+      pushBlockerIf(
+        blockers,
+        !healthyAnchor &&
+        row.conversion_rate !== null && applicableBenchmarks.avgConversion !== null && row.conversion_rate < applicableBenchmarks.avgConversion * 0.7,
+        {
+          type: usingCategoryBenchmarks ? "Below-category conversion" : "Below-portfolio conversion",
+          severity: "medium",
+          area: "Conversion",
+          confidence: relativeConfidence,
+          why: `Conversion is ${formatPercent(row.conversion_rate)}, which is well below the ${usingCategoryBenchmarks ? "category" : "uploaded portfolio"} average of ${formatPercent(applicableBenchmarks.avgConversion)}.`,
+          action: `Review why this ASIN underperforms compared with stronger products in the same ${usingCategoryBenchmarks ? "category" : "upload"}.`
+        }
+      );
+
+      pushBlockerIf(
+        blockers,
+        !healthyAnchor &&
+        row.review_count !== null && applicableBenchmarks.avgReviewCount !== null && row.review_count < applicableBenchmarks.avgReviewCount * 0.35,
+        {
+          type: usingCategoryBenchmarks ? "Below-category review depth" : "Below-portfolio review depth",
+          severity: "low",
+          area: "Trust",
+          confidence: "low",
+          why: `Review count is ${formatNumber(row.review_count)}, far below the ${usingCategoryBenchmarks ? "category" : "uploaded portfolio"} average of ${formatNumber(applicableBenchmarks.avgReviewCount)}.`,
+          action: `Treat review depth as a competitive disadvantage relative to other products in the same ${usingCategoryBenchmarks ? "category" : "portfolio"}.`
+        }
+      );
+
+      if (row.ctr !== null && row.ctr < 0.0035 && row.conversion_rate !== null && row.conversion_rate < 0.025) {
+        blockers.push({
+          type: "Weak demand capture",
+          severity: row.conversion_rate < 0.018 || row.ctr < 0.0025 ? "critical" : "high",
+          area: "Growth",
+          confidence: "high",
+          why: "This ASIN is weak at both winning the click and closing the sale, which points to a broader merchandising problem.",
+          action: "Treat image, title, offer positioning, review quality, and listing clarity as one coordinated fix instead of isolated tweaks."
+        });
+      }
+
+      if (row.acos !== null && row.acos > 0.45 && row.conversion_rate !== null && row.conversion_rate < 0.025) {
+        blockers.push({
+          type: "Ads are scaling a weak listing",
+          severity: row.acos > 0.8 ? "critical" : "high",
+          area: "Ads",
+          confidence: "high",
+          why: "The listing is converting poorly while ad efficiency is also weak. This suggests the product page is not ready for aggressive spend.",
+          action: "Fix conversion first, then tighten campaign structure and only scale spend once the page converts better."
+        });
+      }
+
+      if (
+        row.rating !== null && row.rating < 4.0 &&
+        row.review_count !== null && row.review_count < 25 &&
+        row.conversion_rate !== null && row.conversion_rate < 0.025
+      ) {
+        blockers.push({
+          type: "Trust is suppressing conversion",
+          severity: row.rating < 3.9 ? "critical" : "high",
+          area: "Trust",
+          confidence: "high",
+          why: "The product has both weak review quality and low review depth while conversion is also soft. This suggests buyer trust is likely suppressing performance after the click.",
+          action: "Prioritize fixing trust signals before deeper scaling: resolve complaint themes, improve review quality, and strengthen credibility on the page."
+        });
+      }
+
+      if (
+        row.days_of_cover !== null && row.days_of_cover < 8 &&
+        (
+          (row.sessions_30d !== null && row.sessions_30d > 4000) ||
+          (row.ad_spend_30d !== null && row.ad_spend_30d > 400)
+        )
+      ) {
+        blockers.push({
+          type: "Growth constrained by inventory",
+          severity: "critical",
+          area: "Inventory",
+          confidence: "high",
+          why: "Demand is still active while stock cover is critically low. This ASIN is at real risk of losing momentum because supply cannot safely support current demand.",
+          action: "Prioritize replenishment or deliberately reduce traffic pressure before stock instability damages rank and sales continuity."
+        });
+      }
+
+      const prunedBlockers = pruneBlockers(blockers, healthyAnchor);
+      prunedBlockers.sort((a, b) => severityWeight(a.severity) - severityWeight(b.severity));
+
+      let score = 100;
+      prunedBlockers.forEach(blocker => {
+        score -= ({ critical: 8, high: 5, medium: 3, low: 1 })[blocker.severity] || 0;
+      });
+      if (healthyAnchor) {
+        score += 3;
+      }
+      score = Math.max(score, 0);
+      const diagnosisStrength = summarizeConfidence(prunedBlockers);
+      const dataQuality = assessDataQuality(row);
+
+      return {
+        row,
+        score,
+        healthLabel: score >= 85 ? "Strong" : score >= 70 ? "Watch" : score >= 50 ? "At Risk" : "Critical",
+        executiveSummary: buildExecutiveSummary(prunedBlockers, score, healthyAnchor),
+        rootCause: determineRootCause(prunedBlockers, healthyAnchor),
+        actionPlan: buildActionPlan(prunedBlockers, healthyAnchor),
+        diagnosisStrength,
+        diagnosisCategory: determineDiagnosisCategory(prunedBlockers, healthyAnchor),
+        categoryMix: summarizeCategoryMix(prunedBlockers),
+        benchmarkScope: applicableBenchmarks.scope,
+        benchmarkConfidence: applicableBenchmarks.confidence,
+        benchmarkPeerCount: applicableBenchmarks.count,
+        appliedBenchmarks: {
+          avgCtr: applicableBenchmarks.avgCtr,
+          avgConversion: applicableBenchmarks.avgConversion,
+          avgReviewCount: applicableBenchmarks.avgReviewCount,
+          avgAcos: applicableBenchmarks.avgAcos
+        },
+        dataQuality,
+        validationHints: buildValidationHints(row, prunedBlockers, diagnosisStrength, intakeProfile),
+        sanityFlags: buildSanityFlags(row),
+        scalingReadiness: determineScalingReadiness(
+          prunedBlockers,
+          healthyAnchor,
+          row,
+          dataQuality,
+          diagnosisStrength,
+          applicableBenchmarks.confidence,
+          intakeProfile
+        ),
+        blockers: prunedBlockers,
+        healthyAnchor
+      };
+    }
+
+    function isHealthyAnchor(row, benchmarks) {
+      return Boolean(
+        row.conversion_rate !== null && row.conversion_rate >= 0.045 &&
+        row.ctr !== null && row.ctr >= 0.0045 &&
+        row.rating !== null && row.rating >= 4.4 &&
+        row.review_count !== null && row.review_count >= 100 &&
+        row.acos !== null && row.acos <= 0.25 &&
+        row.days_of_cover !== null && row.days_of_cover >= 30 &&
+        (
+          benchmarks.avgConversion === null ||
+          row.conversion_rate >= benchmarks.avgConversion
+        )
+      );
+    }
+
+    function getApplicableBenchmarks(row, benchmarks) {
+      const category = row.category || "Unknown";
+      const categoryBenchmarks = benchmarks.categoryBenchmarks?.[category];
+
+      if (categoryBenchmarks && categoryBenchmarks.count >= 2) {
+        return {
+          ...categoryBenchmarks,
+          scope: "category",
+          confidence: categoryBenchmarks.count >= 4 ? "medium" : "low"
+        };
+      }
+
+      return {
+        ...benchmarks,
+        scope: "portfolio",
+        confidence: (benchmarks.count || 0) >= 6 ? "medium" : "low"
+      };
+    }
+
+    function pruneBlockers(blockers, healthyAnchor) {
+      if (!healthyAnchor) return blockers;
+      return blockers.filter(blocker => blocker.severity === "critical" || blocker.severity === "high");
+    }
+
+    function summarizeConfidence(blockers) {
+      if (!blockers.length) return "low";
+      const weights = { high: 3, medium: 2, low: 1 };
+      const total = blockers.reduce((sum, blocker) => sum + (weights[blocker.confidence] || 1), 0);
+      const avg = total / blockers.length;
+      if (avg >= 2.4) return "high";
+      if (avg >= 1.6) return "medium";
+      return "low";
+    }
+
+    function average(values) {
+      const valid = values.filter(value => value !== null && value !== undefined);
+      if (!valid.length) return null;
+      const total = valid.reduce((sum, value) => sum + value, 0);
+      return total / valid.length;
+    }
+
+    function assessDataQuality(row) {
+      const missing = [];
+      const softWarnings = [];
+
+      const importantFields = [
+        ["sessions_30d", row.sessions_30d],
+        ["units_ordered_30d", row.units_ordered_30d],
+        ["conversion_rate", row.conversion_rate],
+        ["ctr", row.ctr],
+        ["review_count", row.review_count],
+        ["rating", row.rating],
+        ["days_of_cover", row.days_of_cover],
+        ["acos", row.acos]
+      ];
+
+      importantFields.forEach(([name, value]) => {
+        if (value === null || value === undefined) missing.push(name);
+      });
+
+      if (row.sessions_30d !== null && row.sessions_30d < 1000) {
+        softWarnings.push("Traffic volume is low, so some findings may be less stable.");
+      }
+      if (row.review_count !== null && row.review_count < 10) {
+        softWarnings.push("Review depth is thin, so trust-related reads may change quickly.");
+      }
+      if (row.ad_spend_30d !== null && row.ad_spend_30d < 100) {
+        softWarnings.push("Ad spend is light, so ad-efficiency reads should be treated cautiously.");
+      }
+
+      let completeness = "high";
+      if (missing.length >= 3) completeness = "low";
+      else if (missing.length >= 1 || softWarnings.length >= 2) completeness = "medium";
+
+      return { missing, softWarnings, completeness };
+    }
+
+    function buildValidationHints(row, blockers, diagnosisStrength, intakeProfile) {
+      const hints = [];
+
+      if (diagnosisStrength === "low") {
+        hints.push("Use this diagnosis as a directional read, not a final decision.");
+      }
+      if ((row.sessions_30d ?? 0) < 200) {
+        hints.push("Traffic is still light, so CTR and conversion signals may change quickly with a small amount of new data.");
+      }
+      if ((row.review_count ?? 0) < 15) {
+        hints.push("Review depth is thin, so trust-related conclusions are still early-stage.");
+      }
+      if ((row.ad_spend_30d ?? 0) < 150 && blockers.some(blocker => blocker.area === "Ads")) {
+        hints.push("Ad conclusions are based on light spend, so treat budget changes as tests rather than final optimizations.");
+      }
+      if ((intakeProfile?.categoryCount || 0) > 3 && blockers.some(blocker => blocker.type.startsWith("Below-portfolio"))) {
+        hints.push("This file mixes several categories, so portfolio-relative blockers should be treated as softer signals.");
+      }
+
+      return hints.slice(0, 3);
+    }
+
+    function buildSanityFlags(row) {
+      const flags = [];
+
+      if (row.conversion_rate !== null && (row.conversion_rate < 0 || row.conversion_rate > 1)) {
+        flags.push("Conversion rate is outside the expected 0-1 range.");
+      }
+      if (row.ctr !== null && (row.ctr < 0 || row.ctr > 1)) {
+        flags.push("CTR is outside the expected 0-1 range.");
+      }
+      if (row.acos !== null && row.acos < 0) {
+        flags.push("ACOS is negative, which is not expected.");
+      }
+      if (row.rating !== null && (row.rating < 0 || row.rating > 5)) {
+        flags.push("Rating is outside the expected 0-5 range.");
+      }
+      if (row.days_of_cover !== null && row.days_of_cover < 0) {
+        flags.push("Days of cover is negative.");
+      }
+      if (row.sessions_30d !== null && row.units_ordered_30d !== null && row.units_ordered_30d > row.sessions_30d) {
+        flags.push("Units ordered are higher than sessions, which likely indicates a data issue.");
+      }
+
+      return flags;
+    }
+
+    function assessReadinessEvidence(row, dataQuality, diagnosisStrength, benchmarkConfidence, intakeProfile) {
+      const reasons = [];
+
+      if ((row.sessions_30d ?? 0) < 1500) {
+        reasons.push("traffic depth is still light");
+      }
+      if ((row.review_count ?? 0) < 25) {
+        reasons.push("review depth is still thin");
+      }
+      if (dataQuality?.completeness === "low") {
+        reasons.push("key fields are missing");
+      } else if (dataQuality?.completeness === "medium") {
+        reasons.push("the data is only partially complete");
+      }
+      if (diagnosisStrength === "low") {
+        reasons.push("the current diagnosis is only a low-confidence read");
+      }
+      if (benchmarkConfidence === "low") {
+        reasons.push("relative benchmarks are weak for this ASIN");
+      }
+      if ((intakeProfile?.benchmarkReliability || "unknown") === "low") {
+        reasons.push("the uploaded file is too mixed for a hard portfolio-level green light");
+      }
+
+      return {
+        isThin: reasons.length > 0,
+        reasons
+      };
+    }
+
+    function buildReadinessEvidenceDetail(reasons) {
+      if (!reasons.length) return "";
+      if (reasons.length === 1) {
+        return `${capitalize(reasons[0])}, so treat scaling as a controlled test rather than a full green light.`;
+      }
+      return `${capitalize(reasons[0])} and ${reasons[1]}, so treat scaling as a controlled test rather than a full green light.`;
+    }
+
+    function determineScalingReadiness(blockers, healthyAnchor, row, dataQuality, diagnosisStrength, benchmarkConfidence, intakeProfile) {
+      const evidence = assessReadinessEvidence(row, dataQuality, diagnosisStrength, benchmarkConfidence, intakeProfile);
+
+      if (healthyAnchor && blockers.length === 0) {
+        if (evidence.isThin) {
+          return {
+            label: "Conditional",
+            detail: buildReadinessEvidenceDetail(evidence.reasons)
+          };
+        }
+        return {
+          label: "Ready",
+          detail: "The current signal mix suggests this ASIN can handle more traffic safely."
+        };
+      }
+
+      const hasCritical = blockers.some(blocker => blocker.severity === "critical");
+      const hasOpsRisk = blockers.some(blocker => blocker.area === "Inventory");
+      const hasTrustOrConversion = blockers.some(blocker =>
+        blocker.area === "Trust" || blocker.area === "Conversion" || blocker.area === "Growth"
+      );
+
+      if (hasCritical || hasOpsRisk) {
+        return {
+          label: "Not Ready",
+          detail: "This ASIN should not be pushed harder until the main blockers are stabilized."
+        };
+      }
+
+      if (hasTrustOrConversion) {
+        return {
+          label: "Needs Work",
+          detail: "Fix page and trust issues before increasing traffic pressure."
+        };
+      }
+
+      if (evidence.isThin) {
+        return {
+          label: "Conditional",
+          detail: buildReadinessEvidenceDetail(evidence.reasons)
+        };
+      }
+
+      return {
+        label: "Conditional",
+        detail: "This ASIN may scale, but only with controlled testing and close monitoring."
+      };
+    }
+
+    function buildExecutiveSummary(blockers, score, healthyAnchor) {
+      if (healthyAnchor && blockers.length === 0) {
+        return {
+          headline: `This ASIN is rated ${score}/100 and currently behaves like a healthy portfolio anchor.`,
+          detail: "The current rule set does not see a major growth bottleneck. This product looks more like a benchmark than a recovery case."
+        };
+      }
+      const primary = blockers[0];
+      const topAreas = [...new Set(blockers.slice(0, 3).map(blocker => blocker.area))];
+
+      if (!primary) {
+        return {
+          headline: "No major blockers were detected by the current MVP rules.",
+          detail: "This ASIN does not currently trigger the first-pass diagnosis thresholds."
+        };
+      }
+
+      return {
+        headline: `This ASIN is rated ${score}/100 because the main blocker is ${primary.type.toLowerCase()}.`,
+        detail: `The pressure is concentrated in ${topAreas.join(", ").toLowerCase()}. The priority is to remove the highest-severity blockers before adding more spend or traffic.`
+      };
+    }
+
+    function summarizePortfolio(asinReports) {
+      const weak = asinReports.filter(report => report.score < 70).length;
+      const critical = asinReports.filter(report => report.healthLabel === "Critical").length;
+      const healthy = asinReports.filter(report => report.blockers.length === 0).length;
+      return { weak, critical, healthy };
+    }
+
+    function summarizeCategoryMix(blockers) {
+      const map = {
+        Traffic: 0,
+        Offer: 0,
+        Trust: 0,
+        Ops: 0
+      };
+
+      blockers.forEach(blocker => {
+        const group = normalizeBusinessCategory(blocker.area);
+        map[group] = (map[group] || 0) + 1;
+      });
+
+      return map;
+    }
+
+    function normalizeBusinessCategory(area) {
+      if (["Traffic", "SEO"].includes(area)) return "Traffic";
+      if (["Conversion", "Growth", "Listing", "Ads"].includes(area)) return "Offer";
+      if (["Trust"].includes(area)) return "Trust";
+      if (["Inventory"].includes(area)) return "Ops";
+      return "Offer";
+    }
+
+    function determineDiagnosisCategory(blockers, healthyAnchor) {
+      if (healthyAnchor && !blockers.length) return "Stable";
+      if (!blockers.length) return "Stable";
+      const mix = summarizeCategoryMix(blockers);
+      const sorted = Object.entries(mix).sort((a, b) => b[1] - a[1]);
+      return sorted[0][1] === 0 ? "Stable" : sorted[0][0];
+    }
+
+    function determineRootCause(blockers, healthyAnchor) {
+      if (healthyAnchor && !blockers.length) {
+        return "No dominant blocker detected. This ASIN currently looks structurally healthy under the MVP rule set.";
+      }
+      if (!blockers.length) return "No dominant blocker detected.";
+
+      const types = blockers.map(blocker => blocker.type);
+
+      if (types.includes("Weak demand capture")) {
+        return "The core problem is not one isolated metric. This ASIN is weak at both attracting clicks and converting traffic.";
+      }
+      if (types.includes("Ads are scaling a weak listing")) {
+        return "Paid traffic is amplifying a page-level weakness. The listing likely needs fixing before more ad spend.";
+      }
+      if (types.includes("Conversion weakness")) {
+        return "The main bottleneck appears after the click. Traffic exists, but the product page is not closing the sale well enough.";
+      }
+      if (types.includes("CTR weakness")) {
+        return "The ASIN is likely losing attention before the click. Search positioning and creative attractiveness appear weak.";
+      }
+      if (types.includes("Inventory risk")) {
+        return "Stock instability is a near-term operational risk and may limit safe growth.";
+      }
+
+      return "The ASIN has several moderate issues, but no single dominant bottleneck has fully emerged yet.";
+    }
+
+    function buildActionPlan(blockers, healthyAnchor) {
+      const actions = [];
+      const seen = new Set();
+
+      blockers.forEach(blocker => {
+        if (actions.length >= 4) return;
+        if (seen.has(blocker.action)) return;
+        seen.add(blocker.action);
+        actions.push(blocker.action);
+      });
+
+      if (!actions.length) {
+        actions.push(
+          healthyAnchor
+            ? "No urgent fixes were detected. Use this ASIN as a comparison anchor for weaker products in the same portfolio."
+            : "No urgent fixes were detected. Keep monitoring the ASIN and validate whether stronger benchmarking is needed."
+        );
+      }
+
+      return actions;
+    }
+
+    function populateAsinSelector(report) {
+      const filteredReports = report.asinReports
+        .filter(item => currentAsinFilter === "all" || mapFocusBucket(item.scalingReadiness.label) === currentAsinFilter)
+        .sort((a, b) => a.score - b.score);
+
+      if (!filteredReports.length) {
+        asinSelectorWrap.classList.add("hidden");
+        return;
+      }
+      asinSelectorWrap.classList.remove("hidden");
+      asinFilterMeta.textContent = currentAsinFilter === "all"
+        ? `Showing all ${report.asinReports.length} ASINs in the uploaded file.`
+        : `Showing ${filteredReports.length} ASIN(s) in "${currentAsinFilter}". ${describeFilter(currentAsinFilter)}`;
+      asinSelector.innerHTML = filteredReports.map(asinReport => `
+        <option value="${escapeHtml(asinReport.row.ASIN)}">${escapeHtml(asinReport.row.ASIN)} - ${escapeHtml(asinReport.row.title)}</option>
+      `).join("");
+      asinSelector.value = filteredReports[0].row.ASIN;
+    }
+
+    function describeFilter(filter) {
+      const descriptions = {
+        "Fix first": "These are the most urgent products to stabilize.",
+        "Improve before scaling": "These need better page quality before stronger traffic bets.",
+        "Test carefully": "These can be tested, but only with controlled scaling.",
+        "Can support growth": "These are the cleanest candidates for expansion."
+      };
+
+      return descriptions[filter] || "";
+    }
+
+    function pushBlockerIf(blockers, condition, blocker) {
+      if (condition) blockers.push(blocker);
+    }
+
+    function severityWeight(severity) {
+      return { critical: 0, high: 1, medium: 2, low: 3 }[severity] ?? 9;
+    }
+
+    function renderReport(report, selectedAsin) {
+      emptyState.classList.add("hidden");
+      results.classList.remove("hidden");
+
+      const weakest = report.asinReports.find(asinReport => asinReport.row.ASIN === selectedAsin) || report.weakest;
+      const portfolioRank = getPortfolioRank(report.asinReports, weakest.row.ASIN);
+      const validation = buildValidationAssessment(report);
+      const focusMode = report.asinReports.length === 1
+        ? "Current focus is the only ASIN in the uploaded file."
+        : weakest.row.ASIN === report.weakest.row.ASIN
+          ? "Current focus is the weakest ASIN in the file."
+          : "Current focus is a manually selected ASIN from the file.";
+
+      reportHeader.innerHTML = `
+        <h2>${escapeHtml(weakest.row.title)}</h2>
+        <p class="muted">ASIN ${escapeHtml(weakest.row.ASIN)} | ${escapeHtml(weakest.row.category)} | ${focusMode}</p>
+        <div class="badge-row">
+          <span class="badge ${priorityBadgeClass(weakest.blockers[0]?.severity)}">${escapeHtml(priorityLabel(weakest.blockers[0]?.severity))}</span>
+          <span class="badge ${weakest.healthLabel === 'Critical' ? 'health-critical' : weakest.healthLabel === 'Watch' ? 'health-watch' : 'health-strong'}"><strong>${escapeHtml(weakest.healthLabel)}</strong></span>
+          <span class="badge ${weakest.scalingReadiness.label === 'Not Ready' ? 'readiness-not-ready' : weakest.scalingReadiness.label === 'Ready' ? 'readiness-ready' : ''}">${escapeHtml(weakest.scalingReadiness.label)}</span>
+          <span class="badge">Rank ${portfolioRank} of ${report.asinReports.length}</span>
+          ${weakest.healthyAnchor ? `<span class="badge stable">✓ Healthy Anchor</span>` : ""}
+        </div>
+        <div class="button-row" style="margin-top:12px;">
+          <a class="link-btn secondary" href="#topBlockers">Top Blockers</a>
+          <a class="link-btn secondary" href="#actionPlan">Action Plan</a>
+          <a class="link-btn secondary" href="#dataQuality">Data Quality</a>
+        </div>
+      `;
+
+      executiveSummary.innerHTML = `
+        <div class="note" style="margin-top:16px;">
+          <strong>Executive Summary</strong><br>
+          ${escapeHtml(weakest.executiveSummary.headline)}<br><br>
+          ${escapeHtml(weakest.executiveSummary.detail)}
+        </div>
+        <div class="note" style="margin-top:12px;">
+          <strong>Likely root cause</strong><br>
+          ${escapeHtml(weakest.rootCause)}
+        </div>
+        <div class="note" style="margin-top:12px;">
+          <strong>Diagnosis strength</strong><br>
+          ${escapeHtml(capitalize(weakest.diagnosisStrength))} confidence based on the current rule set and available data depth.
+        </div>
+        ${
+          weakest.validationHints.length
+            ? `<div class="note" style="margin-top:12px;">
+                <strong>Before acting</strong><br>
+                ${weakest.validationHints.map(item => escapeHtml(item)).join("<br>")}
+              </div>`
+            : ""
+        }
+      `;
+
+      summaryGrid.innerHTML = `
+        <div class="stat"><strong>${weakest.score}</strong>Growth score<div class="muted">${weakest.healthLabel}</div></div>
+        <div class="stat"><strong>${weakest.blockers.length}</strong>Blockers found<div class="muted">Ranked by urgency</div></div>
+        <div class="stat"><strong>${weakest.diagnosisCategory}</strong>Main category<div class="muted">Primary business problem</div></div>
+        <div class="stat"><strong>#${portfolioRank}</strong>Portfolio rank<div class="muted">1 = weakest score in file</div></div>
+        <div class="stat"><strong>${escapeHtml(weakest.scalingReadiness.label)}</strong>Scaling readiness<div class="muted">${escapeHtml(weakest.scalingReadiness.detail)}</div></div>
+        <div class="stat"><strong>${formatPercent(weakest.row.conversion_rate)}</strong>Conversion<div class="muted">Traffic to orders</div></div>
+        <div class="stat"><strong>${formatPercent(weakest.row.ctr)}</strong>CTR<div class="muted">Search/ad click capture</div></div>
+        <div class="stat"><strong>${report.portfolioSummary.weak}</strong>Weak ASINs<div class="muted">Score below 70 in this file</div></div>
+        <div class="stat"><strong>${report.portfolioSummary.critical}</strong>Critical ASINs<div class="muted">Severely constrained products</div></div>
+        <div class="stat"><strong>${report.portfolioSummary.healthy}</strong>Healthy ASINs<div class="muted">No blockers triggered</div></div>
+      `;
+
+      topBlockers.innerHTML = weakest.blockers.length
+        ? weakest.blockers.slice(0, 5).map((blocker, index) => `
+        <article class="issue sev-${blocker.severity}">
+          <div class="issue-head">
+            <div>
+              <h3>${escapeHtml(blocker.type)}</h3>
+              <p class="muted"><strong>${escapeHtml(blocker.area)}</strong> | ${escapeHtml(blocker.why)}</p>
+              <div class="badge-row">
+                <span class="badge priority-${Math.min(index + 1, 4)}">Priority ${index + 1}</span>
+                <span class="severity ${blocker.severity}">${blocker.severity}</span>
+              </div>
+              <span class="confidence">${escapeHtml(blocker.confidence)} confidence</span>
+            </div>
+            <span class="severity ${blocker.severity}">${blocker.severity}</span>
+          </div>
+          <p><strong>Next action:</strong> ${escapeHtml(blocker.action)}</p>
+        </article>
+      `).join("")
+        : `
+        <article class="issue">
+          <div class="issue-head">
+            <div>
+              <h3>No major blockers detected</h3>
+              <p class="muted">This ASIN does not currently trigger the active diagnosis rules.</p>
+              <span class="confidence">low confidence</span>
+            </div>
+            <span class="severity low">low</span>
+          </div>
+          <p><strong>Next action:</strong> Keep monitoring the ASIN and compare it against a larger dataset before making major changes.</p>
+        </article>
+      `;
+
+      actionPlan.innerHTML = `
+        <div class="action-plan">
+          <h2>Recommended sequence</h2>
+          <p class="muted">This is the suggested order for fixing the current ASIN based on the blocker mix.</p>
+          <ol>
+            ${weakest.actionPlan.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
+          </ol>
+        </div>
+      `;
+
+      shareSummary.innerHTML = `
+        <div class="share-box">
+          <h2>Copyable summary</h2>
+          <p class="muted">Use this to share the current diagnosis internally or as part of a product demo.</p>
+          <div class="button-row">
+            <button id="copySummaryButton" type="button">Copy Summary</button>
+            <button id="downloadSummaryButton" class="secondary" type="button">Download Summary</button>
+            <button id="downloadCurrentJsonButton" class="secondary" type="button">Download Current JSON</button>
+            <button id="downloadValidationSummaryButton" class="secondary" type="button">Download Validation Summary</button>
+            <button id="downloadPortfolioSummaryButton" class="secondary" type="button">Download Portfolio Summary</button>
+            <button id="downloadPortfolioCsvButton" class="secondary" type="button">Download Portfolio CSV</button>
+            <button id="downloadPortfolioJsonButton" class="secondary" type="button">Download Portfolio JSON</button>
+          </div>
+          <textarea id="summaryText" readonly>${escapeHtml(buildCopySummary(weakest))}</textarea>
+        </div>
+      `;
+
+      exportPreview.innerHTML = `
+        <div class="share-box">
+          <h2>Export preview</h2>
+          <p class="muted">Quick preview of the current ASIN JSON export and the top of the portfolio JSON export.</p>
+          <div class="mini-note">Use the single-ASIN JSON for one-product reviews and the portfolio JSON/CSV for broader prioritization and handoff.</div>
+          <div class="mini-note">Current ASIN benchmark scope: ${escapeHtml(weakest.benchmarkScope)}</div>
+          <div class="mini-note">Current ASIN benchmark confidence: ${escapeHtml(weakest.benchmarkConfidence)} from ${escapeHtml(String(weakest.benchmarkPeerCount))} peer rows.</div>
+          <textarea readonly>${escapeHtml(JSON.stringify(buildCurrentDiagnosisJson(weakest, report), null, 2))}</textarea>
+          <textarea readonly style="margin-top:12px;">${escapeHtml(JSON.stringify(buildPortfolioJsonPreview(report), null, 2))}</textarea>
+        </div>
+      `;
+
+      const copySummaryButton = document.getElementById("copySummaryButton");
+      const downloadSummaryButton = document.getElementById("downloadSummaryButton");
+      const downloadCurrentJsonButton = document.getElementById("downloadCurrentJsonButton");
+      const downloadValidationSummaryButton = document.getElementById("downloadValidationSummaryButton");
+      const downloadPortfolioSummaryButton = document.getElementById("downloadPortfolioSummaryButton");
+      const downloadPortfolioCsvButton = document.getElementById("downloadPortfolioCsvButton");
+      const downloadPortfolioJsonButton = document.getElementById("downloadPortfolioJsonButton");
+      const summaryText = document.getElementById("summaryText");
+      copySummaryButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(summaryText.value);
+          status.textContent = "Diagnosis summary copied.";
+          status.className = "status ok";
+        } catch (error) {
+          summaryText.select();
+          status.textContent = "Clipboard copy is not available here. The summary text has been selected instead.";
+          status.className = "status warn";
+        }
+      });
+      downloadSummaryButton.addEventListener("click", () => {
+        const blob = new Blob([summaryText.value], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${weakest.row.ASIN}_diagnosis_summary.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Diagnosis summary downloaded.";
+        status.className = "status ok";
+      });
+      downloadCurrentJsonButton.addEventListener("click", () => {
+        const jsonText = JSON.stringify(buildCurrentDiagnosisJson(weakest, report), null, 2);
+        const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${weakest.row.ASIN}_diagnosis.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Current diagnosis JSON downloaded.";
+        status.className = "status ok";
+      });
+      downloadValidationSummaryButton.addEventListener("click", () => {
+        const validationSummary = buildValidationSummary(report);
+        const blob = new Blob([validationSummary], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `validation_summary.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Validation summary downloaded.";
+        status.className = "status ok";
+      });
+      downloadPortfolioSummaryButton.addEventListener("click", () => {
+        const portfolioSummary = buildPortfolioSummary(report);
+        const blob = new Blob([portfolioSummary], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `portfolio_diagnosis_summary.txt`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Portfolio summary downloaded.";
+        status.className = "status ok";
+      });
+      downloadPortfolioCsvButton.addEventListener("click", () => {
+        const csvText = buildPortfolioCsv(report);
+        const blob = new Blob([csvText], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `portfolio_diagnosis.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Portfolio diagnosis CSV downloaded.";
+        status.className = "status ok";
+      });
+      downloadPortfolioJsonButton.addEventListener("click", () => {
+        const jsonText = JSON.stringify(buildPortfolioJson(report), null, 2);
+        const blob = new Blob([jsonText], { type: "application/json;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `portfolio_diagnosis.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = "Portfolio diagnosis JSON downloaded.";
+        status.className = "status ok";
+      });
+
+      dataQuality.innerHTML = `
+        <div class="warning-box">
+          <h2>Data quality</h2>
+          <p class="muted">The current diagnosis is based on <strong>${escapeHtml(capitalize(weakest.dataQuality.completeness))}</strong> completeness.</p>
+          ${
+            weakest.dataQuality.missing.length
+              ? `<p><strong>Missing fields:</strong> ${escapeHtml(weakest.dataQuality.missing.join(", "))}</p>`
+              : `<p><strong>Missing fields:</strong> none</p>`
+          }
+          ${
+            weakest.dataQuality.softWarnings.length
+              ? `<ul>${weakest.dataQuality.softWarnings.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+              : `<p class="muted">No extra data quality warnings for this ASIN.</p>`
+          }
+          ${
+            currentLoadStats?.rejectedRows
+              ? `<p><strong>Rejected rows:</strong> ${currentLoadStats.rejectedRows}</p>
+                 <p class="muted">${currentLoadStats.rejectedPreview.map(item => `Row ${item.rowNumber}: ${item.reason}`).join(" | ")}</p>`
+              : ""
+          }
+          <div class="mini-note">Interpret lower-confidence findings more cautiously when data quality is medium or low.</div>
+          ${renderHeaderMapping(currentHeaderMap)}
+        </div>
+        <div class="back-to-top">
+          <a class="link-btn secondary" href="#top">Back to Top</a>
+        </div>
+      `;
+
+      sanityPanel.innerHTML = renderSanityPanel(weakest);
+
+      calibrationOverview.innerHTML = renderCalibrationOverview(report, weakest.row.ASIN);
+      calibrationPanel.innerHTML = renderCalibrationPanel(report, weakest.row.ASIN);
+
+      metricTable.innerHTML = `
+        <h2 style="margin-top:20px;">Metric snapshot</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Value</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderMetricRow("Sessions (30d)", formatNumber(weakest.row.sessions_30d), "Traffic volume available for diagnosis")}
+            ${renderMetricRow("Units ordered (30d)", formatNumber(weakest.row.units_ordered_30d), "Observed sales output")}
+            ${renderMetricRow("Conversion rate", formatPercent(weakest.row.conversion_rate), "Order efficiency")}
+            ${renderMetricRow("CTR", formatPercent(weakest.row.ctr), "Search/ad attractiveness")}
+            ${renderMetricRow("Review count", formatNumber(weakest.row.review_count), "Trust depth")}
+            ${renderMetricRow("Rating", weakest.row.rating?.toFixed(1) ?? "-", "Customer satisfaction signal")}
+            ${renderMetricRow("Days of cover", formatNumber(weakest.row.days_of_cover), "Inventory safety")}
+            ${renderMetricRow("ACOS", formatPercent(weakest.row.acos), "Ad efficiency")}
+            ${renderMetricRow("Images", formatNumber(weakest.row.images_count), "Visual merchandising")}
+            ${renderMetricRow("Bullets", formatNumber(weakest.row.bullet_count), "Content completeness")}
+            ${renderMetricRow("A+ content", weakest.row.has_a_plus ? "Yes" : "No", "Enhanced content depth")}
+          </tbody>
+        </table>
+        <h2 style="margin-top:20px;">Business category mix</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Signals</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderMetricRow("Traffic", formatNumber(weakest.categoryMix.Traffic), "Demand capture and visibility issues")}
+            ${renderMetricRow("Offer", formatNumber(weakest.categoryMix.Offer), "Conversion, listing, and paid efficiency issues")}
+            ${renderMetricRow("Trust", formatNumber(weakest.categoryMix.Trust), "Review and credibility issues")}
+            ${renderMetricRow("Ops", formatNumber(weakest.categoryMix.Ops), "Inventory and operational constraints")}
+          </tbody>
+        </table>
+        <h2 style="margin-top:20px;">Portfolio-wide benchmarks</h2>
+        <div class="mini-note">These are the full-file averages. The selected ASIN may still use category-level benchmarks when enough peers exist.</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Benchmark</th>
+              <th>Average</th>
+              <th>Use in diagnosis</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderMetricRow("Average CTR", formatPercent(report.benchmarks.avgCtr), "Used to detect weak click capture relative to uploaded ASINs")}
+            ${renderMetricRow("Average conversion", formatPercent(report.benchmarks.avgConversion), "Used to detect weak conversion relative to uploaded ASINs")}
+            ${renderMetricRow("Average rating", report.benchmarks.avgRating?.toFixed(2) ?? "-", "Used as context for trust quality")}
+            ${renderMetricRow("Average review count", formatNumber(report.benchmarks.avgReviewCount), "Used to detect trust depth gaps")}
+            ${renderMetricRow("Average ACOS", formatPercent(report.benchmarks.avgAcos), "Used as paid efficiency context")}
+          </tbody>
+        </table>
+        ${renderPortfolioSnapshot(report)}
+        ${renderIntakeProfileTable(report.intakeProfile)}
+        ${renderValidationRead(report)}
+        ${renderReadinessSummaryTable(report.asinReports)}
+        ${renderUrgentTriageTable(report.asinReports)}
+        ${renderPortfolioFocusTable(report.asinReports)}
+        ${renderGrowthCandidateTable(report.asinReports)}
+        ${renderPortfolioDecisionBoard(report.asinReports, report.intakeProfile)}
+        ${renderPortfolioGapTable(weakest, report.benchmarks)}
+        ${renderPortfolioActionTable(report.asinReports, report.intakeProfile)}
+        ${renderRecurringBlockersTable(report.asinReports, report.intakeProfile)}
+        ${renderPortfolioTable(report)}
+      `;
+
+      metricTable.querySelectorAll(".row-link").forEach(button => {
+        button.addEventListener("click", () => {
+          const asin = button.getAttribute("data-asin");
+          currentAsinFilter = "all";
+          asinQuickFilters.querySelectorAll(".asin-filter").forEach(item => item.classList.remove("active"));
+          asinQuickFilters.querySelector('[data-filter="all"]').classList.add("active");
+          populateAsinSelector(report);
+          asinSelector.value = asin;
+          renderReport(report, asin);
+        });
+      });
+
+      calibrationOverview.querySelectorAll(".row-link").forEach(button => {
+        button.addEventListener("click", () => {
+          const asin = button.getAttribute("data-asin");
+          asinSelector.value = asin;
+          renderReport(report, asin);
+        });
+      });
+
+      persistSessionState(weakest.row.ASIN);
+    }
+
+    function buildCopySummary(report) {
+      const blockers = report.blockers.slice(0, 3).map((blocker, index) =>
+        `${index + 1}. ${blocker.type} (${blocker.severity}, ${blocker.confidence} confidence): ${blocker.action}`
+      );
+
+      const actions = report.actionPlan.slice(0, 3).map((action, index) =>
+        `${index + 1}. ${action}`
+      );
+
+      return [
+        `ASIN Diagnosis Summary`,
+        `ASIN: ${report.row.ASIN}`,
+        `Title: ${report.row.title}`,
+        `Score: ${report.score}/100 (${report.healthLabel})`,
+        `Main category: ${report.diagnosisCategory}`,
+        `Diagnosis strength: ${report.diagnosisStrength}`,
+        `Scaling readiness: ${report.scalingReadiness.label}`,
+        `Benchmark scope: ${report.benchmarkScope}`,
+        `Benchmark confidence: ${report.benchmarkConfidence}`,
+        `Benchmark peer count: ${report.benchmarkPeerCount}`,
+        `Data quality: ${report.dataQuality.completeness}`,
+        `Healthy anchor: ${report.healthyAnchor ? "yes" : "no"}`,
+        `Top blocker count: ${report.blockers.length}`,
+        ``,
+        `Likely root cause:`,
+        `${report.rootCause}`,
+        ``,
+        `Top blockers:`,
+        ...(blockers.length ? blockers : ["No major blockers detected."]),
+        ``,
+        `Recommended order of work:`,
+        ...(actions.length ? actions : ["No urgent action sequence available."])
+      ].join("\n");
+    }
+
+    function buildPortfolioSummary(report) {
+      const sortedReports = [...report.asinReports].sort((a, b) => a.score - b.score);
+      const recurring = summarizeRecurringBlockers(report.asinReports);
+      const focusSplit = summarizePortfolioFocus(report.asinReports);
+      const decisionBoard = buildDecisionBoard(report.asinReports, report.intakeProfile);
+      const validation = buildValidationAssessment(report);
+      const lines = [
+        "Portfolio Diagnosis Summary",
+        `ASIN count: ${report.asinReports.length}`,
+        `Weak ASINs: ${report.portfolioSummary.weak}`,
+        `Critical ASINs: ${report.portfolioSummary.critical}`,
+        `Healthy ASINs: ${report.portfolioSummary.healthy}`,
+        `Raw rows: ${validation.rawRows}`,
+        `Rejected rows: ${validation.rejectedRows}`,
+        `Validation score: ${validation.validationScore}`,
+        `Benchmark reliability: ${validation.benchmarkReliability}`,
+        `Current validation decision: ${validation.currentDecision}`,
+        `Fix first: ${focusSplit.fixFirst}`,
+        `Improve before scaling: ${focusSplit.improveBeforeScaling}`,
+        `Test carefully: ${focusSplit.testCarefully}`,
+        `Can support growth: ${focusSplit.canSupportGrowth}`,
+        `Primary call: ${decisionBoard.primaryCall}`,
+        "",
+        "Recurring blockers:",
+        ...(recurring.length
+          ? recurring.map(item => `- ${item.type}: ${item.count} ASINs | ${item.interpretation}`)
+          : ["- None"]),
+        "",
+        "ASIN snapshot:"
+      ];
+
+      sortedReports.forEach((asinReport, index) => {
+        lines.push(
+          `${index + 1}. ${asinReport.row.ASIN} | ${asinReport.row.title} | score ${asinReport.score} | ${asinReport.diagnosisCategory} | ${asinReport.blockers[0]?.type || "No major blocker"}`
+        );
+      });
+
+      lines.push("", "Detailed summaries:");
+      sortedReports.forEach((asinReport) => {
+        lines.push("", buildCopySummary(asinReport));
+      });
+
+      return lines.join("\n");
+    }
+
+    function buildValidationSummary(report) {
+      const validation = buildValidationAssessment(report);
+      const focusSplit = summarizePortfolioFocus(report.asinReports);
+      const recurring = summarizeRecurringBlockers(report.asinReports);
+
+      return [
+        "Validation Summary",
+        `Raw rows: ${validation.rawRows}`,
+        `Valid ASINs: ${report.totalAsins}`,
+        `Rejected rows: ${validation.rejectedRows}`,
+        `Validation score: ${validation.validationScore}`,
+        `Benchmark reliability: ${validation.benchmarkReliability}`,
+        `Top-category share: ${validation.maxCategoryShare === null ? "-" : formatPercent(validation.maxCategoryShare)}`,
+        "",
+        "Validation checks:",
+        ...validation.checks.map(item => `- ${item.label}: ${item.status} | ${item.reason}`),
+        "",
+        "Validation read:",
+        validation.validationCall,
+        "",
+        `Strongest use: ${validation.strongestUse}`,
+        `Main watchout: ${validation.watchout}`,
+        `Current decision: ${validation.currentDecision}`,
+        "",
+        "Portfolio focus split:",
+        `- Fix first: ${focusSplit.fixFirst}`,
+        `- Improve before scaling: ${focusSplit.improveBeforeScaling}`,
+        `- Test carefully: ${focusSplit.testCarefully}`,
+        `- Can support growth: ${focusSplit.canSupportGrowth}`,
+        "",
+        "Top recurring blockers:",
+        ...(recurring.length
+          ? recurring.slice(0, 3).map(item => `- ${item.type}: ${item.count} ASINs`)
+          : ["- None"])
+      ].join("\n");
+    }
+
+    function buildPortfolioCsv(report) {
+      const headers = [
+        "ASIN",
+        "title",
+        "score",
+        "health_label",
+        "diagnosis_category",
+        "diagnosis_strength",
+        "scaling_readiness",
+        "focus_bucket",
+        "benchmark_scope",
+        "benchmark_confidence",
+        "benchmark_peer_count",
+        "benchmark_reliability",
+        "data_quality",
+        "healthy_anchor",
+        "top_blocker",
+        "top_blocker_severity",
+        "blocker_count",
+        "portfolio_rank",
+        "ctr_gap_vs_avg",
+        "conversion_gap_vs_avg",
+        "review_gap_vs_avg",
+        "acos_gap_vs_avg",
+        "root_cause"
+      ];
+
+      const sortedReports = report.asinReports
+        .slice()
+        .sort((a, b) => a.score - b.score);
+
+      const rows = sortedReports.map((item, index) => [
+          item.row.ASIN,
+          item.row.title,
+          item.score,
+          item.healthLabel,
+          item.diagnosisCategory,
+          item.diagnosisStrength,
+          item.scalingReadiness.label,
+          mapFocusBucket(item.scalingReadiness.label),
+          item.benchmarkScope,
+          item.benchmarkConfidence,
+          item.benchmarkPeerCount,
+          report.intakeProfile?.benchmarkReliability || "unknown",
+          item.dataQuality.completeness,
+          item.healthyAnchor ? "yes" : "no",
+          item.blockers[0]?.type || "No major blocker",
+          item.blockers[0]?.severity || "low",
+          item.blockers.length,
+          index + 1,
+          rawGap(item.row.ctr, item.appliedBenchmarks.avgCtr, "percent"),
+          rawGap(item.row.conversion_rate, item.appliedBenchmarks.avgConversion, "percent"),
+          rawGap(item.row.review_count, item.appliedBenchmarks.avgReviewCount, "number"),
+          rawGap(item.row.acos, item.appliedBenchmarks.avgAcos, "percent"),
+          item.rootCause
+        ]);
+
+      return [headers, ...rows]
+        .map(row => row.map(csvEscape).join(","))
+        .join("\n");
+    }
+
+    function buildPortfolioJson(report) {
+      const validation = buildValidationAssessment(report);
+      return {
+        summary: {
+          asinCount: report.asinReports.length,
+          weakAsins: report.portfolioSummary.weak,
+          criticalAsins: report.portfolioSummary.critical,
+          healthyAsins: report.portfolioSummary.healthy,
+          intakeProfile: report.intakeProfile,
+          validation,
+          decisionBoard: buildDecisionBoard(report.asinReports, report.intakeProfile),
+          focusSplit: summarizePortfolioFocus(report.asinReports),
+          recurringBlockers: summarizeRecurringBlockers(report.asinReports)
+        },
+        asins: report.asinReports
+          .slice()
+          .sort((a, b) => a.score - b.score)
+          .map((item, index) => ({
+            portfolio_rank: index + 1,
+            asin: item.row.ASIN,
+            title: item.row.title,
+            score: item.score,
+            health_label: item.healthLabel,
+            diagnosis_category: item.diagnosisCategory,
+            diagnosis_strength: item.diagnosisStrength,
+            scaling_readiness: item.scalingReadiness.label,
+            focus_bucket: mapFocusBucket(item.scalingReadiness.label),
+            benchmark_scope: item.benchmarkScope,
+            benchmark_confidence: item.benchmarkConfidence,
+            benchmark_peer_count: item.benchmarkPeerCount,
+            data_quality: item.dataQuality.completeness,
+            healthy_anchor: item.healthyAnchor,
+            top_blocker: item.blockers[0]?.type || null,
+            blocker_count: item.blockers.length,
+            root_cause: item.rootCause
+          }))
+      };
+    }
+
+    function buildCurrentDiagnosisJson(item, report) {
+      const validation = buildValidationAssessment(report);
+      return {
+        asin: item.row.ASIN,
+        title: item.row.title,
+        score: item.score,
+        health_label: item.healthLabel,
+        diagnosis_category: item.diagnosisCategory,
+        diagnosis_strength: item.diagnosisStrength,
+        scaling_readiness: item.scalingReadiness,
+        portfolio_rank: getPortfolioRank(report.asinReports, item.row.ASIN),
+        benchmark_scope: item.benchmarkScope,
+        benchmark_confidence: item.benchmarkConfidence,
+        benchmark_peer_count: item.benchmarkPeerCount,
+        applied_benchmarks: item.appliedBenchmarks,
+        data_quality: item.dataQuality,
+        validation_context: {
+          validation_score: validation.validationScore,
+          benchmark_reliability: validation.benchmarkReliability,
+          current_decision: validation.currentDecision,
+          strongest_use: validation.strongestUse,
+          checks: validation.checks
+        },
+        sanity_flags: item.sanityFlags,
+        validation_hints: item.validationHints,
+        top_blockers: item.blockers.slice(0, 5),
+        action_plan: item.actionPlan,
+        root_cause: item.rootCause
+      };
+    }
+
+    function buildPortfolioJsonPreview(report) {
+      const full = buildPortfolioJson(report);
+      return {
+        summary: full.summary,
+        validation: full.summary.validation,
+        decision: full.summary.decisionBoard,
+        focus_split: full.summary.focusSplit,
+        first_asins: full.asins.slice(0, 3)
+      };
+    }
+
+    function csvEscape(value) {
+      const stringValue = String(value ?? "");
+      if (/[",\n]/.test(stringValue)) {
+        return `"${stringValue.replace(/"/g, "\"\"")}"`;
+      }
+      return stringValue;
+    }
+
+    function renderHeaderMapping(headerMap) {
+      if (!headerMap) return "";
+      const mappedEntries = Object.entries(headerMap)
+        .filter(([canonical, actual]) => canonical !== actual)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+      if (!mappedEntries.length) {
+        return `<div class="mini-note">Header mapping: using canonical field names directly.</div>`;
+      }
+
+      return `
+        <div class="mini-note">
+          <strong>Header mapping:</strong>
+          ${mappedEntries.map(([canonical, actual]) => `${escapeHtml(actual)} -> ${escapeHtml(canonical)}`).join(" | ")}
+        </div>
+      `;
+    }
+
+    function renderSanityPanel(report) {
+      if (!report.sanityFlags.length) {
+        return `
+          <div class="warning-box">
+            <h2>Sanity checks</h2>
+            <p class="muted">No obvious value-range anomalies were detected for this ASIN.</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="warning-box">
+          <h2>Sanity checks</h2>
+          <p class="muted">These issues suggest the source data may need review before acting on the diagnosis.</p>
+          <ul>${report.sanityFlags.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>
+      `;
+    }
+
+    function renderCalibrationPanel(report, selectedAsin) {
+      const expectation = scenarioExpectations[selectedAsin];
+      if (!expectation) {
+        return "";
+      }
+
+      const selected = report.asinReports.find(item => item.row.ASIN === selectedAsin);
+      const matched = expectation.categories.includes(selected.diagnosisCategory);
+      const readinessMatched = expectation.readiness?.includes(selected.scalingReadiness.label);
+
+      return `
+        <div class="warning-box">
+          <h2>Scenario calibration</h2>
+          <p class="muted">This compares the current diagnosis against the intended sample story for the selected ASIN.</p>
+          <p><strong>Expected category:</strong> ${escapeHtml(expectation.categories.join(" or "))}</p>
+          <p><strong>Observed category:</strong> ${escapeHtml(selected.diagnosisCategory)}</p>
+          <p><strong>Expected readiness:</strong> ${escapeHtml((expectation.readiness || []).join(" or "))}</p>
+          <p><strong>Observed readiness:</strong> ${escapeHtml(selected.scalingReadiness.label)}</p>
+          <p><strong>Expected story:</strong> ${escapeHtml(expectation.story)}</p>
+          <p><strong>Status:</strong> ${matched && readinessMatched ? "Aligned with sample intent." : "Needs further calibration."}</p>
+        </div>
+      `;
+    }
+
+    function renderCalibrationOverview(report, selectedAsin) {
+      const scenarioRows = report.asinReports
+        .filter(item => scenarioExpectations[item.row.ASIN])
+        .map(item => {
+          const expectation = scenarioExpectations[item.row.ASIN];
+          const matched = expectation.categories.includes(item.diagnosisCategory);
+          const readinessMatched = expectation.readiness?.includes(item.scalingReadiness.label);
+          const active = item.row.ASIN === selectedAsin;
+          return `
+            <tr>
+              <td>
+                <button class="row-link" data-asin="${escapeHtml(item.row.ASIN)}">
+                  ${escapeHtml(item.row.ASIN)}
+                </button>
+                ${active ? ` <span class="confidence">current</span>` : ""}
+              </td>
+              <td>${escapeHtml(expectation.categories.join(" or "))}</td>
+              <td>${escapeHtml(item.diagnosisCategory)}</td>
+              <td>${matched && readinessMatched ? "Aligned" : "Needs work"}</td>
+            </tr>
+          `;
+        });
+
+      if (!scenarioRows.length) {
+        return "";
+      }
+
+      return `
+        <h2 style="margin-top:20px;">Scenario calibration overview</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Expected</th>
+              <th>Observed</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${scenarioRows.join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function getPortfolioRank(asinReports, asin) {
+      const sorted = [...asinReports].sort((a, b) => a.score - b.score);
+      const index = sorted.findIndex(report => report.row.ASIN === asin);
+      return index >= 0 ? index + 1 : sorted.length;
+    }
+
+    function renderPortfolioTable(report) {
+      const asinReports = report.asinReports;
+      const intakeProfile = report.intakeProfile;
+      const sortedReports = [...asinReports].sort((a, b) => a.score - b.score);
+      const portfolioDecision = buildDecisionBoard(asinReports, intakeProfile);
+      const validation = buildValidationAssessment(report);
+      const cautionNote = intakeProfile?.benchmarkReliability === "low"
+        ? `<div class="mini-note" style="margin-top:12px;">This table is best read as ASIN prioritization, not strong portfolio proof, because the file is heavily mixed.</div>`
+        : intakeProfile?.benchmarkReliability === "medium"
+          ? `<div class="mini-note" style="margin-top:12px;">This table is directionally useful, but relative portfolio signals are softer than single-ASIN diagnosis.</div>`
+          : "";
+      return `
+        <h2 style="margin-top:20px;">Portfolio overview</h2>
+        <div class="mini-note">Red-tinted rows are currently not ready for more growth pressure. Green-tinted rows are the cleanest growth-ready candidates.</div>
+        <div class="mini-note">Portfolio confidence: ${escapeHtml(portfolioDecision.confidence)} | Validation score: ${escapeHtml(String(validation.validationScore))}</div>
+        ${cautionNote}
+        <table>
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Title</th>
+              <th>Score</th>
+              <th>Health</th>
+              <th>Category</th>
+              <th>Readiness</th>
+              <th>Focus bucket</th>
+              <th>Benchmarks</th>
+              <th>Benchmark confidence</th>
+              <th>Peers</th>
+              <th>Data quality</th>
+              <th>Blockers</th>
+              <th>Primary blocker</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sortedReports.map(report => `
+              <tr class="${report.scalingReadiness.label === "Not Ready" ? "flagged-row" : report.scalingReadiness.label === "Ready" ? "ready-row" : ""}">
+                <td><button class="row-link" data-asin="${escapeHtml(report.row.ASIN)}">${escapeHtml(report.row.ASIN)}</button></td>
+                <td>${escapeHtml(report.row.title)}</td>
+                <td>${report.score}</td>
+                <td>${escapeHtml(report.healthLabel)}</td>
+                <td>${escapeHtml(report.diagnosisCategory)}</td>
+                <td><span class="badge ${priorityBadgeClass(report.blockers[0]?.severity)}">${escapeHtml(report.scalingReadiness.label)}</span></td>
+                <td>${escapeHtml(mapFocusBucket(report.scalingReadiness.label))}</td>
+                <td>${escapeHtml(report.benchmarkScope)}</td>
+                <td>${escapeHtml(report.benchmarkConfidence)}</td>
+                <td>${escapeHtml(String(report.benchmarkPeerCount))}</td>
+                <td>${escapeHtml(report.dataQuality.completeness)}</td>
+                <td>${report.blockers.length}</td>
+                <td>${escapeHtml(report.blockers[0]?.type || "No major blocker")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderRecurringBlockersTable(asinReports, intakeProfile) {
+      const blockerCounts = summarizeRecurringBlockers(asinReports);
+      if (!blockerCounts.length) {
+        return "";
+      }
+
+      const cautionNote = intakeProfile?.benchmarkReliability === "low"
+        ? `<div class="mini-note" style="margin-top:20px;">This file is heavily mixed, so recurring blockers should be treated as soft portfolio signals rather than strong system-level proof.</div>`
+        : intakeProfile?.benchmarkReliability === "medium"
+          ? `<div class="mini-note" style="margin-top:20px;">Recurring blockers are useful here, but they are still softer than single-ASIN diagnosis on mixed files.</div>`
+          : "";
+
+      return `
+        ${cautionNote}
+        <h2 style="margin-top:20px;">Recurring blockers across portfolio</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Blocker</th>
+              <th>ASINs hit</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${blockerCounts.map(item => `
+              <tr>
+                <td>${escapeHtml(item.type)}</td>
+                <td>${item.count}</td>
+                <td>${escapeHtml(item.interpretation)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function summarizeRecurringBlockers(asinReports) {
+      const counts = new Map();
+
+      asinReports.forEach(report => {
+        report.blockers.forEach(blocker => {
+          const current = counts.get(blocker.type) || { type: blocker.type, count: 0, area: blocker.area };
+          current.count += 1;
+          counts.set(blocker.type, current);
+        });
+      });
+
+      return Array.from(counts.values())
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 6)
+        .map(item => ({
+          ...item,
+          interpretation: blockerInterpretation(item)
+        }));
+    }
+
+    function blockerInterpretation(item) {
+      const areaInterpretations = {
+        Traffic: "Repeated click-capture weakness suggests a portfolio-level visibility problem.",
+        Conversion: "Repeated conversion weakness suggests page quality or offer issues across multiple ASINs.",
+        Trust: "Repeated trust flags suggest review depth or rating quality is limiting more than one product.",
+        Ads: "Repeated ad inefficiency suggests campaign structure is amplifying weak merchandising.",
+        Inventory: "Repeated inventory pressure suggests operational planning is constraining growth.",
+        Growth: "Repeated growth blockers suggest combined merchandising issues, not isolated execution misses.",
+        SEO: "Repeated organic visibility weakness suggests keyword coverage is too shallow across the portfolio."
+      };
+
+      return areaInterpretations[item.area] || "Repeated blocker signals a portfolio-wide pattern worth fixing at the system level.";
+    }
+
+    function renderPortfolioActionTable(asinReports, intakeProfile) {
+      const actions = buildPortfolioActions(asinReports, intakeProfile);
+      if (!actions.length) {
+        return "";
+      }
+
+      return `
+        <h2 style="margin-top:20px;">Portfolio action priorities</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Priority</th>
+              <th>Action</th>
+              <th>Why now</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${actions.map((item, index) => `
+              <tr>
+                <td>${index + 1}</td>
+                <td>${escapeHtml(item.action)}</td>
+                <td>${escapeHtml(item.reason)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function buildPortfolioActions(asinReports, intakeProfile) {
+      const recurring = summarizeRecurringBlockers(asinReports);
+      const actionConfidence = intakeProfile?.benchmarkReliability === "low"
+        ? "Treat this as a softer portfolio workstream because the file is heavily mixed."
+        : intakeProfile?.benchmarkReliability === "medium"
+          ? "Treat this as a directional portfolio workstream, but validate against the weakest ASINs first."
+          : "";
+
+      return recurring.slice(0, 4).map(item => {
+        if (item.area === "Traffic") {
+          return {
+            action: "Refresh click-winning assets across weak ASINs first.",
+            reason: `${item.count} ASINs are showing repeated traffic-side weakness. ${actionConfidence}`.trim()
+          };
+        }
+        if (item.area === "Conversion") {
+          return {
+            action: "Prioritize page and offer upgrades before scaling traffic.",
+            reason: `${item.count} ASINs are under-converting relative to the rest of the file. ${actionConfidence}`.trim()
+          };
+        }
+        if (item.area === "Trust") {
+          return {
+            action: "Address trust depth and review quality before aggressive optimization.",
+            reason: `${item.count} ASINs are showing trust-side blockers. ${actionConfidence}`.trim()
+          };
+        }
+        if (item.area === "Ads") {
+          return {
+            action: "Tighten paid spend where ads are amplifying weak listings.",
+            reason: `${item.count} ASINs are wasting spend or scaling weak pages. ${actionConfidence}`.trim()
+          };
+        }
+        if (item.area === "Inventory") {
+          return {
+            action: "Stabilize stock cover before pushing more demand.",
+            reason: `${item.count} ASINs show operational pressure that can break momentum. ${actionConfidence}`.trim()
+          };
+        }
+        return {
+          action: "Treat this blocker as a portfolio-level workstream.",
+          reason: `${item.count} ASINs share the same recurring blocker. ${actionConfidence}`.trim()
+        };
+      });
+    }
+
+    function summarizePortfolioFocus(asinReports) {
+      return {
+        fixFirst: asinReports.filter(item => item.scalingReadiness.label === "Not Ready").length,
+        improveBeforeScaling: asinReports.filter(item => item.scalingReadiness.label === "Needs Work").length,
+        testCarefully: asinReports.filter(item => item.scalingReadiness.label === "Conditional").length,
+        canSupportGrowth: asinReports.filter(item => item.scalingReadiness.label === "Ready").length
+      };
+    }
+
+    function renderPortfolioGapTable(report, benchmarks) {
+      const rows = [
+        {
+          label: "CTR gap",
+          current: formatPercent(report.row.ctr),
+          benchmark: formatPercent(report.appliedBenchmarks.avgCtr),
+          gap: formatGap(report.row.ctr, report.appliedBenchmarks.avgCtr, "percent")
+        },
+        {
+          label: "Conversion gap",
+          current: formatPercent(report.row.conversion_rate),
+          benchmark: formatPercent(report.appliedBenchmarks.avgConversion),
+          gap: formatGap(report.row.conversion_rate, report.appliedBenchmarks.avgConversion, "percent")
+        },
+        {
+          label: "Review depth gap",
+          current: formatNumber(report.row.review_count),
+          benchmark: formatNumber(report.appliedBenchmarks.avgReviewCount),
+          gap: formatGap(report.row.review_count, report.appliedBenchmarks.avgReviewCount, "number")
+        },
+        {
+          label: "ACOS gap",
+          current: formatPercent(report.row.acos),
+          benchmark: formatPercent(report.appliedBenchmarks.avgAcos),
+          gap: formatGap(report.row.acos, report.appliedBenchmarks.avgAcos, "percent")
+        }
+      ];
+
+      return `
+        <div class="mini-note" style="margin-top:20px;">Applied benchmark scope: ${escapeHtml(report.benchmarkScope)}. These comparisons use the benchmark set that powered the diagnosis for this ASIN.</div>
+        <h2 style="margin-top:20px;">Gap vs ${report.benchmarkScope === "category" ? "category" : "portfolio"} averages</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Current ASIN</th>
+              <th>Portfolio avg</th>
+              <th>Gap</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(item => `
+              <tr>
+                <td>${escapeHtml(item.label)}</td>
+                <td>${escapeHtml(String(item.current))}</td>
+                <td>${escapeHtml(String(item.benchmark))}</td>
+                <td>${escapeHtml(item.gap)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderReadinessSummaryTable(asinReports) {
+      const counts = asinReports.reduce((acc, item) => {
+        acc[item.scalingReadiness.label] = (acc[item.scalingReadiness.label] || 0) + 1;
+        return acc;
+      }, {});
+
+      const labels = ["Ready", "Conditional", "Needs Work", "Not Ready"];
+
+      return `
+        <h2 style="margin-top:20px;">Scaling readiness across portfolio</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Readiness</th>
+              <th>ASINs</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${labels.map(label => `
+              <tr>
+                <td>${escapeHtml(label)}</td>
+                <td>${counts[label] || 0}</td>
+                <td>${escapeHtml(readinessInterpretation(label))}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderUrgentTriageTable(asinReports) {
+      const urgent = asinReports
+        .filter(item => item.scalingReadiness.label === "Not Ready" || item.blockers[0]?.severity === "critical")
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 5);
+
+      if (!urgent.length) {
+        return "";
+      }
+
+      return `
+        <h2 style="margin-top:20px;">Immediate triage list</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Score</th>
+              <th>Readiness</th>
+              <th>Top blocker</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${urgent.map(item => `
+              <tr>
+                <td><button class="row-link" data-asin="${escapeHtml(item.row.ASIN)}">${escapeHtml(item.row.ASIN)}</button></td>
+                <td>${item.score}</td>
+                <td>${escapeHtml(item.scalingReadiness.label)}</td>
+                <td>${escapeHtml(item.blockers[0]?.type || "No major blocker")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderGrowthCandidateTable(asinReports) {
+      const candidates = asinReports
+        .filter(item => item.scalingReadiness.label === "Ready" || item.scalingReadiness.label === "Conditional")
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+
+      if (!candidates.length) {
+        return "";
+      }
+
+      return `
+        <h2 style="margin-top:20px;">Growth candidates</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ASIN</th>
+              <th>Score</th>
+              <th>Readiness</th>
+              <th>Why this is a candidate</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${candidates.map(item => `
+              <tr>
+                <td><button class="row-link" data-asin="${escapeHtml(item.row.ASIN)}">${escapeHtml(item.row.ASIN)}</button></td>
+                <td>${item.score}</td>
+                <td>${escapeHtml(item.scalingReadiness.label)}</td>
+                <td>${escapeHtml(item.scalingReadiness.detail)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderPortfolioDecisionBoard(asinReports, intakeProfile) {
+      const focus = summarizePortfolioFocus(asinReports);
+      const decisionBoard = buildDecisionBoard(asinReports, intakeProfile);
+
+      return `
+        <h2 style="margin-top:20px;">Portfolio decision board</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Decision</th>
+              <th>Current read</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Primary call</td>
+              <td>${escapeHtml(decisionBoard.primaryCall)}</td>
+            </tr>
+            <tr>
+              <td>Decision confidence</td>
+              <td>${escapeHtml(decisionBoard.confidence)}</td>
+            </tr>
+            <tr>
+              <td>Fix-first load</td>
+              <td>${focus.fixFirst} ASINs</td>
+            </tr>
+            <tr>
+              <td>Scale-capable load</td>
+              <td>${focus.canSupportGrowth} ASINs</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function buildDecisionBoard(asinReports, intakeProfile) {
+      const focus = summarizePortfolioFocus(asinReports);
+      const reliability = intakeProfile?.benchmarkReliability || "unknown";
+      const confidence = reliability === "low" ? "low" : reliability === "medium" ? "medium" : "medium";
+      return {
+        primaryCall: focus.fixFirst >= focus.canSupportGrowth
+          ? reliability === "low"
+            ? "Stabilize weak ASINs first, but validate the portfolio call against the weakest ASINs because the file is heavily mixed."
+            : "Stabilize weak ASINs first."
+          : reliability === "low"
+            ? "You may have growth candidates, but validate them product-by-product because the file is heavily mixed."
+            : "You have enough clean candidates to test measured growth.",
+        confidence
+      };
+    }
+
+    function renderIntakeProfileTable(intakeProfile) {
+      if (!intakeProfile) {
+        return "";
+      }
+
+      const intakeCall = intakeProfile.benchmarkReliability === "low"
+        ? "This file is heavily mixed, so portfolio comparisons should be treated as soft signals."
+        : intakeProfile.benchmarkReliability === "medium"
+          ? "This file is somewhat mixed, so ASIN-level reads are stronger than broad portfolio comparisons."
+          : "This file is concentrated enough for cleaner internal portfolio comparisons.";
+
+      return `
+        <div class="note" style="margin-top:20px;">
+          <strong>Input read</strong><br>
+          ${escapeHtml(intakeCall)}
+        </div>
+        <h2 style="margin-top:20px;">Input profile</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>Value</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderMetricRow("Distinct categories", intakeProfile.categoryCount, "How mixed the uploaded file is")}
+            ${renderMetricRow("Benchmark reliability", intakeProfile.benchmarkReliability, "How much trust to place in portfolio-relative comparisons")}
+            ${renderMetricRow("Top-category share", formatPercent(intakeProfile.maxCategoryShare), "How concentrated the uploaded file is around one category")}
+            ${intakeProfile.topCategories.map(item => renderMetricRow(`Category: ${item.category}`, item.count, "ASIN count in this category")).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderPortfolioSnapshot(report) {
+      const focus = summarizePortfolioFocus(report.asinReports);
+      const recurring = summarizeRecurringBlockers(report.asinReports)[0];
+      const categoryScoped = report.asinReports.filter(item => item.benchmarkScope === "category").length;
+      const portfolioScoped = report.asinReports.filter(item => item.benchmarkScope === "portfolio").length;
+      const decisionBoard = buildDecisionBoard(report.asinReports, report.intakeProfile);
+      const portfolioCall = focus.fixFirst > focus.canSupportGrowth
+        ? "Portfolio is currently more constrained than expansion-ready."
+        : "Portfolio has enough healthier ASINs to support measured growth testing.";
+
+      return `
+        <div class="note" style="margin-top:20px;">
+          <strong>Portfolio read</strong><br>
+          ${escapeHtml(portfolioCall)}
+        </div>
+        <div class="summary-grid" style="margin-top:20px;">
+          <div class="stat"><strong>${report.totalAsins}</strong>Total ASINs<div class="muted">In current file</div></div>
+          <div class="stat"><strong>${focus.fixFirst}</strong>Fix first<div class="muted">Most urgent bucket</div></div>
+          <div class="stat"><strong>${focus.canSupportGrowth}</strong>Scale-ready<div class="muted">Ready bucket</div></div>
+          <div class="stat"><strong>${categoryScoped}/${portfolioScoped}</strong>Category/portfolio benchmarks<div class="muted">How relative comparisons were scoped</div></div>
+          <div class="stat"><strong>${escapeHtml(capitalize(decisionBoard.confidence))}</strong>Portfolio confidence<div class="muted">How hard to lean on the portfolio call</div></div>
+          <div class="stat"><strong>${escapeHtml(recurring?.type || "None")}</strong>Top recurring blocker<div class="muted">${escapeHtml(recurring ? `${recurring.count} ASINs` : "No repeat pattern")}</div></div>
+        </div>
+      `;
+    }
+
+    function renderValidationRead(report) {
+      const validation = buildValidationAssessment(report);
+
+      return `
+        <div class="note" style="margin-top:20px;">
+          <strong>Validation read</strong><br>
+          ${escapeHtml(validation.validationCall)}
+        </div>
+        <h2 style="margin-top:20px;">Validation status</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Signal</th>
+              <th>Value</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderMetricRow("Raw rows", validation.rawRows, "Rows seen before validation and rejection")}
+            ${renderMetricRow("Valid ASINs", report.totalAsins, "Rows used in diagnosis")}
+            ${renderMetricRow("Rejected rows", validation.rejectedRows, "Rows excluded from diagnosis")}
+            ${renderMetricRow("Validation score", validation.validationScore, "A rough internal read of dataset suitability for this phase")}
+            ${renderMetricRow("Benchmark reliability", validation.benchmarkReliability, "How much trust to place in relative comparisons")}
+            ${renderMetricRow("Top-category share", validation.maxCategoryShare === null ? "-" : formatPercent(validation.maxCategoryShare), "How concentrated this file is around one category")}
+            ${renderMetricRow("Strongest use", validation.strongestUse, "Best role for this dataset in the current phase")}
+            ${renderMetricRow("Main watchout", validation.watchout, "What still needs caution")}
+            ${renderMetricRow("Current decision", validation.currentDecision, "Whether this file is good enough for internal validation")}
+          </tbody>
+        </table>
+        <h2 style="margin-top:20px;">Validation checks</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Area</th>
+              <th>Status</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${validation.checks.map(item => `
+              <tr>
+                <td>${escapeHtml(item.label)}</td>
+                <td>${escapeHtml(item.status)}</td>
+                <td>${escapeHtml(item.reason)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function buildValidationAssessment(report) {
+      const rejectedRows = report.loadStats?.rejectedRows || 0;
+      const rawRows = report.loadStats?.totalRows || report.totalAsins + rejectedRows;
+      const profile = report.intakeProfile || {};
+      const categoryCount = profile.categoryCount || 0;
+      const benchmarkReliability = profile.benchmarkReliability || "unknown";
+      const maxCategoryShare = profile.maxCategoryShare ?? null;
+
+      let validationCall = "This file is suitable for diagnosis review, not just intake stress-testing.";
+      let strongestUse = "Review both ASIN-level and portfolio-level conclusions.";
+      let watchout = "Normal caution still applies to heuristic diagnosis.";
+
+      if (categoryCount > 3 && rejectedRows > 0) {
+        validationCall = "This file is best for intake and resilience testing first, with more caution on portfolio-wide conclusions.";
+        strongestUse = "Check parsing, rejected rows, benchmark scope, and weak-ASIN reads before trusting broader portfolio conclusions.";
+        watchout = "Mixed categories plus rejected rows reduce how cleanly portfolio comparisons should be read.";
+      } else if (benchmarkReliability === "low" || benchmarkReliability === "medium") {
+        validationCall = "This file is useful for diagnosis review, but ASIN-level reads are stronger than portfolio-wide reads.";
+        strongestUse = "Trust the weakest-ASIN diagnosis more than broad portfolio averages.";
+        watchout = "Mixed categories reduce the precision of relative comparisons.";
+      } else if (rejectedRows > 0) {
+        validationCall = "This file is good for both diagnosis review and visible intake validation.";
+        strongestUse = "Use it to confirm that invalid rows are surfaced cleanly without breaking the diagnosis flow.";
+        watchout = "Rejected rows should stay visible so users understand what was ignored.";
+      }
+
+      const currentDecision = benchmarkReliability === "low"
+        ? "Do not use this file as the main proof that portfolio logic is ready."
+        : "Good enough for internal validation of the current MVP.";
+
+      let validationScore = 100;
+      validationScore -= rejectedRows * 8;
+      validationScore -= benchmarkReliability === "low" ? 25 : benchmarkReliability === "medium" ? 12 : 0;
+      if (categoryCount > 4) validationScore -= 8;
+      if (maxCategoryShare !== null && maxCategoryShare < 0.4) validationScore -= 8;
+      validationScore = Math.max(0, Math.min(100, validationScore));
+
+      const checks = [
+        {
+          label: "Intake",
+          status: rejectedRows <= 2 ? "Pass" : "Watch",
+          reason: rejectedRows <= 2
+            ? "The file is loading with a controlled number of rejected rows."
+            : "Too many rows are being rejected for this phase."
+        },
+        {
+          label: "ASIN-level diagnosis",
+          status: benchmarkReliability === "low" ? "Pass with caution" : "Pass",
+          reason: benchmarkReliability === "low"
+            ? "ASIN-level reads are still useful, but stronger than portfolio-wide conclusions."
+            : "The file supports directional ASIN-level diagnosis."
+        },
+        {
+          label: "Portfolio-level diagnosis",
+          status: benchmarkReliability === "low" ? "Watch" : benchmarkReliability === "medium" ? "Pass with caution" : "Pass",
+          reason: benchmarkReliability === "low"
+            ? "The file is too mixed for stronger portfolio proof."
+            : benchmarkReliability === "medium"
+              ? "The portfolio layer is useful, but still softer than single-ASIN diagnosis."
+              : "The file is concentrated enough for stronger portfolio-level interpretation."
+        },
+        {
+          label: "Export integrity",
+          status: "Pass",
+          reason: "Validation, benchmark, and decision context now flow through the exported outputs."
+        }
+      ];
+
+      return {
+        rawRows,
+        rejectedRows,
+        benchmarkReliability,
+        maxCategoryShare,
+        validationScore,
+        checks,
+        validationCall,
+        strongestUse,
+        watchout,
+        currentDecision
+      };
+    }
+
+    function renderPortfolioFocusTable(asinReports) {
+      const grouped = {
+        "Fix first": asinReports.filter(item => item.scalingReadiness.label === "Not Ready").length,
+        "Improve before scaling": asinReports.filter(item => item.scalingReadiness.label === "Needs Work").length,
+        "Test carefully": asinReports.filter(item => item.scalingReadiness.label === "Conditional").length,
+        "Can support growth": asinReports.filter(item => item.scalingReadiness.label === "Ready").length
+      };
+
+      return `
+        <h2 style="margin-top:20px;">Portfolio focus split</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Workstream</th>
+              <th>ASINs</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fix first</td>
+              <td>${grouped["Fix first"]}</td>
+              <td>Do not push these ASINs harder until the main blockers are resolved.</td>
+            </tr>
+            <tr>
+              <td>Improve before scaling</td>
+              <td>${grouped["Improve before scaling"]}</td>
+              <td>These ASINs need page, trust, or offer upgrades before bigger traffic bets.</td>
+            </tr>
+            <tr>
+              <td>Test carefully</td>
+              <td>${grouped["Test carefully"]}</td>
+              <td>These ASINs can be tested, but only in a controlled way.</td>
+            </tr>
+            <tr>
+              <td>Can support growth</td>
+              <td>${grouped["Can support growth"]}</td>
+              <td>These ASINs are the cleanest candidates for expansion.</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    }
+
+    function readinessInterpretation(label) {
+      const meanings = {
+        Ready: "These ASINs appear able to take more traffic without obvious structural blockers.",
+        Conditional: "These ASINs may scale, but only under controlled tests and monitoring.",
+        "Needs Work": "These ASINs need page or trust improvements before stronger scaling.",
+        "Not Ready": "These ASINs should be stabilized before any serious growth push."
+      };
+
+      return meanings[label] || "No interpretation available.";
+    }
+
+    function formatGap(current, benchmark, mode) {
+      if (current === null || current === undefined || benchmark === null || benchmark === undefined) {
+        return "-";
+      }
+
+      const delta = current - benchmark;
+      if (mode === "percent") {
+        const sign = delta > 0 ? "+" : "";
+        return `${sign}${(delta * 100).toFixed(2)} pts`;
+      }
+
+      const rounded = Math.round(delta * 10) / 10;
+      const sign = rounded > 0 ? "+" : "";
+      return `${sign}${rounded}`;
+    }
+
+    function rawGap(current, benchmark, mode) {
+      if (current === null || current === undefined || benchmark === null || benchmark === undefined) {
+        return "";
+      }
+      const delta = current - benchmark;
+      if (mode === "percent") {
+        return (delta * 100).toFixed(2);
+      }
+      return (Math.round(delta * 10) / 10).toString();
+    }
+
+    function mapFocusBucket(readinessLabel) {
+      const mapping = {
+        "Not Ready": "Fix first",
+        "Needs Work": "Improve before scaling",
+        "Conditional": "Test carefully",
+        "Ready": "Can support growth"
+      };
+
+      return mapping[readinessLabel] || "";
+    }
+
+    function renderMetricRow(metric, value, interpretation) {
+      return `<tr><td>${escapeHtml(metric)}</td><td>${escapeHtml(String(value))}</td><td>${escapeHtml(interpretation)}</td></tr>`;
+    }
+
+    function formatPercent(value) {
+      if (value === null || value === undefined) return "-";
+      return `${(value * 100).toFixed(2)}%`;
+    }
+
+    function formatNumber(value) {
+      if (value === null || value === undefined) return "-";
+      return new Intl.NumberFormat("en-US").format(value);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function capitalize(value) {
+      if (!value) return "";
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function priorityLabel(severity) {
+      if (!severity) return "Stable";
+      if (severity === "critical") return "Priority 1";
+      if (severity === "high") return "Priority 2";
+      if (severity === "medium") return "Priority 3";
+      return "Priority 4";
+    }
+
+    function priorityBadgeClass(severity) {
+      if (!severity) return "stable";
+      if (severity === "critical") return "priority-1";
+      if (severity === "high") return "priority-2";
+      if (severity === "medium") return "priority-3";
+      return "priority-4";
+    }
+  </script>
+</body>
+</html>
