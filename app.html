@@ -660,15 +660,16 @@
     ];
 
     const columnAliases = {
-      ASIN: ["asin", "sku_asin"],
+      // Amazon Seller Central Business Report column names (various formats)
+      ASIN: ["asin", "sku_asin", "child_asin", "parent_asin", "_child_asin", "asin_"],
       title: ["product_title", "name", "product_name"],
       category: ["product_category"],
-      sessions_30d: ["sessions", "traffic_30d", "sessions30d"],
-      units_ordered_30d: ["units_ordered", "units", "orders_30d", "units30d"],
-      conversion_rate: ["conversion", "cvr", "unit_session_percentage"],
-      ctr: ["click_through_rate", "clickthroughrate"],
-      review_count: ["reviews", "ratings_total", "reviewcount"],
-      rating: ["avg_rating", "star_rating"],
+      sessions_30d: ["sessions", "traffic_30d", "sessions30d", "sessions_total", "sessions___total"],
+      units_ordered_30d: ["units_ordered", "units", "orders_30d", "units30d", "units_ordered___b2b_and_b2c"],
+      conversion_rate: ["conversion", "cvr", "unit_session_percentage", "unit_session_percentage___b2b_and_b2c"],
+      ctr: ["click_through_rate", "clickthroughrate", "click_through_rate_ctr", "ctr_"],
+      review_count: ["reviews", "ratings_total", "reviewcount", "customer_reviews"],
+      rating: ["avg_rating", "star_rating", "average_customer_review"],
       days_of_cover: ["inventory_days_of_cover", "days_of_inventory", "cover_days"],
       ad_spend_30d: ["ad_spend", "spend_30d", "spend"],
       ad_sales_30d: ["ad_sales", "sales_from_ads", "ad_revenue_30d"],
@@ -677,7 +678,7 @@
       bullet_count: ["bullets", "bullet_points", "bulletpoints"],
       has_a_plus: ["a_plus", "a_plus_content", "has_aplus"],
       organic_rank_top_keyword: ["organic_rank", "top_keyword_rank"],
-      price: ["current_price", "listing_price"]
+      price: ["current_price", "listing_price", "your_price"]
     };
 
     let parsedRows = [];
