@@ -511,15 +511,42 @@
       }
       .nav-links { display: none; }
     }
+
+    /* ── ACCESSIBILITY ── */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 16px;
+      background: var(--blue);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 14px;
+      z-index: 9999;
+      text-decoration: none;
+      transition: top 0.15s;
+    }
+    .skip-link:focus { top: 16px; }
+
+    *:focus-visible {
+      outline: 3px solid #2563eb;
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    button:focus-visible, a:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
   </style>
 </head>
 <body>
 
+  <!-- SKIP NAVIGATION (ADA) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- NAV -->
-  <nav>
+  <nav role="navigation" aria-label="Main navigation">
     <div class="nav-inner">
-      <div class="logo">ASIN<span>Insight</span></div>
-      <ul class="nav-links">
+      <a href="/" class="logo" aria-label="ASINInsight home">ASIN<span>Insight</span></a>
+      <ul class="nav-links" role="list">
         <li><a href="#how">How it works</a></li>
         <li><a href="#features">Features</a></li>
         <li><a href="#pricing">Pricing</a></li>
@@ -528,20 +555,23 @@
     </div>
   </nav>
 
+  <!-- MAIN CONTENT -->
+  <main id="main-content">
+
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" aria-labelledby="hero-heading">
     <div class="hero-inner">
-      <div class="hero-tag">⚡ Instant ASIN Diagnosis</div>
-      <h1>Find out <em>exactly</em> why your<br>Amazon sales stalled</h1>
+      <div class="hero-tag" aria-hidden="true">⚡ Instant ASIN Diagnosis</div>
+      <h1 id="hero-heading">Find out <em>exactly</em> why your<br>Amazon sales stalled</h1>
       <p class="hero-sub">Upload your seller data and get a prioritized list of growth blockers in seconds. No spreadsheets, no guesswork — just the fix.</p>
       <div class="hero-actions">
-        <a href="/tool" class="btn-primary">▶ Start Free Analysis</a>
-        <a href="#how" class="btn-ghost">See how it works</a>
+        <a href="/tool" class="btn-primary" aria-label="Start your free ASIN analysis">▶ Start Free Analysis</a>
+        <a href="#how" class="btn-ghost" aria-label="Learn how ASINInsight works">See how it works</a>
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat"><strong>60s</strong><span>Time to first insight</span></div>
-        <div class="hero-stat"><strong>9+</strong><span>Metrics analyzed</span></div>
-        <div class="hero-stat"><strong>100%</strong><span>Private — runs in your browser</span></div>
+      <div class="hero-stats" role="list" aria-label="Key statistics">
+        <div class="hero-stat" role="listitem"><strong>60s</strong><span>Time to first insight</span></div>
+        <div class="hero-stat" role="listitem"><strong>9+</strong><span>Metrics analyzed</span></div>
+        <div class="hero-stat" role="listitem"><strong>100%</strong><span>Private — runs in your browser</span></div>
       </div>
     </div>
   </section>
@@ -726,8 +756,8 @@
             <li class="price-feature"><span class="price-check">✓</span> Action plan</li>
             <li class="price-feature"><span class="price-check">✓</span> CSV export</li>
           </ul>
-          <form method="POST" action="/checkout/free" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Start for free</button>
+          <form method="POST" action="/checkout/free" style="display:block;margin:0;" onsubmit="handleSubmit(this)" aria-label="Start free plan">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;" aria-label="Start ASINInsight for free">Start for free</button>
           </form>
         </div>
 
@@ -743,8 +773,8 @@
             <li class="price-feature"><span class="price-check">✓</span> JSON + CSV exports</li>
             <li class="price-feature"><span class="price-check">✓</span> Weekly diagnosis history</li>
           </ul>
-          <form method="POST" action="/checkout/pro" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Get started — $49/mo</button>
+          <form method="POST" action="/checkout/pro" style="display:block;margin:0;" onsubmit="handleSubmit(this)" aria-label="Subscribe to Pro plan">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;" aria-label="Subscribe to ASINInsight Pro for $49 per month">Get started — $49/mo</button>
           </form>
         </div>
 
@@ -759,8 +789,8 @@
             <li class="price-feature"><span class="price-check">✓</span> Priority support</li>
             <li class="price-feature"><span class="price-check">✓</span> API access</li>
           </ul>
-          <form method="POST" action="/checkout/agency" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Get started — $199/mo</button>
+          <form method="POST" action="/checkout/agency" style="display:block;margin:0;" onsubmit="handleSubmit(this)" aria-label="Subscribe to Agency plan">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;" aria-label="Subscribe to ASINInsight Agency for $199 per month">Get started — $199/mo</button>
           </form>
         </div>
       </div>
@@ -776,8 +806,10 @@
     </div>
   </section>
 
+  </main>
+
   <!-- FOOTER -->
-  <footer>
+  <footer role="contentinfo">
     <div class="footer-inner">
       <div class="footer-logo">ASIN<span>Insight</span></div>
       <p>© 2026 ASINInsight. Built for Amazon sellers.</p>
