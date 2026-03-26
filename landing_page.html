@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Sales Stalled | Amazon Growth Diagnosis</title>
+  <style>
+    :root {
+      --bg: #f3efe6;
+      --paper: #fffdf8;
+      --ink: #1d1d1d;
+      --muted: #6b655c;
+      --line: #ddd3c5;
+      --accent: #c4512d;
+      --accent-dark: #8f3418;
+      --accent-soft: #f7d8cc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at top right, rgba(196, 81, 45, 0.12), transparent 28%),
+        linear-gradient(180deg, #efe7dc 0%, var(--bg) 100%);
+      color: var(--ink);
+      font: 16px/1.5 Georgia, "Times New Roman", serif;
+    }
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    .hero, .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: 0 8px 30px rgba(74, 41, 21, 0.08);
+    }
+    .hero {
+      padding: 36px 32px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 0.98;
+      letter-spacing: -0.03em;
+    }
+    h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+    p {
+      margin: 0 0 14px;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-block;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .cta {
+      margin-top: 18px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid var(--accent);
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fffdf8;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent-dark);
+    }
+    .mini-panel {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #fff9f2 0%, #fffdf8 100%);
+    }
+    .mini-panel ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+    }
+    .grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      padding: 24px;
+    }
+    .steps {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .foot {
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .email-box {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px dashed var(--accent);
+      background: #fff7f3;
+    }
+    code {
+      font-family: "Courier New", monospace;
+      font-size: 14px;
+    }
+    @media (max-width: 760px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <div class="pill">Beta Positioning Test</div>
+        <h1>Find Out Why Your Amazon Sales Stalled</h1>
+        <p>If your products are live, traffic exists, and sales still are not growing, this audit shows where the bottleneck is and what to fix first.</p>
+        <p class="muted">Built for small and mid-sized Amazon sellers who are tired of dashboards and want a direct answer: is the problem conversion, ad waste, inventory risk, reviews, or listing quality?</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="output/mock_audit_report.html">View Sample Audit</a>
+          <a class="btn btn-secondary" href="mailto:beta@example.com?subject=Why%20Sales%20Stalled%20Beta">Request Beta Access</a>
+        </div>
+        <div class="email-box">
+          Validation note: replace <code>beta@example.com</code> with your real email before sharing this page.
+        </div>
+      </div>
+      <div class="mini-panel">
+        <h2>What the audit checks</h2>
+        <ul>
+          <li>Low-converting ASINs</li>
+          <li>Weak click-through products</li>
+          <li>Ad spend waste</li>
+          <li>Inventory risk and ranking loss</li>
+          <li>Review and trust problems</li>
+          <li>Listing quality gaps</li>
+        </ul>
+        <p class="muted" style="margin-top: 14px;">Output: one prioritized report, not another analytics maze.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>The Core Promise</h2>
+        <p>Most sellers can see that growth has stalled. They usually cannot tell whether the problem is traffic, conversion, ads, stock, reviews, or listing quality.</p>
+        <p class="muted">This product gives them a prioritized answer instead of another dashboard.</p>
+      </article>
+      <article class="card">
+        <h2>Who It Is For</h2>
+        <p>Sellers with 3 to 100 active ASINs, some traffic or ad spend, and a sense that growth should be better than it is.</p>
+        <p class="muted">Not designed for complete beginners and not aimed at large enterprise brands.</p>
+      </article>
+      <article class="card">
+        <h2>What We Need to Learn</h2>
+        <p>Will sellers care enough to request access? Do they trust the framing? Is the pain specific enough to earn replies?</p>
+      </article>
+      <article class="card">
+        <h2>Why It Might Work</h2>
+        <p>The value proposition is direct: tell sellers where revenue is leaking and what to fix next.</p>
+        <p class="muted">If people immediately understand the offer and ask to try it, the angle is promising.</p>
+      </article>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <h2>What the Seller Gets</h2>
+      <ol class="steps">
+        <li>A short report showing the top reasons growth is stuck.</li>
+        <li>A ranked list of issues by urgency and likely business impact.</li>
+        <li>Recommended next actions for the weakest ASINs and channels.</li>
+      </ol>
+      <div class="foot">This page is not the product. It is a test to see whether the positioning is strong enough to earn attention.</div>
+    </section>
+  </div>
+</body>
+</html>

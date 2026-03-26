@@ -1,0 +1,12 @@
+asin;product_title;product_category;sessions;units_ordered;conversion;click_through_rate;reviews;avg_rating;inventory_days_of_cover;ad_spend;ad_sales;ad_acos;image_count;bullet_points;a_plus;organic_rank;current_price
+B0REAL001;Stainless Steel Coffee Canister;Home & Kitchen;4,850;121;2.49%;0.34%;63;4.2;18;$420.00;$1,180.00;35.6%;6;4;yes;24;$29.99
+B0REAL002;Under Desk Cable Tray;Office Products;3,120;144;4.62%;0.47%;188;4.5;52;$210.00;$1,060.00;19.8%;7;5;true;13;$24.50
+B0REAL003;Magnetic Spice Tin Set;Home & Kitchen;6,440;89;1.38%;0.23%;17;3.9;7;$910.00;$870.00;104.6%;4;3;no;49;$18.99
+B0REAL004;Adjustable Laptop Stand;Office Products;9,200;138;1.50%;0.44%;341;4.4;36;$610.00;$2,340.00;26.1%;7;5;yes;16;$39.00
+B0REAL005;Reusable Produce Bags;Grocery;3.980;152;3,82%;0,26%;92;4,3;26;€330,00;€990,00;33,3%;6;5;yes;22;€17,90
+B0REAL006;Portable Smoothie Blender;Kitchen;5,760;118;2.05%;0.39%;11;3.7;31;$355.00;$760.00;46.7%;6;4;false;35;$31.49
+B0REAL007;Dog Treat Training Pouch;Pet Supplies;2,640;149;5.64%;0.55%;256;4.7;58;$145.00;$930.00;15.6%;8;5;yes;8;$16.99
+B0REAL008;Back Seat Car Trash Bin;Automotive;7,180;132;1.84%;0.28%;58;4.0;8;$840.00;$1,250.00;67.2%;5;3;no;41;$21.99
+B0REAL009;Silicone Air Fryer Liners;Home & Kitchen;1,240;29;2.34%;0.31%;6;4.1;14;$95.00;$210.00;45.2%;5;4;no;38;$12.49
+;Unnamed Listing Test;Home & Kitchen;980;14;1.42%;0.19%;4;3.8;12;$70.00;$88.00;79.5%;4;2;false;61;$9.99
+B0REAL011;;Office Products;1,560;21;1.35%;0.22%;9;4.0;17;$120.00;$160.00;75.0%;4;3;false;52;$14.20

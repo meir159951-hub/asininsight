@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amazon Seller Audit Mock Report</title>
+  <style>
+    :root {
+      --bg: #f5f0e8;
+      --panel: #fffdf9;
+      --ink: #1f1f1f;
+      --muted: #6e675f;
+      --line: #ded5c8;
+      --accent: #b44c2d;
+      --accent-soft: #f3d1c6;
+    }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #efe6da 0%, var(--bg) 100%);
+      color: var(--ink);
+      font: 16px/1.5 Georgia, "Times New Roman", serif;
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .hero, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(70, 42, 24, 0.08);
+    }
+    .hero h1, .card h2 {
+      margin-top: 0;
+    }
+    .muted {
+      color: var(--muted);
+    }
+    .score {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    ul {
+      padding-left: 20px;
+      margin-bottom: 0;
+    }
+    .section {
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Lone Star Home Goods Audit Report</h1>
+      <div class="muted">Amazon.com | Demo report for MVP validation</div>
+      <div class="score">Store Health Score: 34/100 (Critical)</div>
+      <p class="muted">This mock report shows the shape of the first product. The live version will eventually generate this from seller data automatically.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Store Snapshot</h2>
+        <ul>
+          <li>3 products analyzed</li>
+          <li>16 total issues found</li>
+          <li>4 critical issues</li>
+          <li>6 high-priority issues</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Issue Mix</h2>
+        <ul>
+          <li><strong>Listing</strong>: 6 issues</li>
+          <li><strong>Inventory</strong>: 2 issues</li>
+          <li><strong>Ads</strong>: 2 issues</li>
+          <li><strong>Conversion</strong>: 2 issues</li>
+          <li><strong>Reviews</strong>: 2 issues</li>
+          <li><strong>Traffic</strong>: 2 issues</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="card section">
+      <h2>Top Priority Actions</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>ASIN</th>
+            <th>Area</th>
+            <th>Why This Matters</th>
+            <th>Recommended Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>CRITICAL</td>
+            <td>B0DEMO003</td>
+            <td>Ads</td>
+            <td>ACOS is 94%, which suggests the current ad spend is destroying margin.</td>
+            <td>Pause weak search terms, cut bids, and fix listing conversion before scaling ads again.</td>
+          </tr>
+          <tr>
+            <td>CRITICAL</td>
+            <td>B0DEMO003</td>
+            <td>Inventory</td>
+            <td>6 days of stock cover creates a high risk of going out of stock and losing rank.</td>
+            <td>Replenish inventory or reduce traffic and ad spend until supply stabilizes.</td>
+          </tr>
+          <tr>
+            <td>HIGH</td>
+            <td>B0DEMO001</td>
+            <td>Listing</td>
+            <td>Only 4 images are live, which likely hurts click-through and conversion.</td>
+            <td>Add at least 2 more images, including an infographic and a lifestyle shot.</td>
+          </tr>
+          <tr>
+            <td>HIGH</td>
+            <td>B0DEMO001</td>
+            <td>Conversion</td>
+            <td>Conversion is 2.19%, which is weak for a product already receiving traffic.</td>
+            <td>Review creative, price positioning, and review quality for this ASIN.</td>
+          </tr>
+          <tr>
+            <td>HIGH</td>
+            <td>B0DEMO003</td>
+            <td>Reviews</td>
+            <td>The product rating is only 3.8, which can suppress both ads and conversion.</td>
+            <td>Investigate complaint themes and improve product quality or positioning.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card section">
+      <h2>Product Metrics</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ASIN</th>
+            <th>Title</th>
+            <th>Conversion</th>
+            <th>CTR</th>
+            <th>Rating</th>
+            <th>Days of Cover</th>
+            <th>ACOS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>B0DEMO001</td>
+            <td>Insulated Water Bottle</td>
+            <td>2.19%</td>
+            <td>0.31%</td>
+            <td>4.1</td>
+            <td>11</td>
+            <td>56%</td>
+          </tr>
+          <tr>
+            <td>B0DEMO002</td>
+            <td>Silicone Baking Mat Set</td>
+            <td>5.39%</td>
+            <td>0.49%</td>
+            <td>4.5</td>
+            <td>48</td>
+            <td>20%</td>
+          </tr>
+          <tr>
+            <td>B0DEMO003</td>
+            <td>Cord Organizer for Kitchen Appliances 6 Pack Self Adhesive Holder Clips for Cables</td>
+            <td>1.43%</td>
+            <td>0.24%</td>
+            <td>3.8</td>
+            <td>6</td>
+            <td>94%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>
