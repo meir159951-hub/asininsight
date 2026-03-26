@@ -10,6 +10,7 @@ from flask import (
     request, session, url_for, jsonify
 )
 from dotenv import load_dotenv
+from functools import wraps
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
@@ -19,6 +20,21 @@ PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
 app = Flask(__name__, static_folder=None)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")
+
+@app.after_request
+def add_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+@app.errorhandler(404)
+def not_found(e):
+    return send_from_directory(BASE_DIR, "error.html"), 404
+
+@app.errorhandler(500)
+def server_error(e):
+    return send_from_directory(BASE_DIR, "error.html"), 500
 
 # ── Pages ──────────────────────────────────────────────────────────────────
 

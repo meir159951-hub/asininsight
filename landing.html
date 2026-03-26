@@ -726,7 +726,7 @@
             <li class="price-feature"><span class="price-check">✓</span> Action plan</li>
             <li class="price-feature"><span class="price-check">✓</span> CSV export</li>
           </ul>
-          <form method="POST" action="/checkout/free" style="display:block;margin:0;">
+          <form method="POST" action="/checkout/free" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
             <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Start for free</button>
           </form>
         </div>
@@ -743,7 +743,7 @@
             <li class="price-feature"><span class="price-check">✓</span> JSON + CSV exports</li>
             <li class="price-feature"><span class="price-check">✓</span> Weekly diagnosis history</li>
           </ul>
-          <form method="POST" action="/checkout/pro" style="display:block;margin:0;">
+          <form method="POST" action="/checkout/pro" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
             <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Get started — $49/mo</button>
           </form>
         </div>
@@ -759,8 +759,8 @@
             <li class="price-feature"><span class="price-check">✓</span> Priority support</li>
             <li class="price-feature"><span class="price-check">✓</span> API access</li>
           </ul>
-          <form method="POST" action="/checkout/agency" style="display:block;margin:0;">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Contact us</button>
+          <form method="POST" action="/checkout/agency" style="display:block;margin:0;" onsubmit="handleSubmit(this)">
+            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;">Get started — $199/mo</button>
           </form>
         </div>
       </div>
@@ -791,6 +791,16 @@
       </p>
     </div>
   </footer>
+
+  <script>
+    function handleSubmit(form) {
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Please wait…';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'not-allowed';
+    }
+  </script>
 
 </body>
 </html>
