@@ -808,6 +808,13 @@
       await loadDatasetFromPath("sample_data/sample_asin_data.csv", "sample_asin_data.csv", true);
     });
 
+    // ── Auto-load demo on first visit ──
+    (async () => {
+      if (!parsedRows.length) {
+        await loadDatasetFromPath("sample_data/sample_asin_data.csv", "sample_asin_data.csv", true);
+      }
+    })();
+
     loadMessySampleButton.addEventListener("click", async () => {
       await loadDatasetFromPath("sample_data/realistic_messy_portfolio.csv", "realistic_messy_portfolio.csv", false);
     });
