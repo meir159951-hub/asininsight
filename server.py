@@ -10,7 +10,6 @@ from flask import (
     request, session, url_for, jsonify
 )
 from dotenv import load_dotenv
-from functools import wraps
 
 BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
@@ -19,7 +18,12 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
 app = Flask(__name__, static_folder=None)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")
+
+secret_key = os.getenv("FLASK_SECRET_KEY")
+if not secret_key:
+    raise RuntimeError("FLASK_SECRET_KEY environment variable is not set")
+app.secret_key = secret_key
+
 
 @app.after_request
 def add_security_headers(response):
@@ -30,13 +34,16 @@ def add_security_headers(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+
 @app.errorhandler(404)
 def not_found(e):
     return send_from_directory(BASE_DIR, "error.html"), 404
 
+
 @app.errorhandler(500)
 def server_error(e):
     return send_from_directory(BASE_DIR, "error.html"), 500
+
 
 # ── Pages ──────────────────────────────────────────────────────────────────
 
@@ -47,8 +54,8 @@ def index():
 
 @app.route("/tool")
 def tool():
-    # Free plan: always accessible
-    # Pro plan: check session
+    if not session.get("plan"):
+        return redirect("/")
     return send_from_directory(BASE_DIR, "app.html")
 
 
@@ -93,12 +100,12 @@ def checkout_pro():
                         "name": "ASINInsight Pro",
                         "description": "Unlimited ASINs, portfolio analysis, category benchmarking"
                     },
-                    "unit_amount": 4900,  # $49.00
+                    "unit_amount": 4900,
                     "recurring": {"interval": "month"},
                 },
                 "quantity": 1,
             }],
-            success_url=f"{base_url}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=f"{base_url}/verify?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base_url}/cancel",
         )
         return redirect(checkout_session.url, code=303)
@@ -120,12 +127,12 @@ def checkout_agency():
                         "name": "ASINInsight Agency",
                         "description": "Unlimited ASINs, white-label reports, API access, priority support"
                     },
-                    "unit_amount": 19900,  # $199.00
+                    "unit_amount": 19900,
                     "recurring": {"interval": "month"},
                 },
                 "quantity": 1,
             }],
-            success_url=f"{base_url}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            success_url=f"{base_url}/verify?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base_url}/cancel",
         )
         return redirect(checkout_session.url, code=303)
@@ -153,7 +160,7 @@ def verify():
             session["stripe_session_id"] = session_id
     except Exception:
         pass
-    return redirect("/tool")
+    return redirect("/success")
 
 
 # ── Run ────────────────────────────────────────────────────────────────────
