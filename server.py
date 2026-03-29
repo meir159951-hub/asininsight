@@ -7,7 +7,7 @@ import stripe
 from pathlib import Path
 from flask import (
     Flask, send_from_directory, redirect,
-    request, session, url_for, jsonify
+    request, session, jsonify
 )
 from dotenv import load_dotenv
 
@@ -15,7 +15,6 @@ BASE_DIR = Path(__file__).resolve().parent
 load_dotenv(BASE_DIR / ".env")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
 app = Flask(__name__, static_folder=None)
 
@@ -23,6 +22,19 @@ secret_key = os.getenv("FLASK_SECRET_KEY")
 if not secret_key:
     raise RuntimeError("FLASK_SECRET_KEY environment variable is not set")
 app.secret_key = secret_key
+
+# Secure session cookie settings
+app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+# Canonical site URL — set SITE_URL in Railway env vars to avoid Host header injection
+SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
+
+
+def get_base_url():
+    """Return the canonical site URL. Falls back to request host only if SITE_URL is not set."""
+    return SITE_URL if SITE_URL else request.host_url.rstrip("/")
 
 
 @app.after_request
@@ -32,6 +44,7 @@ def add_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     response.headers["Pragma"] = "no-cache"
+    response.headers["Strict-Transport-Security"] = "max-age=63072000; includeSubDomains"
     return response
 
 
@@ -89,7 +102,7 @@ def terms():
 @app.route("/checkout/pro", methods=["POST"])
 def checkout_pro():
     try:
-        base_url = request.host_url.rstrip("/")
+        base_url = get_base_url()
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="subscription",
@@ -116,7 +129,7 @@ def checkout_pro():
 @app.route("/checkout/agency", methods=["POST"])
 def checkout_agency():
     try:
-        base_url = request.host_url.rstrip("/")
+        base_url = get_base_url()
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             mode="subscription",
@@ -160,6 +173,11 @@ def verify():
     session_id = request.args.get("session_id")
     if not session_id:
         return redirect("/")
+
+    # Prevent replay: if this session_id was already used, go straight to success
+    if session.get("stripe_session_id") == session_id and session.get("plan") == "pro":
+        return redirect("/success")
+
     try:
         stripe_session = stripe.checkout.Session.retrieve(session_id)
         if stripe_session.payment_status == "paid" or stripe_session.status == "complete":
