@@ -72,6 +72,11 @@ def tool():
     return send_from_directory(BASE_DIR, "app.html")
 
 
+@app.route("/logo.svg")
+def logo():
+    return send_from_directory(BASE_DIR, "logo.svg")
+
+
 @app.route("/sample_data/<path:filename>")
 def sample_data(filename):
     return send_from_directory(BASE_DIR / "sample_data", filename)
