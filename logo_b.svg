@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" width="260" height="60">
+  <defs>
+    <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#1e40af"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Circle background -->
+  <circle cx="30" cy="30" r="26" fill="url(#boltGrad)"/>
+
+  <!-- Subtle bar chart behind bolt -->
+  <rect x="16" y="30" width="5" height="12" rx="1.5" fill="white" opacity="0.15"/>
+  <rect x="23" y="23" width="5" height="19" rx="1.5" fill="white" opacity="0.15"/>
+  <rect x="30" y="26" width="5" height="16" rx="1.5" fill="white" opacity="0.15"/>
+  <rect x="37" y="19" width="5" height="23" rx="1.5" fill="white" opacity="0.15"/>
+
+  <!-- Lightning bolt -->
+  <path d="M33,10 L22,32 L29,32 L27,50 L40,26 L33,26 Z" fill="white" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
+
+  <!-- Text -->
+  <text x="66" y="39" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="27" font-weight="800" letter-spacing="-0.03em">
+    <tspan fill="#111827">ASIN</tspan><tspan fill="#1d4ed8">Insight</tspan>
+  </text>
+</svg>

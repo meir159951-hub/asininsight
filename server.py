@@ -77,6 +77,16 @@ def logo():
     return send_from_directory(BASE_DIR, "logo.svg")
 
 
+@app.route("/logo_b.svg")
+def logo_b():
+    return send_from_directory(BASE_DIR, "logo_b.svg")
+
+
+@app.route("/logo_preview.html")
+def logo_preview():
+    return send_from_directory(BASE_DIR, "logo_preview.html")
+
+
 @app.route("/sample_data/<path:filename>")
 def sample_data(filename):
     return send_from_directory(BASE_DIR / "sample_data", filename)
