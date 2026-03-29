@@ -1,29 +1,44 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" width="260" height="60">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 64" width="280" height="64">
   <defs>
     <linearGradient id="irisGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
+      <stop offset="100%" style="stop-color:#1e3a8a"/>
     </linearGradient>
+    <radialGradient id="glow" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#1d4ed8" flood-opacity="0.25"/>
+    </filter>
   </defs>
 
-  <!-- Eye outer shape -->
-  <path d="M4,30 C14,7 46,7 56,30 C46,53 14,53 4,30 Z" fill="#eff6ff" stroke="#1d4ed8" stroke-width="2.2"/>
+  <!-- Eye white / background fill -->
+  <path d="M4,32 C16,10 52,10 66,32 C52,54 16,54 4,32 Z" fill="#dbeafe"/>
 
-  <!-- Iris -->
-  <circle cx="30" cy="30" r="13.5" fill="url(#irisGrad)"/>
+  <!-- Eye outline top and bottom lashes (subtle) -->
+  <path d="M4,32 C16,10 52,10 66,32" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M4,32 C16,54 52,54 66,32" fill="none" stroke="#1d4ed8" stroke-width="2" stroke-linecap="round"/>
 
-  <!-- Rising chart line inside iris -->
-  <polyline points="21,37 26,31 31,34 38,22" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Iris with glow gradient + shadow -->
+  <circle cx="35" cy="32" r="15" fill="url(#glow)" filter="url(#shadow)"/>
 
-  <!-- Glowing dot at chart peak -->
-  <circle cx="38" cy="22" r="3" fill="white"/>
-  <circle cx="38" cy="22" r="1.5" fill="#93c5fd"/>
+  <!-- Upward trending arrow inside iris -->
+  <!-- Line: low-left to high-right -->
+  <polyline points="25,40 30,33 36,37 42,22" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 
-  <!-- Subtle eye shine -->
-  <circle cx="24" cy="24" r="2.5" fill="white" opacity="0.25"/>
+  <!-- Arrow head at peak -->
+  <polygon points="42,22 38,24 44,28" fill="white"/>
 
-  <!-- Text: ASIN + Insight -->
-  <text x="68" y="39" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="27" font-weight="800" letter-spacing="-0.03em">
-    <tspan fill="#111827">ASIN</tspan><tspan fill="#1d4ed8">Insight</tspan>
+  <!-- Glowing dot at peak -->
+  <circle cx="42" cy="22" r="3.5" fill="white"/>
+  <circle cx="42" cy="22" r="1.8" fill="#93c5fd"/>
+
+  <!-- Eye inner shine (depth effect) -->
+  <circle cx="28" cy="26" r="3" fill="white" opacity="0.2"/>
+
+  <!-- Wordmark -->
+  <text x="78" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="30" font-weight="800" letter-spacing="-0.04em">
+    <tspan fill="#111827">ASIN</tspan><tspan fill="#2563eb">Insight</tspan>
   </text>
 </svg>
