@@ -146,6 +146,13 @@ def checkout_free():
     return redirect("/tool")
 
 
+# ── Plan API ───────────────────────────────────────────────────────────────
+
+@app.route("/api/plan")
+def api_plan():
+    return jsonify({"plan": session.get("plan", "free")})
+
+
 # ── Session verify ─────────────────────────────────────────────────────────
 
 @app.route("/verify")

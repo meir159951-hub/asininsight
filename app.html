@@ -715,6 +715,18 @@
     const calibrationPanel = document.getElementById("calibrationPanel");
     const metricTable = document.getElementById("metricTable");
 
+    const FREE_ASIN_LIMIT = 3;
+    let userPlan = "free";
+    (async () => {
+      try {
+        const res = await fetch("/api/plan");
+        if (res.ok) {
+          const data = await res.json();
+          userPlan = data.plan || "free";
+        }
+      } catch (_) {}
+    })();
+
     const scenarioExpectations = {
       B0DEMO001: { categories: ["Offer", "Ops"], readiness: ["Needs Work", "Not Ready"], story: "Moderate traffic, listing weakness, rising inventory risk, and inefficient ads." },
       B0DEMO002: { categories: ["Stable"], readiness: ["Ready"], story: "Healthy baseline product with good conversion and trust." },
@@ -1867,13 +1879,40 @@
         return;
       }
       asinSelectorWrap.classList.remove("hidden");
+
+      const isPro = userPlan === "pro" || userPlan === "agency";
+      const totalFiltered = filteredReports.length;
+      const visibleReports = isPro ? filteredReports : filteredReports.slice(0, FREE_ASIN_LIMIT);
+      const lockedCount = isPro ? 0 : Math.max(0, totalFiltered - FREE_ASIN_LIMIT);
+
       asinFilterMeta.textContent = currentAsinFilter === "all"
         ? `Showing all ${report.asinReports.length} ASINs in the uploaded file.`
         : `Showing ${filteredReports.length} ASIN(s) in "${currentAsinFilter}". ${describeFilter(currentAsinFilter)}`;
-      asinSelector.innerHTML = filteredReports.map(asinReport => `
+
+      const lockedOptions = !isPro && lockedCount > 0
+        ? filteredReports.slice(FREE_ASIN_LIMIT).map(asinReport => `
+            <option value="" disabled>🔒 ${escapeHtml(asinReport.row.ASIN)} — Upgrade to Pro</option>
+          `).join("")
+        : "";
+
+      asinSelector.innerHTML = visibleReports.map(asinReport => `
         <option value="${escapeHtml(asinReport.row.ASIN)}">${escapeHtml(asinReport.row.ASIN)} - ${escapeHtml(asinReport.row.title)}</option>
-      `).join("");
-      asinSelector.value = filteredReports[0].row.ASIN;
+      `).join("") + lockedOptions;
+      asinSelector.value = visibleReports[0].row.ASIN;
+
+      // Show or remove upgrade banner
+      let banner = document.getElementById("freePlanBanner");
+      if (!isPro && lockedCount > 0) {
+        if (!banner) {
+          banner = document.createElement("div");
+          banner.id = "freePlanBanner";
+          banner.style.cssText = "margin-top:12px;padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;font-size:13px;color:#1e40af;display:flex;align-items:center;justify-content:space-between;gap:12px;";
+          asinSelector.parentNode.insertBefore(banner, asinSelector.nextSibling);
+        }
+        banner.innerHTML = `<span>🔒 <strong>${lockedCount} more ASIN${lockedCount > 1 ? "s" : ""}</strong> locked — Free plan is limited to ${FREE_ASIN_LIMIT} ASINs.</span><a href="/" style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:7px;font-weight:700;font-size:12px;text-decoration:none;white-space:nowrap;">Upgrade to Pro →</a>`;
+      } else if (banner) {
+        banner.remove();
+      }
     }
 
     function describeFilter(filter) {
