@@ -191,6 +191,90 @@ def paddle_webhook():
     return jsonify({"status": "ok"}), 200
 
 
+# ── Email Report ───────────────────────────────────────────────────────────
+
+SENDGRID_API_KEY   = os.getenv("SENDGRID_API_KEY", "")
+EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "reports@asininsight.com")
+EMAIL_FROM_NAME    = os.getenv("EMAIL_FROM_NAME", "ASINInsight")
+
+
+@app.route("/api/send-report", methods=["POST"])
+def send_report():
+    """Send diagnosis summary email to user."""
+    data = request.get_json(force=True)
+    email  = (data.get("email") or "").strip()
+    report = data.get("report", {})
+
+    if not email or "@" not in email:
+        return jsonify({"ok": False, "error": "Invalid email"}), 400
+
+    if not SENDGRID_API_KEY:
+        # No SendGrid configured — just return ok so UI doesn't break
+        return jsonify({"ok": True, "note": "email_not_configured"})
+
+    total     = report.get("total_asins", 0)
+    critical  = report.get("critical_count", 0)
+    weakest   = report.get("weakest_asin", "N/A")
+    score     = report.get("weakest_score", 0)
+    blockers  = report.get("top_blockers", [])
+
+    blockers_html = "".join(f"<li style='margin-bottom:6px;'>⚠️ {b}</li>" for b in blockers) if blockers else "<li>No major blockers found.</li>"
+
+    html_body = f"""
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:32px 16px;">
+      <div style="background:#fff;border-radius:16px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+        <div style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:4px;">ASIN<span style="color:#2563eb;">Insight</span></div>
+        <p style="color:#64748b;font-size:14px;margin:0 0 24px;">Your diagnosis report is ready</p>
+
+        <div style="background:#eff6ff;border-radius:12px;padding:20px;margin-bottom:24px;">
+          <div style="font-size:13px;color:#1e40af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Portfolio Summary</div>
+          <div style="display:flex;gap:24px;flex-wrap:wrap;">
+            <div><div style="font-size:28px;font-weight:800;color:#0f172a;">{total}</div><div style="font-size:12px;color:#64748b;">ASINs analyzed</div></div>
+            <div><div style="font-size:28px;font-weight:800;color:#991b1b;">{critical}</div><div style="font-size:12px;color:#64748b;">Critical issues</div></div>
+            <div><div style="font-size:28px;font-weight:800;color:#0f172a;">{score}</div><div style="font-size:12px;color:#64748b;">Weakest score</div></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:10px;">🔴 Top Issues — {weakest}</div>
+          <ul style="margin:0;padding-left:20px;color:#374151;font-size:14px;line-height:1.7;">
+            {blockers_html}
+          </ul>
+        </div>
+
+        <a href="https://asininsight.com/tool" style="display:block;text-align:center;background:#1d4ed8;color:#fff;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;font-size:15px;">
+          View Full Report →
+        </a>
+
+        <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+          ASINInsight · <a href="https://asininsight.com/privacy" style="color:#94a3b8;">Privacy</a> · <a href="https://asininsight.com/terms" style="color:#94a3b8;">Terms</a>
+        </p>
+      </div>
+    </div>
+    """
+
+    try:
+        sg_resp = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={
+                "Authorization": f"Bearer {SENDGRID_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "personalizations": [{"to": [{"email": email}]}],
+                "from": {"email": EMAIL_FROM_ADDRESS, "name": EMAIL_FROM_NAME},
+                "subject": f"Your ASINInsight Report — {total} ASINs, {critical} Critical Issues",
+                "content": [{"type": "text/html", "value": html_body}],
+            },
+            timeout=10,
+        )
+        if sg_resp.status_code in (200, 202):
+            return jsonify({"ok": True})
+        return jsonify({"ok": False, "error": "Email delivery failed"}), 500
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 # ── Plan API ───────────────────────────────────────────────────────────────
 
 @app.route("/api/plan")

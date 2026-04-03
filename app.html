@@ -817,6 +817,7 @@
       populateAsinSelector(currentReport);
       asinSelectorWrap.classList.remove("hidden");
       renderReport(currentReport, currentReport.weakest.row.ASIN);
+      showEmailCapture(currentReport);
     });
 
     loadSampleButton.addEventListener("click", async () => {
@@ -3432,6 +3433,100 @@
       if (severity === "high") return "priority-2";
       if (severity === "medium") return "priority-3";
       return "priority-4";
+    }
+  </script>
+
+  <!-- Email Capture Modal -->
+  <div id="emailModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);position:relative;">
+      <button onclick="closeEmailModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#9ca3af;">✕</button>
+      <div style="font-size:28px;margin-bottom:8px;">📬</div>
+      <h3 style="margin:0 0 8px;font-size:18px;font-weight:700;color:#0f172a;">Get this report in your inbox</h3>
+      <p style="margin:0 0 20px;font-size:14px;color:#64748b;">We'll email you a summary of the diagnosis so you can review it anytime.</p>
+      <div id="emailError" style="display:none;background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:12px;"></div>
+      <input type="email" id="emailInput" placeholder="your@email.com"
+        style="width:100%;box-sizing:border-box;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:15px;margin-bottom:12px;outline:none;">
+      <button onclick="submitEmailCapture()"
+        style="width:100%;padding:12px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">
+        Send me the report →
+      </button>
+      <p style="margin:12px 0 0;font-size:12px;color:#94a3b8;text-align:center;">No spam. One email per analysis. Unsubscribe anytime.</p>
+    </div>
+  </div>
+
+  <!-- Amazon Connect Status -->
+  <style>
+    #emailModal.open { display: flex !important; }
+  </style>
+
+  <!-- Email Capture Logic -->
+  <script>
+    let _emailReportData = null;
+
+    function showEmailCapture(report) {
+      // Don't show if already sent email this session
+      if (sessionStorage.getItem('emailSent')) return;
+      _emailReportData = {
+        total_asins: report.totalAsins,
+        critical_count: report.asinReports.filter(r => r.healthLabel === 'Critical').length,
+        weakest_asin: report.weakest ? report.weakest.row.ASIN : '',
+        weakest_score: report.weakest ? report.weakest.score : 0,
+        top_blockers: (report.weakest && report.weakest.blockers || []).slice(0, 3).map(b => b.label || b.title || String(b)),
+        portfolio_summary: report.portfolioSummary || {}
+      };
+      setTimeout(() => {
+        document.getElementById('emailModal').classList.add('open');
+      }, 2000);
+    }
+
+    function closeEmailModal() {
+      document.getElementById('emailModal').classList.remove('open');
+    }
+
+    function submitEmailCapture() {
+      const email = document.getElementById('emailInput').value.trim();
+      const errorEl = document.getElementById('emailError');
+      errorEl.style.display = 'none';
+
+      if (!email || !email.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.querySelector('#emailModal button:last-of-type');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+
+      fetch('/api/send-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, report: _emailReportData })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          sessionStorage.setItem('emailSent', '1');
+          document.getElementById('emailModal').innerHTML = `
+            <div style="background:#fff;border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;">
+              <div style="font-size:48px;margin-bottom:16px;">✅</div>
+              <h3 style="margin:0 0 8px;color:#0f172a;">Report sent!</h3>
+              <p style="color:#64748b;margin:0 0 20px;">Check your inbox at <strong>${email}</strong></p>
+              <button onclick="closeEmailModal()" style="padding:10px 24px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Done</button>
+            </div>`;
+        } else {
+          errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+          errorEl.style.display = 'block';
+          btn.textContent = 'Send me the report →';
+          btn.disabled = false;
+        }
+      })
+      .catch(() => {
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.style.display = 'block';
+        btn.textContent = 'Send me the report →';
+        btn.disabled = false;
+      });
     }
   </script>
 
