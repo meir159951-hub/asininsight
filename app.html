@@ -544,7 +544,10 @@
   <div class="wrap">
     <nav class="topnav">
       <a href="/" class="topnav-logo" style="text-decoration:none;">ASIN<span>Insight</span></a>
-      <div class="topnav-badge">Amazon Seller Tool</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div id="amazon-status"></div>
+        <div class="topnav-badge">Amazon Seller Tool</div>
+      </div>
     </nav>
 
     <section class="hero">
@@ -3430,6 +3433,39 @@
       if (severity === "medium") return "priority-3";
       return "priority-4";
     }
+  </script>
+
+  <!-- Amazon Connect Status -->
+  <script>
+    (function() {
+      const statusEl = document.getElementById('amazon-status');
+      if (!statusEl) return;
+
+      fetch('/api/plan')
+        .then(r => r.json())
+        .then(data => {
+          if (data.amazon_connected) {
+            statusEl.innerHTML = `
+              <span style="display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#065f46;
+                border:1px solid #a7f3d0;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;">
+                ✓ Amazon Connected
+                <button onclick="disconnectAmazon()" style="background:none;border:none;cursor:pointer;
+                  color:#6b7280;font-size:11px;padding:0;margin-left:4px;">disconnect</button>
+              </span>`;
+          } else {
+            statusEl.innerHTML = `
+              <a href="/amazon/connect" style="display:inline-flex;align-items:center;gap:6px;
+                background:#1d4ed8;color:#fff;border-radius:999px;padding:6px 14px;
+                font-size:12px;font-weight:600;text-decoration:none;">
+                🔗 Connect Amazon Store
+              </a>`;
+          }
+        });
+
+      function disconnectAmazon() {
+        fetch('/amazon/disconnect').then(() => location.reload());
+      }
+    })();
   </script>
 </body>
 </html>

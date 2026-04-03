@@ -886,9 +886,7 @@
             <li class="price-feature"><span class="price-check">✓</span> JSON + CSV exports</li>
             <li class="price-feature"><span class="price-check">✓</span> Weekly diagnosis history</li>
           </ul>
-          <form method="POST" action="/checkout/pro" style="display:block;margin:0;" onsubmit="handleSubmit(this)" aria-label="Subscribe to Pro plan">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;" aria-label="Subscribe to ASINInsight Pro for $49 per month">Get started — $49/mo</button>
-          </form>
+          <button class="btn-plan" style="width:100%;cursor:pointer;" onclick="openPaddleCheckout('pro')" aria-label="Subscribe to ASINInsight Pro for $49 per month">Get started — $49/mo</button>
         </div>
 
         <div class="price-card">
@@ -902,14 +900,12 @@
             <li class="price-feature"><span class="price-check">✓</span> Priority support</li>
             <li class="price-feature"><span class="price-check">✓</span> API access</li>
           </ul>
-          <form method="POST" action="/checkout/agency" style="display:block;margin:0;" onsubmit="handleSubmit(this)" aria-label="Subscribe to Agency plan">
-            <button type="submit" class="btn-plan" style="width:100%;cursor:pointer;" aria-label="Subscribe to ASINInsight Agency for $199 per month">Get started — $199/mo</button>
-          </form>
+          <button class="btn-plan" style="width:100%;cursor:pointer;" onclick="openPaddleCheckout('agency')" aria-label="Subscribe to ASINInsight Agency for $199 per month">Get started — $199/mo</button>
         </div>
       </div>
       <div class="trust-badge" style="margin-top:32px;">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#64748b" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Payments secured by Stripe — 256-bit SSL encryption — Cancel anytime
+        Payments secured by Paddle — 256-bit SSL encryption — Cancel anytime
       </div>
     </div>
   </section>
@@ -950,14 +946,30 @@
     </div>
   </footer>
 
+  <!-- Paddle.js -->
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
   <script>
-    // ── Loading state on checkout buttons ──
-    function handleSubmit(form) {
-      const btn = form.querySelector('button[type="submit"]');
-      btn.disabled = true;
-      btn.textContent = 'Please wait…';
-      btn.style.opacity = '0.7';
-      btn.style.cursor = 'not-allowed';
+    // ── Paddle Checkout ──
+    let paddleConfig = {};
+    fetch('/api/paddle-config')
+      .then(r => r.json())
+      .then(cfg => {
+        paddleConfig = cfg;
+        if (cfg.client_token) {
+          Paddle.Initialize({ token: cfg.client_token });
+        }
+      });
+
+    function openPaddleCheckout(plan) {
+      const priceId = plan === 'pro' ? paddleConfig.price_pro : paddleConfig.price_agency;
+      if (!priceId) {
+        alert('Payment system loading, please try again in a moment.');
+        return;
+      }
+      Paddle.Checkout.open({
+        items: [{ priceId: priceId, quantity: 1 }],
+        successUrl: window.location.origin + '/success',
+      });
     }
 
     // ── Mobile hamburger menu ──
