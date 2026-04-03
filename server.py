@@ -112,6 +112,11 @@ def terms():
     return send_from_directory(BASE_DIR, "terms.html")
 
 
+@app.route("/refund")
+def refund():
+    return send_from_directory(BASE_DIR, "refund.html")
+
+
 # ── Stripe Checkout ────────────────────────────────────────────────────────
 
 @app.route("/checkout/pro", methods=["POST"])
