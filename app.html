@@ -3475,12 +3475,12 @@
         portfolio_summary: report.portfolioSummary || {}
       };
       setTimeout(() => {
-        document.getElementById('emailModal').classList.add('open');
+        document.getElementById('emailModal').style.display = 'flex';
       }, 2000);
     }
 
     function closeEmailModal() {
-      document.getElementById('emailModal').classList.remove('open');
+      document.getElementById('emailModal').style.display = 'none';
     }
 
     function submitEmailCapture() {
