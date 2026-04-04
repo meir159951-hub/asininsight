@@ -786,7 +786,7 @@
         <div class="feature-card">
           <div class="feature-icon">⚡</div>
           <h3>Results in 60 seconds</h3>
-          <p>Upload your CSV and get a full diagnosis instantly. No waiting, no setup, no account required.</p>
+          <p>Get a full diagnosis of your listings instantly. No waiting, no setup, no account required.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">🔒</div>
@@ -915,8 +915,10 @@
   <section class="cta-band">
     <div style="max-width:600px; margin:0 auto;">
       <h2>Stop guessing. Start fixing.</h2>
-      <p>Upload your CSV and get your first ASIN diagnosis in under 60 seconds. Free, private, instant.</p>
-      <a href="/tool" class="btn-primary" style="display:inline-flex;">▶ Run Free Diagnosis Now</a>
+      <p>Get a full diagnosis of your Amazon listings in under 60 seconds. Free, no credit card needed.</p>
+      <form method="POST" action="/checkout/free" style="display:inline;" onsubmit="handleSubmit(this)">
+        <button type="submit" class="btn-primary" style="display:inline-flex;cursor:pointer;">▶ Run Free Diagnosis Now</button>
+      </form>
     </div>
   </section>
 
