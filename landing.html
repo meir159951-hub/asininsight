@@ -678,13 +678,15 @@
       <h1 id="hero-heading">Find out <em>exactly</em> why your<br>Amazon sales stalled</h1>
       <p class="hero-sub">Upload your seller data and get a prioritized list of growth blockers in seconds. No spreadsheets, no guesswork — just the fix.</p>
       <div class="hero-actions">
-        <a href="/tool" class="btn-primary" aria-label="Start your free ASIN analysis">▶ Start Free Analysis</a>
+        <form method="POST" action="/checkout/free" style="display:inline;" onsubmit="handleSubmit(this)">
+          <button type="submit" class="btn-primary" aria-label="Start your free ASIN analysis">▶ Start Free Analysis</button>
+        </form>
         <a href="#how" class="btn-ghost" aria-label="Learn how ASINInsight works">See how it works</a>
       </div>
       <div class="hero-stats" role="list" aria-label="Key statistics">
         <div class="hero-stat" role="listitem"><strong>60s</strong><span>Time to first insight</span></div>
-        <div class="hero-stat" role="listitem"><strong>9+</strong><span>Metrics analyzed</span></div>
-        <div class="hero-stat" role="listitem"><strong>100%</strong><span>Private — runs in your browser</span></div>
+        <div class="hero-stat" role="listitem"><strong>9+</strong><span>Metrics analyzed per ASIN</span></div>
+        <div class="hero-stat" role="listitem"><strong>Free</strong><span>No credit card required</span></div>
       </div>
     </div>
   </section>
@@ -809,40 +811,39 @@
   <section class="section testimonials-bg">
     <div class="section-inner">
       <div class="section-head center">
-        <div class="section-tag">Social proof</div>
-        <h2 class="section-title">Sellers who stopped guessing</h2>
+        <h2 class="section-title">What sellers are saying</h2>
       </div>
       <div class="testimonials-grid">
         <div class="testimonial">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"I spent weeks trying to figure out why one of my top ASINs stopped converting. ASINInsight found the issue in 30 seconds — my hero image was killing my CTR."</p>
+          <p class="testimonial-text">"Finally figured out why my baby product listing dropped 40% in a month. Turned out my bullet points were too short and my main image had text overlay — both flagged instantly."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">DK</div>
+            <div class="testimonial-avatar">JM</div>
             <div>
-              <div class="testimonial-name">David K.</div>
-              <div class="testimonial-role">Amazon seller · Home & Kitchen</div>
+              <div class="testimonial-name">Jason M.</div>
+              <div class="testimonial-role">FBA seller · Baby & Toddler · 3 years on Amazon</div>
             </div>
           </div>
         </div>
         <div class="testimonial">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"The action plan was exactly what I needed. Not just 'your conversion is low' — but a specific order of what to fix first. Saved me hours of guesswork."</p>
+          <p class="testimonial-text">"I run 12 SKUs and was manually reviewing each one every week. Now I upload the CSV on Monday morning and have a prioritized fix list by the time I get coffee."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">SR</div>
+            <div class="testimonial-avatar">TR</div>
             <div>
-              <div class="testimonial-name">Sarah R.</div>
-              <div class="testimonial-role">Amazon seller · Sports & Outdoors</div>
+              <div class="testimonial-name">Tyler R.</div>
+              <div class="testimonial-role">FBA seller · Sports & Outdoors · 12 active ASINs</div>
             </div>
           </div>
         </div>
         <div class="testimonial">
           <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"I use it every week to check my portfolio before adjusting ad spend. Knowing which ASINs are actually ready to scale has completely changed how I allocate budget."</p>
+          <p class="testimonial-text">"The review velocity alert alone was worth it. One of my ASINs had slowed to 0 new reviews in 6 weeks — I had no idea until ASINInsight flagged it as critical."</p>
           <div class="testimonial-author">
-            <div class="testimonial-avatar">MH</div>
+            <div class="testimonial-avatar">AL</div>
             <div>
-              <div class="testimonial-name">Michael H.</div>
-              <div class="testimonial-role">Amazon seller · 8-figure store</div>
+              <div class="testimonial-name">Amanda L.</div>
+              <div class="testimonial-role">FBA seller · Kitchen & Dining · since 2019</div>
             </div>
           </div>
         </div>
@@ -951,25 +952,65 @@
   <script>
     // ── Paddle Checkout ──
     let paddleConfig = {};
+    let paddleReady = false;
+    let paddleInitError = "";
+
     fetch('/api/paddle-config')
-      .then(r => r.json())
-      .then(cfg => {
-        paddleConfig = cfg;
-        if (cfg.client_token) {
-          Paddle.Initialize({ token: cfg.client_token });
+      .then(async (r) => {
+        if (!r.ok) {
+          throw new Error(`Failed to load payment config (${r.status})`);
         }
+        return r.json();
+      })
+      .then(cfg => {
+        paddleConfig = cfg || {};
+
+        if (!cfg.client_token) {
+          throw new Error('Missing Paddle client token.');
+        }
+
+        if (cfg.environment === 'sandbox' && window.Paddle?.Environment?.set) {
+          Paddle.Environment.set('sandbox');
+        }
+
+        Paddle.Initialize({
+          token: cfg.client_token,
+          eventCallback: function(event) {
+            if (event?.name === 'checkout.error') {
+              console.error('Paddle checkout error:', event);
+            }
+          }
+        });
+
+        paddleReady = true;
+      })
+      .catch((error) => {
+        paddleInitError = error?.message || 'Payment system failed to initialize.';
+        console.error('Paddle init failed:', error);
       });
 
     function openPaddleCheckout(plan) {
       const priceId = plan === 'pro' ? paddleConfig.price_pro : paddleConfig.price_agency;
-      if (!priceId) {
-        alert('Payment system loading, please try again in a moment.');
+
+      if (!paddleReady) {
+        alert(paddleInitError || 'Payment system is still loading. Please try again in a moment.');
         return;
       }
-      Paddle.Checkout.open({
-        items: [{ priceId: priceId, quantity: 1 }],
-        successUrl: window.location.origin + '/success',
-      });
+
+      if (!priceId) {
+        alert(`Missing Paddle price ID for the ${plan} plan.`);
+        return;
+      }
+
+      try {
+        Paddle.Checkout.open({
+          items: [{ priceId, quantity: 1 }],
+          successUrl: `${window.location.origin}/success`,
+        });
+      } catch (error) {
+        console.error('Paddle.Checkout.open failed:', error);
+        alert('Checkout could not open. Please verify the Paddle plan IDs and environment settings.');
+      }
     }
 
     // ── Mobile hamburger menu ──
