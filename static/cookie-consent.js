@@ -32,7 +32,7 @@
       '<strong style="font-size:14px;font-weight:700;">We use essential cookies only.</strong> ',
       '<span style="color:rgba(255,255,255,.78);">',
         'A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. ',
-        'We comply with GDPR (EU) and CCPA (California). ',
+        'EU visitors: GDPR applies. California residents: CCPA applies. Other visitors: only essential cookies are used. ',
         '<a href="/privacy" style="color:rgba(255,255,255,.85);text-decoration:underline;">Privacy Policy</a>',
       '</span>',
     '</div>',
