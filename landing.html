@@ -238,9 +238,9 @@
   <div class="wrap">
     <div class="hero-label">Amazon Listing Diagnostics</div>
     <h1>Your Business Report already has the answer. We just tell you which line.</h1>
-    <p class="hero-sub">Upload your Business Report. Get the one metric costing you the most right now — and a numbered action plan to fix it. Under 30 seconds.</p>
-    <p style="margin-top:14px;font-size:15px;font-weight:700;color:var(--blue);">Not another suite. Not another score. One diagnosis. One fix. Done.</p>
-    <p style="margin-top:8px;font-size:13px;color:var(--muted);line-height:1.65;">Reads CTR, CVR, ACOS, sessions, units ordered, Buy Box %, and review count from your Business Report. Checks them in priority order. Tells you which one is the problem and exactly what to do about it.</p>
+    <p class="hero-sub">Upload your Business Report. Get the one metric costing you the most right now. Get a numbered action plan to fix it. Under 30 seconds.</p>
+    <p style="margin-top:14px;font-size:15px;font-weight:700;color:var(--blue);">Not another suite. Not another score. One diagnosis. One fix.</p>
+    <p style="margin-top:8px;font-size:13px;color:var(--muted);line-height:1.65;">Reads CTR, CVR, ACOS, sessions, units ordered, Buy Box %, and review count from your Business Report. Checks them in priority order. Tells you which one is the problem and what to do about it.</p>
     <div class="btn-row">
       <form action="/checkout/free" method="post">
         <button type="submit" class="btn btn-primary btn-lg">Diagnose my listing free →</button>
@@ -275,7 +275,7 @@
   <div class="wrap">
     <p class="section-label">Example output</p>
     <h2>This is what you get</h2>
-    <p class="section-sub">Real diagnosis format. Your numbers, your listing. No scoring dashboards — just a clear problem and what to fix.</p>
+    <p class="section-sub">Real diagnosis format. Your numbers, your listing. A clear problem and exactly what to fix.</p>
 
     <div style="margin-top:28px; max-width:560px;">
       <div class="card">
@@ -292,7 +292,7 @@
 
           <div class="ibox">
             <div class="ibox-label">Why this listing is losing clicks</div>
-            <p>CTR of 0.14% is below the 0.20% critical floor. Competitors are winning clicks on the same search page without spending more. A buyer spends under 0.5 seconds scanning each result — the hero image is the only thing they evaluate before clicking or scrolling past.</p>
+            <p>CTR of 0.14% is below the 0.20% critical floor. Competitors are winning clicks on the same search page without spending more. A buyer spends under 0.5 seconds scanning each result. The hero image is the only thing they evaluate before clicking or scrolling past.</p>
           </div>
 
           <div class="impact-box">
@@ -305,7 +305,7 @@
 
           <div class="ibox">
             <div class="ibox-label">What to do now</div>
-            <p>1. Reshoot hero image on pure white (RGB 255/255/255), product filling 85% of frame — no text overlays.<br>2. Study your top 3 competitors' thumbnails: note the angle, lighting, and scale.<br>3. Run the new image for exactly 7 days before changing anything else.</p>
+            <p>1. Reshoot hero image on pure white (RGB 255/255/255), product filling 85% of frame. No text overlays.<br>2. Study your top 3 competitors' thumbnails: note the angle, lighting, and scale.<br>3. Run the new image for exactly 7 days before changing anything else.</p>
           </div>
 
           <div class="conf-row">High confidence · 650 sessions · 82 reviews</div>
@@ -340,6 +340,154 @@
   </div>
 </section>
 
+<!-- Animated Demo -->
+<section class="section" style="padding-bottom:16px;">
+  <div class="wrap">
+    <p class="section-label">See it in action</p>
+    <h2>Watch it diagnose a real listing.</h2>
+    <p class="section-sub" style="margin-top:8px;">This is exactly what you see when you upload your Business Report. The whole process takes under 30 seconds.</p>
+
+    <div style="margin-top:28px;background:#fff;border:1px solid rgba(221,212,198,.9);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(31,95,168,.08);">
+      <!-- Browser chrome bar -->
+      <div style="background:#f0ece4;padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(221,212,198,.8);">
+        <div style="display:flex;gap:6px;">
+          <div style="width:12px;height:12px;border-radius:50%;background:#f87171;"></div>
+          <div style="width:12px;height:12px;border-radius:50%;background:#fbbf24;"></div>
+          <div style="width:12px;height:12px;border-radius:50%;background:#4ade80;"></div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,.7);border-radius:6px;padding:5px 12px;font-size:12px;color:#9fb0c4;max-width:280px;">asininsight.com/tool</div>
+      </div>
+      <!-- Demo content -->
+      <div style="padding:32px 40px;min-height:340px;display:flex;align-items:center;justify-content:center;" id="demoWrap">
+        <!-- Step 1: Upload -->
+        <div id="demoStep1" style="width:100%;max-width:480px;text-align:center;">
+          <div style="border:2px dashed rgba(31,95,168,.3);border-radius:16px;padding:40px 24px;background:#fafaf8;cursor:pointer;transition:all .3s;" id="demoDropZone" onclick="runDemo()">
+            <div style="font-size:36px;margin-bottom:12px;">📊</div>
+            <div style="font-size:17px;font-weight:700;color:#15263d;margin-bottom:6px;">Drop your Amazon Business Report here</div>
+            <div style="font-size:13px;color:#9fb0c4;">or <span style="color:#1f5fa8;font-weight:700;text-decoration:underline;">browse to select a file</span></div>
+            <div style="display:flex;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;">
+              <span style="font-size:11px;font-weight:700;color:#c8d6e3;letter-spacing:.04em;text-transform:uppercase;">CTR</span>
+              <span style="color:#ddd;">·</span>
+              <span style="font-size:11px;font-weight:700;color:#c8d6e3;letter-spacing:.04em;text-transform:uppercase;">ACOS</span>
+              <span style="color:#ddd;">·</span>
+              <span style="font-size:11px;font-weight:700;color:#c8d6e3;letter-spacing:.04em;text-transform:uppercase;">Buy Box</span>
+              <span style="color:#ddd;">·</span>
+              <span style="font-size:11px;font-weight:700;color:#c8d6e3;letter-spacing:.04em;text-transform:uppercase;">Sessions</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button onclick="runDemo()" style="background:#1f5fa8;color:#fff;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">▶ Run the demo</button>
+          </div>
+        </div>
+        <!-- Step 2: Loading (hidden) -->
+        <div id="demoStep2" style="display:none;width:100%;max-width:480px;text-align:center;">
+          <div style="font-size:13px;font-weight:700;color:#9fb0c4;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px;">Analyzing your listing...</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="demo-progress-row" id="dp1">
+              <div style="width:16px;height:16px;border-radius:50%;border:2px solid #e2d9ce;flex-shrink:0;" id="dp1c"></div>
+              <span style="font-size:14px;color:#9fb0c4;">Reading data</span>
+            </div>
+            <div class="demo-progress-row" id="dp2" style="opacity:.4;">
+              <div style="width:16px;height:16px;border-radius:50%;border:2px solid #e2d9ce;flex-shrink:0;" id="dp2c"></div>
+              <span style="font-size:14px;color:#9fb0c4;">Running diagnosis</span>
+            </div>
+            <div class="demo-progress-row" id="dp3" style="opacity:.4;">
+              <div style="width:16px;height:16px;border-radius:50%;border:2px solid #e2d9ce;flex-shrink:0;" id="dp3c"></div>
+              <span style="font-size:14px;color:#9fb0c4;">Building action plan</span>
+            </div>
+          </div>
+        </div>
+        <!-- Step 3: Result (hidden) -->
+        <div id="demoStep3" style="display:none;width:100%;max-width:560px;">
+          <div style="background:var(--paper);border:1px solid rgba(221,212,198,.9);border-radius:16px;overflow:hidden;">
+            <div style="padding:10px 16px;border-bottom:1px solid rgba(221,212,198,.8);display:flex;justify-content:space-between;font-size:12px;color:#9fb0c4;background:#fcf9f3;">
+              <span>Diagnosis · ASIN B08XYZ1234</span>
+              <strong style="color:#15263d;">ACOS Issue Detected</strong>
+            </div>
+            <div style="padding:20px;">
+              <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:16px;">
+                <span style="font-size:52px;font-weight:800;line-height:1;color:#92400e;">63</span>
+                <span style="font-size:18px;color:#9fb0c4;">/ 100</span>
+                <span style="background:#f8e8e2;color:#9e402e;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:999px;">Critical</span>
+              </div>
+              <div style="background:#fff;border:1px solid rgba(221,212,198,.9);border-radius:12px;padding:14px;margin-bottom:10px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9fb0c4;margin-bottom:6px;">ACOS CRITICALLY HIGH</div>
+                <p style="font-size:14px;color:#15263d;line-height:1.55;">ACOS is 82%. Above the 70% critical threshold. You are spending $0.82 for every $1.00 in ad sales.</p>
+              </div>
+              <div style="background:#e7f3eb;border:1px solid #c8e1d1;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                  <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1d6a42;">Revenue impact</div>
+                  <p style="font-size:13px;color:#1d6a42;margin-top:3px;">Cutting ACOS from 82% to 30% saves ~$266/month</p>
+                </div>
+                <span style="font-size:22px;font-weight:800;color:#1d6a42;white-space:nowrap;">$266/mo</span>
+              </div>
+              <div style="background:#fff;border:1px solid rgba(221,212,198,.9);border-radius:12px;padding:14px;">
+                <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#9fb0c4;margin-bottom:8px;">What to do now</div>
+                <div style="font-size:13px;color:#15263d;line-height:1.7;">
+                  1. Download your Search Term Report (Ads → Reports → Search Terms).<br>
+                  2. Sort by spend. Pause every keyword with ACOS above 80% and fewer than 2 orders.<br>
+                  3. Convert your top 10 keywords from broad to exact match.<br>
+                  4. Cut daily budget by 40% until ACOS drops below 50%.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;text-align:center;">
+            <button onclick="resetDemo()" style="background:transparent;border:1px solid rgba(221,212,198,.9);border-radius:10px;padding:10px 20px;font-size:13px;font-weight:600;color:#617184;cursor:pointer;font-family:inherit;">↺ Run again</button>
+            <a href="/tool" style="display:inline-block;margin-left:10px;background:#1f5fa8;color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:14px;font-weight:700;text-decoration:none;">Try with your data →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .demo-progress-row { display:flex;align-items:center;gap:12px;transition:opacity .4s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinning { animation: spin .7s linear infinite; border-color: #1f5fa8 transparent transparent transparent !important; border-width: 2px !important; }
+  .done-check { background: #1d6a42 !important; border-color: #1d6a42 !important; position:relative; }
+  .done-check::after { content:'✓'; position:absolute; color:#fff; font-size:10px; font-weight:800; top:50%; left:50%; transform:translate(-50%,-50%); }
+</style>
+<script>
+function runDemo() {
+  document.getElementById('demoStep1').style.display = 'none';
+  var s2 = document.getElementById('demoStep2');
+  s2.style.display = 'block';
+  var dp1c = document.getElementById('dp1c');
+  var dp2 = document.getElementById('dp2');
+  var dp2c = document.getElementById('dp2c');
+  var dp3 = document.getElementById('dp3');
+  var dp3c = document.getElementById('dp3c');
+  dp1c.classList.add('spinning');
+  setTimeout(function() {
+    dp1c.classList.remove('spinning'); dp1c.classList.add('done-check');
+    dp2.style.opacity='1'; dp2c.classList.add('spinning');
+  }, 800);
+  setTimeout(function() {
+    dp2c.classList.remove('spinning'); dp2c.classList.add('done-check');
+    dp3.style.opacity='1'; dp3c.classList.add('spinning');
+  }, 1600);
+  setTimeout(function() {
+    dp3c.classList.remove('spinning'); dp3c.classList.add('done-check');
+  }, 2400);
+  setTimeout(function() {
+    s2.style.display='none';
+    document.getElementById('demoStep3').style.display='block';
+  }, 2800);
+}
+function resetDemo() {
+  document.getElementById('demoStep3').style.display='none';
+  ['dp1c','dp2c','dp3c'].forEach(function(id){
+    var el=document.getElementById(id);
+    el.className=''; el.style.cssText='width:16px;height:16px;border-radius:50%;border:2px solid #e2d9ce;flex-shrink:0;';
+  });
+  document.getElementById('dp2').style.opacity='.4';
+  document.getElementById('dp3').style.opacity='.4';
+  document.getElementById('demoStep1').style.display='block';
+}
+</script>
+
 <!-- Value props -->
 <section class="section">
   <div class="wrap">
@@ -355,8 +503,8 @@
       </div>
       <div class="prop">
         <div class="prop-icon">📋</div>
-        <h3>Steps you can execute today — not someday</h3>
-        <p>"Optimize your listing" is not actionable. Every step in your output uses your actual metric values: "Your ACOS is 78% — download your Search Term Report, sort by spend, pause anything above 80% ACOS with fewer than 2 orders."</p>
+        <h3>Steps you can execute today, not someday</h3>
+        <p>"Optimize your listing" is not actionable. Every step uses your actual metric values: "Your ACOS is 78%. Download your Search Term Report, sort by spend, pause anything above 80% ACOS with fewer than 2 orders."</p>
       </div>
       <div class="prop">
         <div class="prop-icon">🎯</div>
@@ -384,7 +532,7 @@
         <div class="output-dot"></div>
         <div>
           <h4>Severity level</h4>
-          <p>Critical, high, or medium — with the exact threshold it crossed and how far past it you are.</p>
+          <p>Critical, high, or medium. Shows the exact threshold it crossed and how far past it you are.</p>
         </div>
       </div>
       <div class="output">
@@ -423,7 +571,7 @@
 <section class="section">
   <div class="wrap">
     <p class="section-label">Who this is for</p>
-    <h2>Built for sellers who already know their numbers — and need to know what to do with them.</h2>
+    <h2>Built for sellers who already know their numbers. And need to know what to do with them.</h2>
     <div class="for-list">
       <div class="for-item">
         <div class="for-dot"></div>
@@ -452,7 +600,7 @@
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px;">
       <div style="padding:20px;background:var(--paper);border:1px solid rgba(221,212,198,.9);border-radius:16px;">
         <div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Helium 10 / Jungle Scout</div>
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;">20+ tools. Steep learning curve. Gives you data on every metric — but doesn't tell you which one to act on first. <strong style="color:var(--red);">You still have to figure out the diagnosis yourself.</strong></p>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">20+ tools. Steep learning curve. Gives you data on every metric, but doesn't tell you which one to act on first. <strong style="color:var(--red);">You still have to figure out the diagnosis yourself.</strong></p>
       </div>
       <div style="padding:20px;background:var(--paper);border:1px solid rgba(221,212,198,.9);border-radius:16px;">
         <div style="font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Spreadsheet / Manual review</div>
@@ -508,14 +656,14 @@
           What exactly is a Business Report and where do I get it?
           <svg class="faq-chevron" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="faq-a">It's a CSV file from Amazon Seller Central. Go to <strong>Reports → Business Reports → Detail Page Sales and Traffic by Child Item</strong>. Set the date range to last 30 days and click Download. The file contains your CTR, CVR, sessions, units ordered, ACOS, Buy Box %, and more — everything ASINInsight needs.</div>
+        <div class="faq-a">It's a CSV file from Amazon Seller Central. Go to <strong>Reports → Business Reports → Detail Page Sales and Traffic by Child Item</strong>. Set the date range to last 30 days and click Download. The file contains your CTR, CVR, sessions, units ordered, ACOS, Buy Box %, and everything ASINInsight needs.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           Is my data private? Do you store my CSV?
           <svg class="faq-chevron" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="faq-a">Your file is analyzed on our server and permanently deleted immediately after the diagnosis is generated. We never store your CSV, never share it, and have no access to your Amazon account. No credentials required — just the exported file.</div>
+        <div class="faq-a">Your file is analyzed on our server and permanently deleted immediately after the diagnosis is generated. We never store your CSV, never share it, and have no access to your Amazon account. No credentials required. Just the exported file.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
@@ -529,14 +677,14 @@
           My listing has multiple problems. Does this only show one?
           <svg class="faq-chevron" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="faq-a">By design, yes — you see the single highest-priority issue. Amazon listings often have 5–10 metrics off threshold simultaneously, but fixing them all at once makes it impossible to know what worked. ASINInsight prioritizes the one that's costing you the most revenue right now. Fix that first, re-upload next week, and it'll surface the next one.</div>
+        <div class="faq-a">By design, yes. You see the single highest-priority issue. Amazon listings often have 5–10 metrics off threshold simultaneously, but fixing them all at once makes it impossible to know what worked. ASINInsight prioritizes the one that's costing you the most revenue right now. Fix that first, re-upload next week, and it'll surface the next one.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q" onclick="toggleFaq(this)">
           Does this work if I don't run ads?
           <svg class="faq-chevron" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
         </div>
-        <div class="faq-a">Yes. If you don't run ads, ACOS won't be present in your report and ASINInsight skips that check automatically. It still analyzes CTR, CVR, sessions, inventory, Buy Box %, and review count — all of which affect organic rank and conversion regardless of ad spend.</div>
+        <div class="faq-a">Yes. If you don't run ads, ACOS won't be present in your report and ASINInsight skips that check automatically. It still analyzes CTR, CVR, sessions, inventory, Buy Box %, and review count. All of these affect organic rank and conversion regardless of ad spend.</div>
       </div>
     </div>
   </div>
