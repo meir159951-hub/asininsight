@@ -2203,6 +2203,29 @@ def _refresh_amazon_token() -> bool:
     return False
 
 
+# ── Keep-alive ping (prevents cold starts on Railway free tier) ────────────
+# Sends a GET /health request to itself every 4 minutes so the dyno never
+# idles. Only runs in production (when SITE_URL is configured).
+
+def _keepalive_loop():
+    """Background thread: ping our own /health every 4 minutes."""
+    INTERVAL = 4 * 60  # seconds
+    time.sleep(INTERVAL)  # initial delay — let the server boot first
+    while True:
+        try:
+            requests.get(f"{SITE_URL}/health", timeout=10)
+            log.debug("Keep-alive ping sent")
+        except Exception as e:
+            log.debug("Keep-alive ping failed (non-critical): %s", e)
+        time.sleep(INTERVAL)
+
+
+if SITE_URL:
+    _ka_thread = threading.Thread(target=_keepalive_loop, daemon=True, name="keepalive")
+    _ka_thread.start()
+    log.info("Keep-alive thread started (pinging %s/health every 4 min)", SITE_URL)
+
+
 # ── Run ────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

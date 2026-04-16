@@ -257,13 +257,22 @@
     .notice-bar.notice-info { background: var(--blue-soft);  color: var(--blue);  border-bottom: 1px solid #bfdbfe; }
     .notice-bar.notice-err  { background: var(--red-soft);   color: var(--red);   border-bottom: 1px solid #fecaca; }
 
-    /* ── Cookie bar ── */
-    #cookieBar { position: fixed; bottom: 0; left: 0; right: 0; background: #15263d; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 999; flex-wrap: wrap; }
-    #cookieBar a { color: rgba(255,255,255,.7); text-decoration: underline; }
-
-    @media (max-width: 520px) {
+    @media (max-width: 640px) {
+      .shell { padding: 20px 12px 80px; }
       .panel { padding: 20px 16px; }
-      .score-header { flex-direction: column; align-items: flex-start; }
+      .upload-zone { padding: 36px 20px; }
+      .progress-bar { padding: 12px 8px; gap: 0; }
+      .prog-step { padding: 0 6px; font-size: 11px; }
+      .prog-sep { width: 20px; }
+    }
+    @media (max-width: 520px) {
+      .score-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .score-circle { width: 60px; height: 60px; }
+      .score-circle .sn { font-size: 22px; }
+      .score-text h2 { font-size: 16px; }
+      .modal-box { padding: 24px 20px; }
+      .modal-box h3 { font-size: 18px; }
+      .topnav { padding: 0 14px; }
     }
   </style>
 </head>

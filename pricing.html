@@ -109,12 +109,19 @@
     .foot-links { display: flex; gap: 16px; }
     .foot-links a:hover { color: var(--blue); }
 
-    /* ── Cookie bar ── */
-    #cookieBar { position: fixed; bottom: 0; left: 0; right: 0; background: #15263d; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 999; flex-wrap: wrap; }
-    #cookieBar a { color: rgba(255,255,255,.7); text-decoration: underline; }
-
-    @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } .btn { width: 100%; } }
-    @media (max-width: 520px) { .nav-links .nav-link { display: none; } }
+    @media (max-width: 760px) {
+      .plans { grid-template-columns: 1fr; }
+      .btn { width: 100%; }
+      .hero { padding: 40px 0 24px; }
+      .foot { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .foot-links { flex-wrap: wrap; gap: 14px; }
+    }
+    @media (max-width: 520px) {
+      .nav-links .nav-link { display: none; }
+      .hero h1 { font-size: 26px; }
+      .hero p { font-size: 15px; }
+      .wrap { padding: 0 16px; }
+    }
   </style>
 </head>
 <body>
