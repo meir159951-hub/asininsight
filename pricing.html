@@ -235,8 +235,18 @@
   // ── Checkout helper ────────────────────────────────────────────────────
   function checkout(priceId, btn, errEl) {
     if (!paddleReady || !priceId) {
-      // Paddle not configured (dev/staging) — start free plan instead
-      document.querySelector('form[action="/checkout/free"]').submit();
+      // Paddle not configured — start free plan instead (with CSRF token)
+      var form = document.querySelector('form[action="/checkout/free"]');
+      if (form) {
+        var m = document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);
+        var token = m ? decodeURIComponent(m[1]) : '';
+        if (token && !form.querySelector('[name="_csrf"]')) {
+          var inp = document.createElement('input');
+          inp.type = 'hidden'; inp.name = '_csrf'; inp.value = token;
+          form.appendChild(inp);
+        }
+        form.submit();
+      }
       return;
     }
 
