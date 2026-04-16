@@ -381,12 +381,15 @@
   let proPriceId   = '';
   let agencyPriceId = '';
 
+  let ownerEmail = '';
+
   fetch('/api/paddle-config')
     .then(r => r.json())
     .then(cfg => {
       if (!cfg.ready) return;  // Paddle not yet configured — buttons become no-ops below
       proPriceId    = cfg.price_pro    || '';
       agencyPriceId = cfg.price_agency || '';
+      ownerEmail    = (cfg.owner_email || '').toLowerCase().trim();
       try {
         var paddleOpts = { token: cfg.client_token };
         if (cfg.environment === 'sandbox') paddleOpts.environment = 'sandbox';
@@ -402,6 +405,15 @@
 
   // ── Checkout helper ────────────────────────────────────────────────────
   function checkout(priceId, btn, errEl) {
+    // Block owner from accidentally charging themselves
+    if (ownerEmail) {
+      var entered = (document.activeElement && document.activeElement.value || '').toLowerCase().trim();
+      // If Paddle's email field is pre-filled with owner email, block
+      if (entered === ownerEmail) {
+        alert('Owner account detected. Use the Paddle dashboard to manage your subscription.');
+        return;
+      }
+    }
     if (!paddleReady || !priceId) {
       // Paddle not configured — start free plan instead (with CSRF token)
       var form = document.querySelector('form[action="/checkout/free"]');

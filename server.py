@@ -69,6 +69,9 @@ PADDLE_PRICE_PRO      = os.getenv("PADDLE_PRICE_PRO", "")
 PADDLE_PRICE_AGENCY   = os.getenv("PADDLE_PRICE_AGENCY", "")
 PADDLE_CLIENT_TOKEN   = os.getenv("PADDLE_CLIENT_TOKEN", "")
 
+# Owner email — checkout is blocked for this address to prevent accidental self-charges
+OWNER_EMAIL = os.getenv("OWNER_EMAIL", "").lower().strip()
+
 AMAZON_CLIENT_ID     = os.getenv("AMAZON_CLIENT_ID", "")
 AMAZON_CLIENT_SECRET = os.getenv("AMAZON_CLIENT_SECRET", "")
 AMAZON_REDIRECT_URI  = os.getenv("AMAZON_REDIRECT_URI", "")
@@ -580,6 +583,7 @@ def paddle_config():
         "price_agency": PADDLE_PRICE_AGENCY,
         "environment":  environment,
         "ready":        bool(PADDLE_CLIENT_TOKEN and PADDLE_PRICE_PRO and PADDLE_PRICE_AGENCY),
+        "owner_email":  OWNER_EMAIL,   # frontend blocks checkout for this address
     })
 
 
