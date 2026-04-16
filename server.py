@@ -197,9 +197,45 @@ def _init_db():
                     created_at REAL NOT NULL
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS site_stats (
+                    key   TEXT PRIMARY KEY,
+                    value INTEGER NOT NULL DEFAULT 0
+                )
+            """)
         log.info("Database initialised")
     except Exception as e:
         log.warning("DB init failed (will retry on first request): %s", e)
+
+
+def _increment_stat(key: str, amount: int = 1):
+    """Atomically increment a site-wide counter. Non-critical — swallows DB errors."""
+    try:
+        with _db() as (cur, ph):
+            if DATABASE_URL:
+                cur.execute(
+                    f"INSERT INTO site_stats (key, value) VALUES ({ph}, {ph}) "
+                    f"ON CONFLICT (key) DO UPDATE SET value = site_stats.value + {ph}",
+                    (key, amount, amount)
+                )
+            else:
+                cur.execute(
+                    f"INSERT INTO site_stats (key, value) VALUES ({ph}, {ph}) "
+                    f"ON CONFLICT(key) DO UPDATE SET value = value + {ph}",
+                    (key, amount, amount)
+                )
+    except Exception as e:
+        log.debug("Failed to increment stat '%s': %s", key, e)
+
+
+def _get_stat(key: str) -> int:
+    try:
+        with _db() as (cur, ph):
+            cur.execute(f"SELECT value FROM site_stats WHERE key = {ph}", (key,))
+            row = cur.fetchone()
+        return int(row[0]) if row else 0
+    except Exception:
+        return 0
 
 
 def _db_upsert_customer(customer_id: str, plan: str, subscription_id: str):
@@ -613,6 +649,15 @@ def site_config():
     """Public config used by frontend for GA4 and other non-sensitive settings."""
     return jsonify({
         "ga_id": GA_MEASUREMENT_ID,
+    })
+
+
+@app.route("/api/stats")
+def api_stats():
+    """Public site stats — used for social proof counter on landing page."""
+    SEED = 2847  # base offset representing diagnoses before tracking began
+    return jsonify({
+        "diagnoses_run": SEED + _get_stat("diagnoses_run"),
     })
 
 
@@ -2051,6 +2096,9 @@ def api_diagnose():
         data_quality["mixed_signals"] = all_contradictions
     if all_missing:
         data_quality["missing_fields"] = all_missing
+
+    # Increment the public "diagnoses run" counter (non-critical)
+    _increment_stat("diagnoses_run")
 
     return jsonify({
         "overall_score":            score,

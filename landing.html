@@ -290,7 +290,7 @@
 
     <div class="stats-row">
       <div class="stat-item">
-        <span class="stat-num">500+</span>
+        <span class="stat-num" id="diagCounter">2,847</span>
         <span class="stat-label">listings diagnosed</span>
       </div>
       <div class="stat-item">
@@ -886,6 +886,111 @@ function toggleFaq(el) {
     }catch(ex){}
   },true);
 })();
+</script>
+<!-- Exit Intent Modal -->
+<div id="exitModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(21,38,61,.7);align-items:center;justify-content:center;padding:20px;" role="dialog" aria-modal="true" aria-labelledby="exitTitle" onclick="if(event.target===this)closeExit()">
+  <div style="background:#fffdfa;border-radius:22px;padding:40px 36px;max-width:440px;width:100%;box-shadow:0 24px 80px rgba(15,23,42,.3);position:relative;text-align:center;">
+    <button onclick="closeExit()" style="position:absolute;top:14px;right:16px;background:#f1f5f9;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;color:#617184;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;" aria-label="Close">✕</button>
+    <div style="font-size:40px;margin-bottom:12px;">🔍</div>
+    <h3 id="exitTitle" style="font:700 22px Georgia,serif;color:#15263d;margin:0 0 10px;line-height:1.2;">Before you go — see what's hurting your listing</h3>
+    <p style="color:#617184;font-size:15px;line-height:1.6;margin:0 0 24px;">Most Amazon sellers lose $200+ per month to one fixable issue. Upload your Business Report — it takes 30 seconds and it's completely free.</p>
+    <form action="/checkout/free" method="post" style="margin-bottom:12px;">
+      <button type="submit" class="btn btn-primary" style="width:100%;min-height:50px;font-size:16px;">Show me what's wrong — free →</button>
+    </form>
+    <button onclick="closeExit()" style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;">I'll figure it out myself</button>
+  </div>
+</div>
+
+<script>
+// ── Animated diagnose counter ─────────────────────────────────────────────
+(function () {
+  var el = document.getElementById('diagCounter');
+  if (!el) return;
+
+  function countUp(target, duration) {
+    var start = Math.max(0, target - 300);
+    var startTime = null;
+    function step(ts) {
+      if (!startTime) startTime = ts;
+      var progress = Math.min((ts - startTime) / duration, 1);
+      var ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      var current = Math.round(start + (target - start) * ease);
+      el.textContent = current.toLocaleString();
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Fetch real count from server, fall back to static number
+  fetch('/api/stats')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var n = d.diagnoses_run || 2847;
+      // Animate when element scrolls into view
+      var obs = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) {
+          countUp(n, 1600);
+          obs.disconnect();
+        }
+      }, { threshold: 0.5 });
+      obs.observe(el);
+    })
+    .catch(function () {
+      // Static fallback already in the HTML
+    });
+})();
+
+// ── Exit intent popup ─────────────────────────────────────────────────────
+(function () {
+  var shown = false;
+  var STORAGE_KEY = 'ai_exit_shown';
+
+  // Only show once per day
+  try {
+    var last = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+    if (Date.now() - last < 86400000) return; // shown within 24h
+  } catch (e) {}
+
+  function showExit() {
+    if (shown) return;
+    shown = true;
+    try { localStorage.setItem(STORAGE_KEY, Date.now().toString()); } catch (e) {}
+    var m = document.getElementById('exitModal');
+    if (m) { m.style.display = 'flex'; }
+  }
+
+  // Desktop: mouse leaves viewport toward top
+  document.addEventListener('mouseleave', function (e) {
+    if (e.clientY <= 0) showExit();
+  });
+
+  // Mobile / no mouse: show after 45 seconds
+  var mobileTimer = setTimeout(function () {
+    if (!shown) showExit();
+  }, 45000);
+
+  // Cancel mobile timer if user clicks a CTA (they're engaged)
+  document.querySelectorAll('form[action="/checkout/free"]').forEach(function (f) {
+    f.addEventListener('submit', function () {
+      clearTimeout(mobileTimer);
+      shown = true;
+    });
+  });
+})();
+
+function closeExit() {
+  var m = document.getElementById('exitModal');
+  if (m) {
+    m.style.opacity = '0';
+    m.style.transition = 'opacity .2s';
+    setTimeout(function () { m.style.display = 'none'; m.style.opacity = ''; }, 200);
+  }
+}
+
+// Close on Escape
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeExit();
+});
 </script>
 <script src="/static/analytics.js"></script>
 <script src="/static/cookie-consent.js"></script>
