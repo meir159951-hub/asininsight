@@ -511,6 +511,21 @@ def blog():
     return send_from_directory(BASE_DIR, "blog.html")
 
 
+@app.route("/blog/high-acos-fix")
+def blog_high_acos():
+    return send_from_directory(BASE_DIR / "blog", "high-acos-fix.html")
+
+
+@app.route("/blog/ctr-fix")
+def blog_ctr_fix():
+    return send_from_directory(BASE_DIR / "blog", "ctr-fix.html")
+
+
+@app.route("/blog/business-report-guide")
+def blog_business_report():
+    return send_from_directory(BASE_DIR / "blog", "business-report-guide.html")
+
+
 @app.route("/sitemap.xml")
 def sitemap():
     return send_from_directory(BASE_DIR / "static", "sitemap.xml",
