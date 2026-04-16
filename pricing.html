@@ -219,10 +219,9 @@
       proPriceId    = cfg.price_pro    || '';
       agencyPriceId = cfg.price_agency || '';
       try {
-        Paddle.Initialize({
-          token: cfg.client_token,
-          environment: cfg.environment === 'sandbox' ? 'sandbox' : undefined,
-        });
+        var paddleOpts = { token: cfg.client_token };
+        if (cfg.environment === 'sandbox') paddleOpts.environment = 'sandbox';
+        Paddle.Initialize(paddleOpts);
         paddleReady = true;
       } catch (e) {
         console.warn('Paddle init error:', e);
