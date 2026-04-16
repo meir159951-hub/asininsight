@@ -13,6 +13,21 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+    }
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+    }
+    .logo { font-size: 20px; font-weight: 800; color: #0f172a; text-decoration: none; }
+    .logo span { color: #2563eb; }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
@@ -36,9 +51,14 @@
   </style>
 </head>
 <body>
-  <div class="code">404</div>
-  <h1>Page not found</h1>
-  <p>The page you're looking for doesn't exist or has been moved.</p>
-  <a href="/" class="btn">← Back to Home</a>
+  <nav>
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+  </nav>
+  <div class="main">
+    <div class="code">404</div>
+    <h1>Page not found</h1>
+    <p>The page you're looking for doesn't exist or has been moved.</p>
+    <a href="/" class="btn">← Back to Home</a>
+  </div>
 </body>
 </html>

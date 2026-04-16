@@ -47,12 +47,12 @@
 
   <div class="container">
     <h1>Terms of Service</h1>
-    <p class="date">Last updated: March 26, 2026</p>
+    <p class="date">Last updated: April 14, 2026</p>
 
     <p>Please read these Terms of Service carefully before using ASINInsight. By accessing or using the Service, you agree to be bound by these terms.</p>
 
     <h2>1. The Service</h2>
-    <p>ASINInsight provides an Amazon seller diagnostic tool that analyzes CSV data to identify growth blockers and provide actionable recommendations. All analysis is performed in your browser — your data is never uploaded to our servers.</p>
+    <p>ASINInsight provides an Amazon seller diagnostic tool that analyzes CSV data to identify growth blockers and provide actionable recommendations. CSV files are transmitted to our server for processing and are not retained after the analysis response is returned. See our <a href="/privacy">Privacy Policy</a> for full details on data handling.</p>
 
     <h2>2. Subscriptions & Billing</h2>
     <ul>
@@ -97,5 +97,31 @@
   </div>
 
   <footer>© 2026 ASINInsight. All rights reserved.</footer>
+
+  <!-- Cookie bar -->
+  <div id="cookieBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#15263d;padding:14px 20px;align-items:center;justify-content:space-between;gap:16px;z-index:999;flex-wrap:wrap;" role="dialog" aria-live="polite" aria-label="Cookie consent">
+    <div style="max-width:680px;">
+      <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
+      <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy" style="color:rgba(255,255,255,.7);text-decoration:underline;">Privacy Policy</a></span>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
+      <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var consent = localStorage.getItem('cookieConsent');
+      if (!consent) { document.getElementById('cookieBar').style.display = 'flex'; }
+    })();
+    function dismissCookie() {
+      localStorage.setItem('cookieConsent', 'accepted');
+      document.getElementById('cookieBar').style.display = 'none';
+    }
+    function declineCookie() {
+      localStorage.setItem('cookieConsent', 'declined');
+      document.getElementById('cookieBar').style.display = 'none';
+    }
+  </script>
 </body>
 </html>

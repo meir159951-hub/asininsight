@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pricing — ASINInsight</title>
+  <meta name="description" content="Free plan included. Upgrade only when a weekly diagnosis is worth more than it costs.">
+  <link rel="canonical" href="https://asininsight.com/pricing">
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://asininsight.com/pricing">
+  <meta property="og:title"       content="Pricing — ASINInsight">
+  <meta property="og:description" content="Start free. Pay only when it's worth it. Run the diagnosis on your worst ASIN before spending a dollar.">
+  <meta name="twitter:card"       content="summary">
+  <meta name="twitter:title"      content="Pricing — ASINInsight">
+  <meta name="twitter:description" content="Start free. Pay only when it's worth it.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    :root {
+      --muted: #617184; --line: #ddd4c6; --paper: #fffdfa;
+      --blue: #1f5fa8; --blue-dark: #184d87;
+      --green: #1d6a42; --green-soft: #e7f3eb;
+      --red: #9e402e; --red-soft: #f8e8e2;
+      --amber: #92400e; --amber-soft: #fef3c7;
+    }
+    .wrap { width: min(860px, calc(100% - 32px)); margin: 0 auto; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 48px; padding: 0 22px; border-radius: 12px;
+      border: 1px solid transparent; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+      transition: background .15s, opacity .15s;
+    }
+    .btn-primary { background: var(--blue); color: #fff; border: none; }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dark); }
+    .btn-primary:disabled { opacity: 0.55; cursor: wait; }
+    .btn-secondary { border-color: var(--line); background: transparent; color: var(--blue); }
+    .btn-secondary:hover:not(:disabled) { background: #fff; }
+    .btn-secondary:disabled { opacity: 0.55; cursor: wait; }
+    nav { position: sticky; top: 0; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); z-index: 40; }
+    .nav-inner { width: min(860px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 24px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 14px; }
+    .nav-link { font-size: 14px; color: var(--muted); }
+    .nav-link:hover { color: var(--blue); }
+
+    /* ── Cancelled notice ── */
+    .notice-bar {
+      background: var(--amber-soft); border-bottom: 1px solid #fde68a;
+      padding: 12px 20px; text-align: center; font-size: 14px; font-weight: 600; color: var(--amber);
+    }
+
+    .hero { padding: 64px 0 20px; text-align: center; }
+    .hero h1 { max-width: 560px; margin: 0 auto; font-size: clamp(34px, 6vw, 54px); line-height: 1.04; }
+    .hero p { margin-top: 12px; color: var(--muted); font-size: 17px; }
+    .section { padding: 20px 0 48px; }
+    .plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .plan, .note { padding: 24px; background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 18px; }
+    .plan.pro { background: #fff; border-color: #c7d8eb; box-shadow: 0 4px 20px rgba(31,95,168,.1); }
+    .plan-badge { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 3px 10px; border-radius: 999px; margin-bottom: 8px; }
+    .plan h3 { font-size: 22px; }
+    .plan-desc { margin-top: 6px; color: var(--muted); font-size: 14px; min-height: 38px; }
+    .price { margin-top: 14px; font-size: 40px; font-weight: 800; line-height: 1; }
+    .price small { font-size: 15px; color: var(--muted); font-weight: 600; }
+    .plan ul { margin: 16px 0 20px; padding: 0; list-style: none; display: grid; gap: 8px; color: var(--muted); font-size: 14px; }
+    .plan li::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 9px; border-radius: 50%; background: var(--green); vertical-align: middle; }
+    .plan .btn { width: 100%; }
+    .note h2 { font-size: 28px; }
+    .note p { margin-top: 8px; color: var(--muted); font-size: 15px; }
+    .guarantee { margin-top: 10px; font-size: 12px; color: var(--green); font-weight: 700; }
+    .checkout-err { margin-top: 10px; font-size: 13px; color: var(--red); font-weight: 600; display: none; }
+    .secure-note { margin-top: 8px; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.5; }
+
+    footer { padding: 24px 0 40px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+    .foot-links { display: flex; gap: 16px; }
+    .foot-links a:hover { color: var(--blue); }
+
+    /* ── Cookie bar ── */
+    #cookieBar { position: fixed; bottom: 0; left: 0; right: 0; background: #15263d; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; z-index: 999; flex-wrap: wrap; }
+    #cookieBar a { color: rgba(255,255,255,.7); text-decoration: underline; }
+
+    @media (max-width: 760px) { .plans { grid-template-columns: 1fr; } .btn { width: 100%; } }
+    @media (max-width: 520px) { .nav-links .nav-link { display: none; } }
+  </style>
+</head>
+<body>
+
+<!-- Nav — all links use server routes, not file paths -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn btn-primary" style="min-height:40px;padding:0 18px;font-size:14px;">Start free — no card</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- Cancelled notice — shown when user returns from abandoned Paddle checkout -->
+<div class="notice-bar" id="cancelledBar" style="display:none;">
+  No charge was made. You can start for free below or return to checkout any time.
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Start free. Pay only when it's worth it.</h1>
+    <p>Run your first diagnosis at no cost. Upgrade when the tool earns more than it costs — which usually happens on the first fix.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="plans">
+
+      <!-- Free -->
+      <div class="plan">
+        <h3>Free</h3>
+        <p class="plan-desc">Test it on your worst ASIN before spending a dollar.</p>
+        <div class="price">$0 <small>/ mo</small></div>
+        <ul>
+          <li>3 diagnoses per month</li>
+          <li>Primary issue + severity</li>
+          <li>First action step</li>
+        </ul>
+        <form action="/checkout/free" method="post">
+          <button type="submit" class="btn btn-secondary">Start free</button>
+        </form>
+      </div>
+
+      <!-- Pro -->
+      <div class="plan pro">
+        <div class="plan-badge">Most popular</div>
+        <h3>Pro</h3>
+        <p class="plan-desc">For sellers who audit weekly and act on what they find.</p>
+        <div class="price">$49 <small>/ mo</small></div>
+        <ul>
+          <li>Unlimited diagnoses</li>
+          <li>Full action plan — all steps</li>
+          <li>Email reports</li>
+          <li>Connect Amazon account</li>
+          <li>Revenue impact estimates</li>
+        </ul>
+        <button class="btn btn-primary" id="proBtn" type="button">Get Pro — $49/mo →</button>
+        <div class="checkout-err" id="proErr">Checkout failed. Please try again or contact support.</div>
+        <p class="guarantee">7-day money-back guarantee · Cancel anytime</p>
+        <p class="secure-note">🔒 Secure checkout via Paddle · No surprise charges</p>
+      </div>
+
+      <!-- Agency -->
+      <div class="plan">
+        <h3>Agency</h3>
+        <p class="plan-desc">For teams managing multiple Amazon accounts.</p>
+        <div class="price">$199 <small>/ mo</small></div>
+        <ul>
+          <li>Everything in Pro</li>
+          <li>Multiple accounts</li>
+          <li>Bulk CSV upload</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="btn btn-secondary" id="agencyBtn" type="button">Get Agency — $199/mo →</button>
+        <div class="checkout-err" id="agencyErr">Checkout failed. Please try again or contact support.</div>
+        <p class="guarantee">7-day money-back guarantee · Cancel anytime</p>
+        <p class="secure-note">🔒 Secure checkout via Paddle · No surprise charges</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="note">
+      <h2>Run it on your worst ASIN first.</h2>
+      <p>Pick the listing that's costing you the most right now. Run the diagnosis. If the fix recovers more than $49 that month, Pro paid for itself on one ASIN. If it doesn't, cancel in 7 days and you won't be charged again.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div>ASINInsight</div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/refund">Refund</a>
+    </div>
+    <div>&copy; 2026 ASINInsight. All rights reserved.</div>
+  </div>
+</footer>
+
+<script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+<script>
+(function () {
+
+  // ── Show cancelled notice if user came back from abandoned checkout ──────
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('cancelled') === '1') {
+    document.getElementById('cancelledBar').style.display = 'block';
+    // Clean the URL so a refresh doesn't keep showing the notice
+    history.replaceState(null, '', '/pricing');
+  }
+
+  // ── Load Paddle config from server (token + price IDs) ──────────────────
+  let paddleReady = false;
+  let proPriceId   = '';
+  let agencyPriceId = '';
+
+  fetch('/api/paddle-config')
+    .then(r => r.json())
+    .then(cfg => {
+      if (!cfg.ready) return;  // Paddle not yet configured — buttons become no-ops below
+      proPriceId    = cfg.price_pro    || '';
+      agencyPriceId = cfg.price_agency || '';
+      try {
+        Paddle.Initialize({
+          token: cfg.client_token,
+          environment: cfg.environment === 'sandbox' ? 'sandbox' : undefined,
+        });
+        paddleReady = true;
+      } catch (e) {
+        console.warn('Paddle init error:', e);
+      }
+    })
+    .catch(() => {
+      // Config endpoint down — buttons will fall back to free plan
+    });
+
+  // ── Checkout helper ────────────────────────────────────────────────────
+  function checkout(priceId, btn, errEl) {
+    if (!paddleReady || !priceId) {
+      // Paddle not configured (dev/staging) — start free plan instead
+      document.querySelector('form[action="/checkout/free"]').submit();
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Opening checkout…';
+    errEl.style.display = 'none';
+
+    try {
+      Paddle.Checkout.open({
+        items: [{ priceId, quantity: 1 }],
+        // Template variable {checkout.customer.id} is resolved by Paddle at redirect time
+        successUrl: location.origin + '/success?customer_id={checkout.customer.id}',
+        // Route /cancel redirects to /pricing?cancelled=1 (handled above)
+        closeCallback: function () {
+          // User closed overlay without completing — reset button
+          btn.disabled    = false;
+          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+        },
+        errorCallback: function (err) {
+          btn.disabled    = false;
+          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+          errEl.style.display = 'block';
+          console.error('Paddle checkout error:', err);
+        },
+      });
+    } catch (e) {
+      btn.disabled    = false;
+      btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+      errEl.style.display = 'block';
+    }
+  }
+
+  document.getElementById('proBtn').addEventListener('click', () =>
+    checkout(proPriceId, document.getElementById('proBtn'), document.getElementById('proErr'))
+  );
+  document.getElementById('agencyBtn').addEventListener('click', () =>
+    checkout(agencyPriceId, document.getElementById('agencyBtn'), document.getElementById('agencyErr'))
+  );
+
+})();
+</script>
+
+<!-- Cookie bar -->
+<div id="cookieBar" style="display:none;" role="dialog" aria-live="polite" aria-label="Cookie consent">
+  <div style="max-width:680px;">
+    <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
+    <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy">Privacy Policy</a></span>
+  </div>
+  <div style="display:flex;gap:10px;flex-shrink:0;">
+    <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font:inherit;font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
+    <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
+  </div>
+</div>
+<script>
+  (function() {
+    var consent = localStorage.getItem('cookieConsent');
+    if (!consent) {
+      document.getElementById('cookieBar').style.display = 'flex';
+    }
+  })();
+  function dismissCookie() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    document.getElementById('cookieBar').style.display = 'none';
+  }
+  function declineCookie() {
+    localStorage.setItem('cookieConsent', 'declined');
+    document.getElementById('cookieBar').style.display = 'none';
+  }
+</script>
+
+<!-- CSRF double-submit: read _csrf cookie → inject into all same-origin
+     fetch calls (X-CSRF-Token header) and form POSTs (_csrf hidden field). -->
+<script>
+(function(){
+  function _t(){
+    var m=document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);
+    return m?decodeURIComponent(m[1]):'';
+  }
+  // Patch fetch
+  var _f=window.fetch;
+  window.fetch=function(u,o){
+    o=o||{};
+    if(typeof u==='string'&&/^\//.test(u)){
+      o.headers=Object.assign({'X-CSRF-Token':_t()},o.headers||{});
+    }
+    return _f.call(this,u,o);
+  };
+  // Inject into same-origin form POSTs
+  document.addEventListener('submit',function(e){
+    var f=e.target;
+    if(!f||f.method.toLowerCase()!=='post') return;
+    try{
+      if(new URL(f.action,location.href).origin===location.origin){
+        if(!f.querySelector('[name="_csrf"]')){
+          var i=document.createElement('input');
+          i.type='hidden';i.name='_csrf';i.value=_t();
+          f.appendChild(i);
+        }
+      }
+    }catch(ex){}
+  },true);
+})();
+</script>
+</body>
+</html>

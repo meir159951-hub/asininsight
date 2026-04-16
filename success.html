@@ -3,88 +3,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Payment Successful — ASINInsight</title>
+  <title>Payment Confirmed — ASINInsight</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --navy: #0f172a;
-      --blue: #2563eb;
-      --blue2: #1d4ed8;
-      --green: #10b981;
-      --green-light: #d1fae5;
-      --white: #ffffff;
-      --gray: #64748b;
-      --light: #f8fafc;
+      --ink: #0f172a; --blue: #1f5fa8; --blue2: #184d87;
+      --green: #1d6a42; --green-soft: #e7f3eb; --green-ring: #86efac;
+      --red: #9e402e; --red-soft: #f8e8e2;
+      --amber: #92400e; --amber-soft: #fef3c7;
+      --muted: #64748b; --light: #f6f3ec; --paper: #fffdfa; --line: #ddd4c6;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--light);
-      color: var(--navy);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--light); color: var(--ink);
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 24px;
     }
     .card {
-      background: var(--white);
-      border-radius: 20px;
-      padding: 56px 48px;
-      max-width: 480px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 8px 48px rgba(0,0,0,0.10);
+      background: var(--paper); border: 1px solid var(--line);
+      border-radius: 20px; padding: 48px 44px;
+      max-width: 460px; width: 100%; text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,.07);
     }
-    .check-circle {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: var(--green-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 28px;
-      font-size: 36px;
+
+    /* ── Icon states ── */
+    .icon-wrap {
+      width: 72px; height: 72px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px; font-size: 32px;
     }
-    h1 {
-      font-size: 28px;
-      font-weight: 800;
-      margin-bottom: 12px;
-      color: var(--navy);
+    .icon-loading { background: #e8f0fa; }
+    .icon-ok      { background: var(--green-soft); }
+    .icon-error   { background: var(--red-soft); }
+    .icon-slow    { background: var(--amber-soft); }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 3px solid rgba(31,95,168,.15); border-top-color: var(--blue);
+      animation: spin .8s linear infinite;
     }
-    p {
-      color: var(--gray);
-      font-size: 16px;
-      line-height: 1.6;
-      margin-bottom: 32px;
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    h1 { font-size: 26px; font-weight: 800; margin-bottom: 10px; }
+    .sub { color: var(--muted); font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
+    .plan-badge {
+      display: inline-block; font-size: 12px; font-weight: 800;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--blue); background: #e8f0fa;
+      padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
     }
+
     .btn {
-      display: inline-block;
-      background: var(--blue);
-      color: var(--white);
-      padding: 14px 32px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 15px;
-      text-decoration: none;
-      transition: background 0.15s, transform 0.1s;
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 48px; padding: 0 28px; border-radius: 12px;
+      border: none; font-size: 15px; font-weight: 700; font-family: inherit;
+      cursor: pointer; text-decoration: none; transition: background .15s;
     }
-    .btn:hover { background: var(--blue2); transform: translateY(-1px); }
-    .note {
-      margin-top: 24px;
-      font-size: 13px;
-      color: var(--gray);
-    }
+    .btn-primary { background: var(--blue); color: #fff; width: 100%; }
+    .btn-primary:hover { background: var(--blue2); }
+    .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--blue); width: 100%; margin-top: 10px; }
+    .btn-ghost:hover { background: #fff; }
+
+    .note { margin-top: 18px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+    .note a { color: var(--blue); }
+
+    /* ── Feature list (success state) ── */
+    .feature-list { list-style: none; padding: 0; margin: 0 0 24px; display: grid; gap: 8px; text-align: left; }
+    .feature-list li { font-size: 14px; color: var(--green); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .feature-list li::before { content: "✓"; font-weight: 800; flex-shrink: 0; }
+
+    /* ── Retry counter ── */
+    .retry-note { font-size: 13px; color: var(--amber); margin-bottom: 18px; }
+
+    /* Hide all states by default — JS shows the right one */
+    .state { display: none; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div class="check-circle">✓</div>
-    <h1>You're all set!</h1>
-    <p>Your subscription is now active. You have full access to ASINInsight — unlimited ASIN analysis, portfolio insights, and priority exports — all ready to go.</p>
-    <a href="/tool" class="btn">▶ Open ASINInsight</a>
-    <p class="note">A receipt has been sent to your email. Questions? Reply to that email anytime.</p>
+<div class="card">
+
+  <!-- STATE: Confirming (default while polling) -->
+  <div class="state" id="stateLoading">
+    <div class="icon-wrap icon-loading">
+      <div class="spinner"></div>
+    </div>
+    <h1>Confirming your payment…</h1>
+    <p class="sub">This takes 2–3 seconds. Stay on this page — we'll confirm automatically.</p>
   </div>
+
+  <!-- STATE: Success -->
+  <div class="state" id="stateOk">
+    <div class="icon-wrap icon-ok">✓</div>
+    <div class="plan-badge" id="planName">Pro</div>
+    <h1>You're in.</h1>
+    <p class="sub">Your account is active. Start diagnosing your listings right now.</p>
+    <ul class="feature-list">
+      <li>Unlimited diagnoses</li>
+      <li>Full action plans with every step</li>
+      <li>Email reports to save and share</li>
+    </ul>
+    <a href="/tool" class="btn btn-primary">Open ASINInsight →</a>
+    <p class="note">Paddle sent a receipt to the email you used at checkout.<br>Questions? <a href="mailto:support@asininsight.com">support@asininsight.com</a></p>
+  </div>
+
+  <!-- STATE: Slow webhook — still waiting -->
+  <div class="state" id="stateSlow">
+    <div class="icon-wrap icon-slow">⏳</div>
+    <h1>Almost there.</h1>
+    <p class="sub">Your payment went through. Account setup is taking a few extra seconds. It will resolve on its own.</p>
+    <p class="retry-note" id="retryNote">Checking again in a moment…</p>
+    <button class="btn btn-primary" id="retryBtn" onclick="retryNow()">Check again</button>
+    <p class="note">If activation takes more than a minute, email <a href="mailto:support@asininsight.com">support@asininsight.com</a> with your order confirmation. We'll activate manually within the hour.</p>
+  </div>
+
+  <!-- STATE: Error — payment not found -->
+  <div class="state" id="stateError">
+    <div class="icon-wrap icon-error">!</div>
+    <h1>Activation pending</h1>
+    <p class="sub">Your payment was captured. We just couldn't confirm it automatically. This is rare and almost always resolves without any action on your part.</p>
+    <a href="mailto:support@asininsight.com?subject=Activation%20issue" class="btn btn-primary">Contact support →</a>
+    <a href="/pricing" class="btn btn-ghost">Back to pricing</a>
+    <p class="note">Include the email you used at checkout. We'll resolve it within a few hours.</p>
+  </div>
+
+</div>
+
+<script>
+// ── Constants ───────────────────────────────────────────────────────────────
+const MAX_QUICK_RETRIES  = 5;   // First 5 attempts: 1.5s apart (webhook usually arrives in 2–5s)
+const MAX_SLOW_RETRIES   = 4;   // Then 4 more in "slow" mode: 4s apart
+const QUICK_INTERVAL_MS  = 1500;
+const SLOW_INTERVAL_MS   = 4000;
+
+let attempt      = 0;
+let customerId   = '';
+let retryTimeout = null;
+
+// ── Show one state ───────────────────────────────────────────────────────────
+function show(id) {
+  ['stateLoading', 'stateOk', 'stateSlow', 'stateError'].forEach(s => {
+    document.getElementById(s).style.display = (s === id) ? 'block' : 'none';
+  });
+}
+
+// ── Activation call ──────────────────────────────────────────────────────────
+async function tryActivate() {
+  attempt++;
+
+  try {
+    const resp = await fetch('/api/paddle/activate', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ customer_id: customerId }),
+    });
+    const data = await resp.json().catch(() => ({}));
+
+    if (data.ok) {
+      // Success — show plan name and the open-tool button
+      const plan = (data.plan || 'pro');
+      document.getElementById('planName').textContent = plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan';
+      show('stateOk');
+      return;
+    }
+
+    // 402 = webhook hasn't arrived yet — keep retrying
+    if (resp.status === 402) {
+      scheduleRetry();
+      return;
+    }
+
+    // Any other error (4xx/5xx) — stop retrying, show error
+    show('stateError');
+
+  } catch (_) {
+    // Network error — keep trying until limit
+    scheduleRetry();
+  }
+}
+
+// ── Retry logic ───────────────────────────────────────────────────────────────
+function scheduleRetry() {
+  if (attempt < MAX_QUICK_RETRIES) {
+    retryTimeout = setTimeout(tryActivate, QUICK_INTERVAL_MS);
+    return;
+  }
+  if (attempt < MAX_QUICK_RETRIES + MAX_SLOW_RETRIES) {
+    // Switch to slow mode — show the "Still confirming" state
+    show('stateSlow');
+    const remaining = MAX_QUICK_RETRIES + MAX_SLOW_RETRIES - attempt;
+    document.getElementById('retryNote').textContent =
+      `Checking again automatically (${remaining} attempt${remaining !== 1 ? 's' : ''} left)…`;
+    retryTimeout = setTimeout(tryActivate, SLOW_INTERVAL_MS);
+    return;
+  }
+  // All retries exhausted
+  show('stateSlow');
+  document.getElementById('retryNote').textContent = 'Auto-retry limit reached.';
+}
+
+// ── Manual retry button ───────────────────────────────────────────────────────
+function retryNow() {
+  clearTimeout(retryTimeout);
+  show('stateLoading');
+  attempt = 0;  // Reset counter so it does a fresh quick sequence
+  tryActivate();
+}
+
+// ── Entry point ───────────────────────────────────────────────────────────────
+(function init() {
+  const params = new URLSearchParams(window.location.search);
+  customerId   = params.get('customer_id') || '';
+
+  if (!customerId) {
+    // No customer_id in URL — old-style success redirect without activation
+    // Just show success and let them proceed (session may already be set via webhook)
+    show('stateOk');
+    document.getElementById('planName').textContent = 'Your plan';
+    return;
+  }
+
+  // Clean URL so a page refresh doesn't create confusion
+  history.replaceState(null, '', '/success');
+
+  show('stateLoading');
+  tryActivate();
+})();
+</script>
+
+<!-- CSRF double-submit: add X-CSRF-Token to /api/paddle/activate fetch. -->
+<script>
+(function(){
+  function _t(){
+    var m=document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);
+    return m?decodeURIComponent(m[1]):'';
+  }
+  var _f=window.fetch;
+  window.fetch=function(u,o){
+    o=o||{};
+    if(typeof u==='string'&&/^\//.test(u)){
+      o.headers=Object.assign({'X-CSRF-Token':_t()},o.headers||{});
+    }
+    return _f.call(this,u,o);
+  };
+})();
+</script>
 </body>
 </html>

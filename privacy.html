@@ -47,16 +47,16 @@
 
   <div class="container">
     <h1>Privacy Policy</h1>
-    <p class="date">Last updated: March 26, 2026</p>
+    <p class="date">Last updated: April 14, 2026</p>
 
-    <p>ASINInsight ("we", "us", or "our") operates the website at web-production-0bd61.up.railway.app ("Service"). This Privacy Policy explains how we collect, use, and protect your information when you use our Service.</p>
+    <p>ASINInsight ("we", "us", or "our") operates the website at asininsight.com ("Service"). This Privacy Policy explains how we collect, use, and protect your information when you use our Service.</p>
 
     <h2>1. Information We Collect</h2>
     <p>We collect the following types of information:</p>
     <ul>
-      <li><strong>Account information:</strong> Email address and payment details when you subscribe to a paid plan (processed securely by Stripe).</li>
-      <li><strong>Usage data:</strong> Pages visited, browser type, IP address, and session duration collected automatically.</li>
-      <li><strong>Uploaded data:</strong> CSV files you upload for analysis. These files are processed entirely in your browser and are never sent to our servers.</li>
+      <li><strong>Account information:</strong> Email address and payment details when you subscribe to a paid plan (processed securely by Paddle).</li>
+      <li><strong>Usage data:</strong> Pages visited, IP address, and session duration collected automatically for security and rate-limiting purposes only.</li>
+      <li><strong>Uploaded data:</strong> CSV files you upload are sent to our server for analysis. We do not store the contents of your CSV files after the analysis request completes. Your Amazon seller data is processed in memory and immediately discarded.</li>
     </ul>
 
     <h2>2. How We Use Your Information</h2>
@@ -67,14 +67,14 @@
       <li>To improve and optimize our Service</li>
     </ul>
 
-    <h2>3. Your Data Stays in Your Browser</h2>
-    <p>All CSV analysis is performed locally in your browser. We do not upload, store, or process your Amazon seller data on our servers. Your business data stays entirely on your device.</p>
+    <h2>3. How Your CSV Data Is Handled</h2>
+    <p>When you upload a CSV file for analysis, it is transmitted securely (HTTPS) to our server where the diagnosis engine processes it. The file contents are held in memory only for the duration of the request and are not written to disk, logged, or stored in any database. Once the response is returned to your browser, the data is discarded.</p>
 
     <h2>4. Payment Processing</h2>
-    <p>Payments are processed by Stripe, Inc. We do not store your credit card information. Stripe's privacy policy is available at <a href="https://stripe.com/privacy" target="_blank">stripe.com/privacy</a>.</p>
+    <p>Payments are processed by Paddle.com Market Limited. We do not store your credit card information. Paddle's privacy policy is available at <a href="https://www.paddle.com/legal/privacy" target="_blank">paddle.com/legal/privacy</a>.</p>
 
     <h2>5. Cookies</h2>
-    <p>We use essential session cookies to keep you logged in and remember your subscription status. We do not use advertising or tracking cookies.</p>
+    <p>We use one essential session cookie to keep you signed in and remember your subscription status. We do not use advertising cookies, analytics cookies, or any third-party tracking. When you first visit ASINInsight, we ask for your explicit consent before setting any cookies. You may accept or decline at any time. Declining does not affect your ability to use the core diagnostic tool.</p>
 
     <h2>6. Data Retention</h2>
     <p>We retain your account information for as long as your subscription is active or as required by law. You may request deletion of your data at any time by contacting us.</p>
@@ -93,5 +93,31 @@
   </div>
 
   <footer>© 2026 ASINInsight. All rights reserved.</footer>
+
+  <!-- Cookie bar -->
+  <div id="cookieBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#15263d;padding:14px 20px;align-items:center;justify-content:space-between;gap:16px;z-index:999;flex-wrap:wrap;" role="dialog" aria-live="polite" aria-label="Cookie consent">
+    <div style="max-width:680px;">
+      <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
+      <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy" style="color:rgba(255,255,255,.7);text-decoration:underline;">Privacy Policy</a></span>
+    </div>
+    <div style="display:flex;gap:10px;flex-shrink:0;">
+      <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
+      <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
+    </div>
+  </div>
+  <script>
+    (function() {
+      var consent = localStorage.getItem('cookieConsent');
+      if (!consent) { document.getElementById('cookieBar').style.display = 'flex'; }
+    })();
+    function dismissCookie() {
+      localStorage.setItem('cookieConsent', 'accepted');
+      document.getElementById('cookieBar').style.display = 'none';
+    }
+    function declineCookie() {
+      localStorage.setItem('cookieConsent', 'declined');
+      document.getElementById('cookieBar').style.display = 'none';
+    }
+  </script>
 </body>
 </html>

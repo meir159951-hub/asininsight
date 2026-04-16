@@ -1,3 +1,42 @@
+# ── Secrets — NEVER commit these ──────────────────────────────────────────
 .env
+.env.*
+!.env.example
+
+# ── Python ────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ───────────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env_/
+
+# ── Database files — contain real user/payment data ───────────────────────
+*.db
+*.sqlite
+*.sqlite3
+asininsight.db
+
+# ── Logs ───────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS / editor noise ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Beta test responses (may contain real user feedback) ──────────────────
+beta_testing/responses/*.json
+!beta_testing/responses/RESP-XXX-*.json
