@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amazon Seller Resources — ASINInsight Blog</title>
+  <meta name="description" content="Practical guides for Amazon sellers: how to read your Business Report, fix high ACOS, improve CTR, and recover lost Buy Box.">
+  <link rel="canonical" href="https://asininsight.com/blog">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://asininsight.com/blog">
+  <meta property="og:title" content="Amazon Seller Resources — ASINInsight">
+  <meta property="og:description" content="Practical guides for Amazon sellers on CTR, ACOS, CVR, and Business Report analysis.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.6 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    :root { --muted: #617184; --line: #ddd4c6; --paper: #fffdfa; --blue: #1f5fa8; --blue-dark: #184d87; }
+    .wrap { width: min(860px, calc(100% - 32px)); margin: 0 auto; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(860px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); }
+    .nav-links a:hover { color: var(--blue); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; background: var(--blue); color: #fff; }
+    .btn:hover { background: var(--blue-dark); }
+    .hero { padding: 64px 0 32px; }
+    .hero-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 5px 12px; border-radius: 999px; margin-bottom: 16px; }
+    .hero h1 { font-size: clamp(32px, 5vw, 48px); line-height: 1.1; max-width: 640px; }
+    .hero p { margin-top: 14px; color: var(--muted); font-size: 17px; max-width: 520px; }
+    .posts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 40px; padding-bottom: 64px; }
+    .post { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 18px; padding: 28px; display: flex; flex-direction: column; gap: 12px; transition: box-shadow .15s; }
+    .post:hover { box-shadow: 0 4px 20px rgba(31,95,168,.08); }
+    .post-tag { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 3px 10px; border-radius: 999px; display: inline-block; }
+    .post h2 { font-size: 20px; line-height: 1.3; }
+    .post p { font-size: 14px; color: var(--muted); line-height: 1.6; flex: 1; }
+    .post-meta { font-size: 12px; color: #9fb0c4; }
+    .post-cta { font-size: 14px; font-weight: 700; color: var(--blue); }
+    .post-cta:hover { text-decoration: underline; }
+    .coming-soon { opacity: 0.55; cursor: default; }
+    .coming-soon .post-cta { color: var(--muted); }
+    footer { padding: 28px 0 44px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+    .foot-links { display: flex; gap: 20px; }
+    .foot-links a:hover { color: var(--blue); }
+    @media (max-width: 640px) { .posts { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/pricing">Pricing</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn">Start free</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-label">Amazon Seller Resources</div>
+    <h1>Practical guides for Amazon sellers who want answers, not fluff.</h1>
+    <p>How to read your Business Report, diagnose underperforming ASINs, fix high ACOS, and turn data into action.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="posts">
+
+    <div class="post">
+      <span class="post-tag">ACOS</span>
+      <h2>Why Your ACOS Is High — and the 4 Fixes That Actually Work</h2>
+      <p>High ACOS usually has one of four causes: broad-match keyword bleed, low-converting search terms, poor product-market fit, or mis-priced bids. Here's how to identify which one is your problem and what to do about it.</p>
+      <div class="post-meta">5 min read · Ads & PPC</div>
+      <a href="/blog/high-acos-fix" class="post-cta">Read guide →</a>
+    </div>
+
+    <div class="post">
+      <span class="post-tag">CTR</span>
+      <h2>Amazon CTR Below 0.20%? Here's What to Change First</h2>
+      <p>Click-through rate is the single most controllable metric in your Business Report. Learn why 0.20% is the critical floor, how to benchmark against your category, and what a $300 hero image reshoot can recover in monthly revenue.</p>
+      <div class="post-meta">4 min read · Listing Optimization</div>
+      <a href="/blog/ctr-fix" class="post-cta">Read guide →</a>
+    </div>
+
+    <div class="post">
+      <span class="post-tag">Business Report</span>
+      <h2>How to Read Amazon's Business Report (Every Column Explained)</h2>
+      <p>The Detail Page Sales and Traffic report contains 20+ columns. Most sellers look at 3. This guide explains what each metric means, which thresholds matter, and how to use the report to find your highest-leverage fix in under 10 minutes.</p>
+      <div class="post-meta">8 min read · Data & Analytics</div>
+      <a href="/blog/business-report-guide" class="post-cta">Read guide →</a>
+    </div>
+
+    <div class="post coming-soon">
+      <span class="post-tag">Buy Box</span>
+      <h2>Lost Buy Box: The Silent Listing Killer and How to Get It Back</h2>
+      <p>Buy Box loss can tank your conversion rate overnight without any obvious warning. Learn the 6 causes of Buy Box suppression, how to check your eligibility score, and the fastest path back to winning the box.</p>
+      <div class="post-meta">Coming soon · Pricing & Competition</div>
+      <span class="post-cta">Coming soon</span>
+    </div>
+
+    <div class="post coming-soon">
+      <span class="post-tag">CVR</span>
+      <h2>Conversion Rate Below 10%? The 3-Part Listing Audit Checklist</h2>
+      <p>Sessions are fine but sales aren't — that's a conversion problem. Walk through a systematic audit of your title, bullets, images, price anchoring, and review velocity to find exactly which element is causing buyers to leave without purchasing.</p>
+      <div class="post-meta">Coming soon · Listing Optimization</div>
+      <span class="post-cta">Coming soon</span>
+    </div>
+
+    <div class="post coming-soon">
+      <span class="post-tag">Strategy</span>
+      <h2>The Weekly Amazon Audit: A 15-Minute Routine for Sellers</h2>
+      <p>Most sellers check their sales but never diagnose their listings. This 15-minute weekly routine covers exactly which Business Report numbers to pull, what thresholds to watch, and when to act vs. when to wait for more data.</p>
+      <div class="post-meta">Coming soon · Workflow</div>
+      <span class="post-cta">Coming soon</span>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logo" style="font-size:16px;">ASIN<span style="color:var(--blue);">Insight</span></div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <div>&copy; 2026 ASINInsight. All rights reserved.</div>
+  </div>
+</footer>
+
+</body>
+</html>

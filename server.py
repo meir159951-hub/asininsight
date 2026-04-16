@@ -501,6 +501,28 @@ def sample_data(filename):
     return send_from_directory(BASE_DIR / "sample_data", filename)
 
 
+@app.route("/static/<path:filename>")
+def static_files(filename):
+    return send_from_directory(BASE_DIR / "static", filename)
+
+
+@app.route("/blog")
+def blog():
+    return send_from_directory(BASE_DIR, "blog.html")
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(BASE_DIR / "static", "sitemap.xml",
+                                mimetype="application/xml")
+
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(BASE_DIR / "static", "robots.txt",
+                                mimetype="text/plain")
+
+
 @app.route("/pricing")
 def pricing():
     return send_from_directory(BASE_DIR, "pricing.html")

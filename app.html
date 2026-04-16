@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ASINInsight — Diagnose Your Listing</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -89,23 +90,27 @@
 
     /* ── Upload state ── */
     .upload-zone {
-      border: 2px dashed var(--line);
-      border-radius: 16px;
-      padding: 40px 24px;
+      border: 2px dashed rgba(31,95,168,.35);
+      border-radius: 20px;
+      padding: 52px 32px;
       text-align: center;
       cursor: pointer;
-      transition: border-color .15s, background .15s;
+      transition: border-color .15s, background .15s, transform .1s;
       background: #fff;
       margin-bottom: 16px;
+      position: relative;
     }
-    .upload-zone:hover, .upload-zone.dragover { border-color: var(--blue); background: var(--blue-soft); }
-    .upload-zone.has-file { border-color: var(--green); background: #f0fdf4; }
-    .upload-icon { font-size: 32px; margin-bottom: 10px; }
-    .upload-zone h2 { font-size: 18px; margin-bottom: 6px; font-family: "Segoe UI", Arial, sans-serif; font-weight: 700; }
+    .upload-zone:hover { border-color: var(--blue); background: var(--blue-soft); transform: translateY(-1px); }
+    .upload-zone.dragover { border-color: var(--blue); background: var(--blue-soft); border-style: solid; transform: scale(1.01); }
+    .upload-zone.has-file { border-color: var(--green); background: #f0fdf4; border-style: solid; }
+    .upload-icon { font-size: 42px; margin-bottom: 14px; line-height: 1; }
+    .upload-zone h2 { font-size: 20px; margin-bottom: 8px; font-family: "Segoe UI", Arial, sans-serif; font-weight: 700; color: var(--ink); }
     .upload-zone p { font-size: 14px; color: var(--muted); }
     .upload-zone .file-label { color: var(--blue); font-weight: 700; text-decoration: underline; cursor: pointer; }
-    .upload-zone .hint { font-size: 12px; margin-top: 8px; color: #9fb0c4; }
+    .upload-zone .hint { font-size: 12px; margin-top: 10px; color: #9fb0c4; letter-spacing: .02em; }
     .upload-zone .filename { font-size: 14px; font-weight: 700; color: var(--green); margin-top: 8px; }
+    .upload-metrics { display: flex; justify-content: center; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
+    .upload-metric { font-size: 11px; font-weight: 700; color: #9fb0c4; letter-spacing: .04em; text-transform: uppercase; }
     #csvFile { display: none; }
 
     /* ── CSV guide accordion ── */
@@ -299,9 +304,20 @@
       ondragleave="handleDragLeave(event)"
       ondrop="handleDrop(event)"
     >
-      <div class="upload-icon">📄</div>
+      <div class="upload-icon">📊</div>
       <h2>Drop your Amazon Business Report here</h2>
       <p>or <span class="file-label">browse to select a file</span></p>
+      <div class="upload-metrics">
+        <span class="upload-metric">CTR</span>
+        <span class="upload-metric">·</span>
+        <span class="upload-metric">CVR</span>
+        <span class="upload-metric">·</span>
+        <span class="upload-metric">ACOS</span>
+        <span class="upload-metric">·</span>
+        <span class="upload-metric">Buy Box</span>
+        <span class="upload-metric">·</span>
+        <span class="upload-metric">Sessions</span>
+      </div>
       <p class="hint">Detail Page Sales and Traffic · CSV · Max 2 MB</p>
       <p class="filename" id="fileNameDisplay" hidden></p>
     </div>
