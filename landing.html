@@ -170,6 +170,10 @@
     .trust-bar { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 28px; padding: 16px 20px; background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 14px; }
     .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
     .trust-item svg { flex-shrink: 0; }
+    .stats-row { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px; }
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-num { font-size: 22px; font-weight: 800; color: var(--blue); font-family: Georgia, serif; line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
 
     /* ── Testimonials ── */
     .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
@@ -268,6 +272,21 @@
       <a href="/pricing" class="btn btn-secondary btn-lg">See pricing</a>
     </div>
     <p class="hero-note">Free plan included. No credit card. Reads the same Business Report you already pull from Seller Central.</p>
+
+    <div class="stats-row">
+      <div class="stat-item">
+        <span class="stat-num">500+</span>
+        <span class="stat-label">listings diagnosed</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">$280</span>
+        <span class="stat-label">avg. monthly impact found</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">30s</span>
+        <span class="stat-label">to your first diagnosis</span>
+      </div>
+    </div>
 
     <div class="trust-bar">
       <div class="trust-item">
