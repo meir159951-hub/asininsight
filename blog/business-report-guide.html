@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Read Amazon's Business Report (Every Column Explained)</title>
+  <meta name="description" content="The Amazon Business Report has 20+ columns. Most sellers look at 3. This guide explains every metric, the thresholds that matter, and the 10-minute weekly audit routine.">
+  <link rel="canonical" href="https://asininsight.com/blog/business-report-guide">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.7 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    :root { --muted: #617184; --line: #ddd4c6; --paper: #fffdfa; --blue: #1f5fa8; --blue-dark: #184d87; --green: #1d6a42; --red: #c0392b; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(860px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); }
+    .nav-links a:hover { color: var(--blue); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; background: var(--blue); color: #fff; }
+    .btn:hover { background: var(--blue-dark); }
+    .article-wrap { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 80px; }
+    .article-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+    .article-wrap h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.1; margin-bottom: 16px; }
+    .article-meta { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+    .article-body { display: flex; flex-direction: column; gap: 20px; }
+    .article-body p { font-size: 16px; line-height: 1.75; color: #2d3f55; }
+    .article-body h2 { font-size: 26px; line-height: 1.2; margin-top: 12px; }
+    .article-body h3 { font-size: 20px; line-height: 1.3; margin-top: 8px; }
+    .callout { background: #e8f0fa; border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 16px 20px; }
+    .callout p { font-size: 15px; color: #15263d; }
+    .callout strong { color: var(--blue); }
+    .metric-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .metric-table th { text-align: left; padding: 10px 14px; background: #e8f0fa; color: var(--blue); font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+    .metric-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.55; color: #2d3f55; }
+    .metric-table tr:last-child td { border-bottom: none; }
+    .metric-table td:first-child { font-weight: 700; color: var(--blue); white-space: nowrap; }
+    .threshold-good { color: var(--green); font-weight: 700; }
+    .threshold-bad { color: var(--red); font-weight: 700; }
+    .num-list { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .num-list li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.65; color: #2d3f55; }
+    .num-list li .num { background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; }
+    .cta-box { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 20px; padding: 32px; text-align: center; margin-top: 12px; }
+    .cta-box h3 { font-size: 22px; margin-bottom: 10px; }
+    .cta-box p { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    footer { padding: 24px 0 40px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { width: min(860px, calc(100% - 32px)); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+    .foot-links { display: flex; gap: 20px; }
+    .foot-links a:hover { color: var(--blue); }
+    @media (max-width: 600px) { .metric-table { font-size: 13px; } .metric-table td:first-child { white-space: normal; } }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn">Start free</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="article-wrap">
+  <span class="article-tag">Business Report</span>
+  <h1>How to Read Amazon's Business Report (Every Column Explained)</h1>
+  <div class="article-meta">8 min read &middot; Data &amp; Analytics &middot; April 2026</div>
+
+  <div class="article-body">
+
+    <p>Amazon's Business Report is the most useful data source most sellers never fully read. It contains 20+ columns and most sellers look at three of them: sessions, units ordered, and sometimes ordered product sales. The other columns tell you exactly why those three numbers are what they are. This guide explains every metric, what thresholds to watch, and a 10-minute weekly routine that gets you to the highest-leverage problem in your account.</p>
+
+    <h2>Where to find it and which report to use</h2>
+
+    <p>In Seller Central, go to Reports, then Business Reports. You will see a list on the left. The correct report is <strong>Detail Page Sales and Traffic by Child Item</strong>. Do not use the parent ASIN version. Child item gives you data per variation, which is the level at which CTR and CVR actually vary. Set the date range to the last 30 days. Download the CSV.</p>
+
+    <div class="callout">
+      <p><strong>Date range matters more than most sellers realize.</strong> Less than 7 days has too much noise to be actionable. More than 90 days dilutes seasonal signals and hides recent changes. 30 days is the right default for weekly audits. Use 7 days only if you made a change and need to see its immediate effect.</p>
+    </div>
+
+    <h2>Every column explained</h2>
+
+    <p>The columns below are listed in the order they appear in the export.</p>
+
+    <div style="overflow-x:auto; margin: 4px 0;">
+    <table class="metric-table">
+      <thead>
+        <tr>
+          <th>Column</th>
+          <th>What it means</th>
+          <th>Threshold</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Date</td>
+          <td>The date range of the report. For the 30-day export, this shows a single row per child ASIN covering the full period.</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td>Parent ASIN</td>
+          <td>The parent product identifier. Ignore this for child-level analysis.</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td>Child ASIN</td>
+          <td>The specific variation (size, color, pack) you are analyzing.</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td>Title</td>
+          <td>The listing title at time of export.</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td>Sessions</td>
+          <td>Unique visitors to your listing in the period. One person visiting three times counts as one session. This is your organic plus paid traffic combined.</td>
+          <td>Trending up or stable is healthy. A sudden drop of 20%+ with no ad change signals an organic ranking issue or inventory problem.</td>
+        </tr>
+        <tr>
+          <td>Session Percentage</td>
+          <td>Your share of sessions in the category for that product. Low on its own, but useful for tracking over time.</td>
+          <td>Useful for tracking week-over-week trend.</td>
+        </tr>
+        <tr>
+          <td>Page Views</td>
+          <td>Total page loads, including multiple visits from the same buyer. Higher than sessions means buyers are returning, which often indicates comparison shopping.</td>
+          <td>Page views being 2x+ sessions suggests buyers are not deciding on first visit.</td>
+        </tr>
+        <tr>
+          <td>Page Views Percentage</td>
+          <td>Share of category page views. Mostly useful for competitive benchmarking.</td>
+          <td>n/a</td>
+        </tr>
+        <tr>
+          <td>Featured Offer (Buy Box) Percentage</td>
+          <td>How often your listing held the Buy Box during the period. If you are the only seller, this should be close to 100%. If it is below 90%, another seller or Amazon itself is winning some of your clicks.</td>
+          <td><span class="threshold-good">95%+ is healthy.</span> <span class="threshold-bad">Below 80% needs investigation.</span></td>
+        </tr>
+        <tr>
+          <td>Units Ordered</td>
+          <td>Total units sold. This is the core output metric.</td>
+          <td>Trending up is the goal. Flat or down with stable sessions means a conversion problem.</td>
+        </tr>
+        <tr>
+          <td>Units Ordered — B2B</td>
+          <td>Business-to-business sales portion. Only relevant if you sell to business buyers.</td>
+          <td>n/a for most sellers</td>
+        </tr>
+        <tr>
+          <td>Unit Session Percentage (CVR)</td>
+          <td>Orders divided by sessions. This is your conversion rate. The most important ratio in the report after CTR.</td>
+          <td><span class="threshold-good">10%+ is healthy for most categories.</span> <span class="threshold-bad">Below 7% needs attention.</span> Below 4% is critical.</td>
+        </tr>
+        <tr>
+          <td>Unit Session Percentage — B2B</td>
+          <td>B2B conversion rate. Ignore unless you are targeting business buyers.</td>
+          <td>n/a for most sellers</td>
+        </tr>
+        <tr>
+          <td>Ordered Product Sales</td>
+          <td>Total revenue from units ordered. Sessions x CVR x price, essentially.</td>
+          <td>Use this for revenue tracking but diagnose from the component metrics.</td>
+        </tr>
+        <tr>
+          <td>Ordered Product Sales — B2B</td>
+          <td>B2B portion of revenue.</td>
+          <td>n/a for most sellers</td>
+        </tr>
+        <tr>
+          <td>Total Order Items</td>
+          <td>Total line items ordered, including multiple units per order. Usually close to units ordered unless buyers frequently buy multipacks.</td>
+          <td>n/a</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>The Business Report does not include ACOS directly. That lives in your advertising reports. ASINInsight pulls ACOS from the ad reports automatically when you upload the Business Report alongside your campaign data.</p>
+
+    <h2>The three columns that matter most</h2>
+
+    <p>If you only have ten minutes, look at these three in this order:</p>
+
+    <p><strong>1. Featured Offer Percentage (Buy Box %)</strong> first. If this is below 90%, everything else in the report is contaminated. Sessions and CVR will look artificially low because buyers are being routed to a competitor's offer. Fix Buy Box suppression before diagnosing anything else.</p>
+
+    <p><strong>2. Unit Session Percentage (CVR)</strong> second. This tells you whether the traffic you get is converting. A CVR below 7% with a Buy Box above 90% means your listing fails at the moment of decision. The fix is listing-side: images, bullets, price, or reviews.</p>
+
+    <p><strong>3. Sessions</strong> third. If Buy Box and CVR are healthy but you are still not hitting your revenue target, you have a traffic problem. More sessions come from better organic rank (which comes from conversion history and review velocity) or from ads. CTR is the ad-traffic equivalent of this: sessions from search impressions.</p>
+
+    <h2>CTR is not in the Business Report directly</h2>
+
+    <p>This is the most common source of confusion. Click-through rate comes from your advertising reports (the Search Term Report or the placement report in campaign manager), not from the Business Report. However, ASINInsight calculates CTR from ad report data and maps it back to the ASIN. The threshold that matters: below 0.20% is critical regardless of category.</p>
+
+    <h2>The 10-minute weekly audit</h2>
+
+    <p>This is the routine that finds problems before they become expensive. Do it every Monday using the previous 7-day Business Report.</p>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Download the last 7-day report. Sort by Ordered Product Sales descending. Your worst revenue ASIN is the one with the most to fix.</li>
+      <li><span class="num">2</span>Check Buy Box percentage for your top 5 ASINs by revenue. Any below 90% gets flagged immediately.</li>
+      <li><span class="num">3</span>Check CVR for those same 5 ASINs. Flag anything below 8%. Note whether CVR dropped from the previous week.</li>
+      <li><span class="num">4</span>Check sessions for your top 5. A drop of 15%+ week-over-week with no ad change indicates an organic ranking problem or a stranded/suppressed listing.</li>
+      <li><span class="num">5</span>For any flagged ASIN, identify the single highest-priority issue and add one action to your task list. Only one per ASIN, per week. Multiple simultaneous changes make it impossible to attribute what worked.</li>
+    </ul>
+
+    <p>This routine catches 80% of listing problems within the week they start. Most sellers who do it consistently report that their revenue becomes more predictable because they catch suppression, conversion drops, and Buy Box losses before they compound.</p>
+
+    <div class="callout">
+      <p><strong>Skip the 30-day aggregate when diagnosing.</strong> Use 30 days for strategic decisions and trend analysis. Use 7 days for diagnosing active problems. A drop in CVR that happened three weeks ago is invisible in a 30-day average if CVR recovered since then.</p>
+    </div>
+
+    <h2>What the Business Report does not tell you</h2>
+
+    <p>The Business Report does not tell you why CVR dropped. It does not tell you which keywords are driving sessions. It does not show you what competitors are doing. It does not give you ACOS or ad spend. It shows you what happened but not the cause. That is where pattern recognition matters. A sudden CVR drop on the same day as a price increase from a competitor is a different problem than a CVR drop after you changed your main image.</p>
+
+    <p>ASINInsight cross-references Business Report data with ad report data and applies diagnostic rules to identify the most likely root cause. The output is a single primary issue with the evidence, revenue impact, and action steps specific to your numbers.</p>
+
+    <div class="cta-box">
+      <h3>Upload your Business Report and get the diagnosis automatically</h3>
+      <p>Instead of reading 20 columns yourself, upload the CSV and get the one issue that is costing you the most, with the exact steps to fix it. Free to start, no credit card.</p>
+      <form action="/checkout/free" method="post">
+        <button type="submit" class="btn" style="min-height:44px;font-size:15px;padding:0 24px;">Diagnose my listing free</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <div class="logo" style="font-size:15px;">ASIN<span style="color:var(--blue);">Insight</span></div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <div>&copy; 2026 ASINInsight</div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Why Your ACOS Is High and the 4 Fixes That Actually Work</title>
+  <meta name="description" content="High Amazon ACOS usually comes from one of four causes. Here is how to identify which one you have and the exact steps to fix it.">
+  <link rel="canonical" href="https://asininsight.com/blog/high-acos-fix">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.7 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    :root { --muted: #617184; --line: #ddd4c6; --paper: #fffdfa; --blue: #1f5fa8; --blue-dark: #184d87; --green: #1d6a42; --red: #c0392b; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(860px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); }
+    .nav-links a:hover { color: var(--blue); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; background: var(--blue); color: #fff; }
+    .btn:hover { background: var(--blue-dark); }
+    .article-wrap { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 80px; }
+    .article-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+    .article-wrap h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.1; margin-bottom: 16px; }
+    .article-meta { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+    .article-body { display: flex; flex-direction: column; gap: 20px; }
+    .article-body p { font-size: 16px; line-height: 1.75; color: #2d3f55; }
+    .article-body h2 { font-size: 26px; line-height: 1.2; margin-top: 12px; }
+    .article-body h3 { font-size: 20px; line-height: 1.3; margin-top: 8px; }
+    .callout { background: #e8f0fa; border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 16px 20px; }
+    .callout p { font-size: 15px; color: #15263d; }
+    .callout strong { color: var(--blue); }
+    .warn-callout { background: #fef9ec; border-left: 3px solid #d97706; border-radius: 0 12px 12px 0; padding: 16px 20px; }
+    .warn-callout p { font-size: 15px; color: #15263d; }
+    .num-list { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .num-list li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.65; color: #2d3f55; }
+    .num-list li .num { background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; }
+    .cta-box { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 20px; padding: 32px; text-align: center; margin-top: 12px; }
+    .cta-box h3 { font-size: 22px; margin-bottom: 10px; }
+    .cta-box p { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    footer { padding: 24px 0 40px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { width: min(860px, calc(100% - 32px)); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+    .foot-links { display: flex; gap: 20px; }
+    .foot-links a:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn">Start free</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="article-wrap">
+  <span class="article-tag">ACOS</span>
+  <h1>Why Your ACOS Is High and the 4 Fixes That Actually Work</h1>
+  <div class="article-meta">7 min read &middot; Ads &amp; PPC &middot; April 2026</div>
+
+  <div class="article-body">
+
+    <p>High ACOS is usually the first number Amazon sellers panic about. They cut bids, pause campaigns, and still watch the percentage stay stubborn. The problem is that most sellers treat high ACOS as a single condition when it is actually a symptom with four completely different root causes. Cutting bids fixes one of them. For the other three, it does nothing.</p>
+
+    <p>This guide covers each cause, how to identify which one you actually have, and the exact steps to fix it. The fixes are not theoretical. They are the same action plans ASINInsight generates when it detects ACOS above threshold in your Business Report.</p>
+
+    <div class="callout">
+      <p><strong>The thresholds that matter:</strong> ACOS above 35% starts hurting profitability for most product categories. Above 50% you are likely losing money on every ad click. Above 70% is critical. If you do not know your break-even ACOS, calculate it as: (profit margin / sale price) x 100.</p>
+    </div>
+
+    <h2>Why ACOS gets high in the first place</h2>
+
+    <p>ACOS = ad spend divided by ad revenue. So it rises when you spend more without generating proportional sales. That can happen from four directions: the keywords you are bidding on are wrong, the product page fails to convert the clicks you do get, the price relative to your category is off, or the bids themselves are misaligned with conversion probability. Each has a different fix.</p>
+
+    <h2>Fix 1: Broad-match keyword bleed</h2>
+
+    <p>This is the most common cause of sudden ACOS spikes. Broad and phrase-match keywords pull in search terms that have nothing to do with your product. You pay for clicks from buyers who were never going to purchase.</p>
+
+    <p>How to confirm this is your problem: download your Search Term Report from Seller Central (Ads, then Reports, then Search Terms). Sort by spend. Look at the top 20 search terms by cost. If any are clearly off-topic, or if they have 20+ clicks and zero orders, you have found your bleed.</p>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Download the Search Term Report. Filter by spend descending. Identify every term with more than $5 spent and zero orders.</li>
+      <li><span class="num">2</span>Add those terms as exact-match negatives at the campaign level.</li>
+      <li><span class="num">3</span>For terms that are partially relevant but converting poorly (ACOS above 80%), add them as negative phrase-match.</li>
+      <li><span class="num">4</span>Do this every 7 days for 4 weeks. Your ACOS will fall as the bad spend dries up.</li>
+    </ul>
+
+    <p>One week of search term cleanup typically recovers 15 to 25 percentage points of ACOS for sellers who have never done this before.</p>
+
+    <h2>Fix 2: Low-converting search terms</h2>
+
+    <p>This is different from bleed. The search terms are relevant, the clicks are real buyers, but those buyers are not purchasing. Your conversion rate on those specific terms is under 5%. The cause is usually a listing that fails at the moment of decision: the images do not match the search intent, the title or bullets do not address the buyer's need, or the price does not feel justified for what is shown.</p>
+
+    <div class="warn-callout">
+      <p>You can confirm this in your Search Term Report by looking at orders divided by clicks. A healthy conversion rate for most categories is 10 to 15%. Terms converting below 5% are losing you money on every click even at normal bids.</p>
+    </div>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Identify the top 5 converting search terms that are also your highest spend. These are your real buyers.</li>
+      <li><span class="num">2</span>Search Amazon for each term. Look at the top 5 results. Compare their images, titles, and prices to yours.</li>
+      <li><span class="num">3</span>Identify the single biggest visual difference between your listing and the category leader.</li>
+      <li><span class="num">4</span>Fix that one thing first. Do not change multiple elements at once. You need to know what moved the needle.</li>
+    </ul>
+
+    <h2>Fix 3: Poor product-market fit for the keywords you are targeting</h2>
+
+    <p>Some sellers bid on keywords where their product is technically relevant but not competitive. A $45 cutting board bidding on "professional chef cutting board" will have terrible ACOS because the buyer expectation does not match the price point. The clicks happen because the match type qualifies them, but the purchases do not follow.</p>
+
+    <p>The tell: clicks are converting, but only at very low rates (under 3%), and no amount of listing improvement makes a difference. The product is fine for one set of buyers but you are advertising to a different set.</p>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Review each of your active campaigns. For every keyword, ask: would a buyer searching this term buy my product at this price?</li>
+      <li><span class="num">2</span>Pause any keyword where the honest answer is no. Replace them with terms that match your actual product tier.</li>
+      <li><span class="num">3</span>Build a separate campaign around your product's true value proposition. If it is a budget option, bid on terms that reflect that.</li>
+    </ul>
+
+    <h2>Fix 4: Mis-priced bids</h2>
+
+    <p>This one is purely mechanical. If your conversion rate on a search term is 8% and you are bidding $1.20 per click, you are paying $15 in ad spend for every sale. If your product sells for $28 and your margin is 30%, your maximum cost-per-sale to break even is about $8.40. You are spending nearly double that.</p>
+
+    <p>The right bid is: (target ACOS) x (product price) x (conversion rate for that term). If your target ACOS is 25%, your price is $28, and conversion rate is 8%, your max bid is $0.56. Many sellers are bidding two to three times their profitable limit without knowing it.</p>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Calculate your break-even ACOS: profit margin divided by sale price.</li>
+      <li><span class="num">2</span>Calculate your target ACOS: typically 60 to 70% of break-even to stay profitable.</li>
+      <li><span class="num">3</span>For each keyword, calculate the max profitable bid: (target ACOS / 100) x price x (orders / clicks).</li>
+      <li><span class="num">4</span>Reduce bids to this number. Set a calendar reminder to recalculate monthly as conversion rates shift.</li>
+    </ul>
+
+    <h2>Which fix to do first</h2>
+
+    <p>If you have never cleaned your search terms, start with Fix 1. It gives the fastest results and the learning you get from it informs everything else. If your search terms are already clean, look at your conversion rate per term to distinguish between Fix 2 and Fix 3. If your conversion rate is above 8% but ACOS is still high, go straight to Fix 4 and recalculate your bids.</p>
+
+    <p>Most sellers with persistently high ACOS have a combination of all four. The right order: clean search terms first, then fix bids, then fix the listing if conversion rate is still low, then audit keyword targeting fit.</p>
+
+    <div class="callout">
+      <p><strong>One thing most sellers miss:</strong> ACOS is an ad metric. But your Business Report has the full picture, including organic sessions, CVR, and Buy Box percentage. If your ACOS is 60% but your listing also has a 0.12% CTR, fixing the image will reduce your cost-per-click faster than any bid adjustment because more organic traffic converts without any ad spend.</p>
+    </div>
+
+    <div class="cta-box">
+      <h3>Find out what is actually holding back your listing</h3>
+      <p>Upload your Business Report and ASINInsight will check ACOS, CTR, CVR, sessions, and Buy Box in priority order. You get the one issue costing you the most, with numbered steps to fix it. Takes 30 seconds.</p>
+      <form action="/checkout/free" method="post">
+        <button type="submit" class="btn" style="min-height:44px;font-size:15px;padding:0 24px;">Diagnose my listing free</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <div class="logo" style="font-size:15px;">ASIN<span style="color:var(--blue);">Insight</span></div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <div>&copy; 2026 ASINInsight</div>
+  </div>
+</footer>
+
+</body>
+</html>

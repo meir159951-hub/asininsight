@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amazon CTR Below 0.20%? Here's What to Change First</title>
+  <meta name="description" content="0.20% is the critical CTR floor on Amazon. Below it, you are losing to competitors who spend the same but get more clicks. Here is what to change first.">
+  <link rel="canonical" href="https://asininsight.com/blog/ctr-fix">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.7 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: inherit; text-decoration: none; }
+    :root { --muted: #617184; --line: #ddd4c6; --paper: #fffdfa; --blue: #1f5fa8; --blue-dark: #184d87; --green: #1d6a42; --red: #c0392b; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(860px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); }
+    .nav-links a:hover { color: var(--blue); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 18px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; background: var(--blue); color: #fff; }
+    .btn:hover { background: var(--blue-dark); }
+    .article-wrap { width: min(720px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 80px; }
+    .article-tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 4px 12px; border-radius: 999px; margin-bottom: 16px; }
+    .article-wrap h1 { font-size: clamp(28px, 4vw, 42px); line-height: 1.1; margin-bottom: 16px; }
+    .article-meta { font-size: 13px; color: var(--muted); margin-bottom: 36px; }
+    .article-body { display: flex; flex-direction: column; gap: 20px; }
+    .article-body p { font-size: 16px; line-height: 1.75; color: #2d3f55; }
+    .article-body h2 { font-size: 26px; line-height: 1.2; margin-top: 12px; }
+    .article-body h3 { font-size: 20px; line-height: 1.3; margin-top: 8px; }
+    .callout { background: #e8f0fa; border-left: 3px solid var(--blue); border-radius: 0 12px 12px 0; padding: 16px 20px; }
+    .callout p { font-size: 15px; color: #15263d; }
+    .callout strong { color: var(--blue); }
+    .warn-callout { background: #fef9ec; border-left: 3px solid #d97706; border-radius: 0 12px 12px 0; padding: 16px 20px; }
+    .warn-callout p { font-size: 15px; color: #15263d; }
+    .num-list { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .num-list li { display: flex; gap: 14px; align-items: flex-start; font-size: 15px; line-height: 1.65; color: #2d3f55; }
+    .num-list li .num { background: var(--blue); color: #fff; font-size: 12px; font-weight: 800; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 2px; flex-shrink: 0; }
+    .math-box { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 14px; padding: 20px 24px; }
+    .math-box p { font-size: 15px; color: #2d3f55; }
+    .math-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+    .math-row:last-child { border-bottom: none; }
+    .math-row strong { color: var(--green); font-size: 16px; }
+    .cta-box { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 20px; padding: 32px; text-align: center; margin-top: 12px; }
+    .cta-box h3 { font-size: 22px; margin-bottom: 10px; }
+    .cta-box p { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    footer { padding: 24px 0 40px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { width: min(860px, calc(100% - 32px)); margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 13px; }
+    .foot-links { display: flex; gap: 20px; }
+    .foot-links a:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn">Start free</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<div class="article-wrap">
+  <span class="article-tag">CTR</span>
+  <h1>Amazon CTR Below 0.20%? Here's What to Change First</h1>
+  <div class="article-meta">5 min read &middot; Listing Optimization &middot; April 2026</div>
+
+  <div class="article-body">
+
+    <p>Click-through rate is the metric most Amazon sellers underinvest in. They watch ACOS, check CVR after a campaign change, monitor inventory — but CTR sits in the Business Report mostly unread. That is a mistake. CTR is the first thing every buyer evaluates, before they see your price, your bullets, or your reviews. If they do not click, none of the rest matters.</p>
+
+    <p>The 0.20% number matters because it represents roughly the average across Amazon search results. Below it, you are consistently losing to your category average. A competing listing with the same sessions, same price, and same reviews but a CTR of 0.40% gets twice the traffic from the same ad budget. You pay the same CPCs, they get double the clicks.</p>
+
+    <div class="callout">
+      <p><strong>CTR benchmarks by category:</strong> Electronics and tech accessories typically run 0.15 to 0.25%. Home and Kitchen averages 0.25 to 0.40%. Beauty and personal care can run 0.35 to 0.60% for strong hero images. Health and household varies widely from 0.15 to 0.45%. If you are consistently below 0.20% in any category, you have a fixable problem.</p>
+    </div>
+
+    <h2>What a buyer actually evaluates in under one second</h2>
+
+    <p>Eye-tracking studies on Amazon search pages show that buyers spend under 0.5 seconds on each search result before deciding to click or scroll. In that window, they evaluate three things in order: the main image, the price, and the number of reviews (or the star rating badge). That is it. Title bullets, A+ content, and secondary images come after the click.</p>
+
+    <p>This means that CTR optimization is almost entirely about the main image and, secondarily, the price. Review count matters but you cannot manufacture reviews quickly. Price can be adjusted but is constrained by margin. The image is the highest-leverage, fastest-moving variable you control.</p>
+
+    <h2>The three elements that drive CTR</h2>
+
+    <h3>1. Main image</h3>
+
+    <p>Amazon requires a pure white background (RGB 255/255/255), and the product must fill at least 85% of the frame. Those are the minimums. What actually drives clicks goes further.</p>
+
+    <p>High-CTR images in most categories share these characteristics: the product is photographed from an angle that shows its most recognizable or attractive feature, the lighting is soft and even with no harsh shadows, the product scale feels large in the frame, and there are no distracting props or text overlays. In competitive categories, many sellers also show the product in use or add lifestyle context in the first secondary image slot, which appears as a thumbnail in some search views.</p>
+
+    <p>The single most common CTR problem: hero images shot on slightly off-white backgrounds that photograph as beige or light gray. These look dull in search results next to pure white listings, and Amazon's algorithm also penalizes them in image quality scoring.</p>
+
+    <h3>2. Price positioning</h3>
+
+    <p>Price affects CTR directly because it appears in the search result. If your product is priced 30% above the category average for similar listings on the search page, some buyers click through but many do not bother. If you are priced competitively, price is not limiting your CTR. The way to check: search your top keywords and look at where your listing falls on the price spectrum visible in results.</p>
+
+    <h3>3. Review count and star rating</h3>
+
+    <p>Below 20 reviews, CTR suffers significantly in most categories. Below 10, it can be catastrophic. Above 50 reviews with a 4.2+ rating, review count stops being the CTR bottleneck. If you are between 10 and 50 reviews, enrolling in Amazon Vine or running a follow-up email sequence is worth doing, but it is slower than fixing the image. Do both in parallel.</p>
+
+    <h2>How to calculate what a CTR fix is worth in dollars</h2>
+
+    <p>This calculation makes the value of a new hero image concrete. Take the numbers from your Business Report.</p>
+
+    <div class="math-box">
+      <div class="math-row"><span>Current sessions per month</span><span>2,400</span></div>
+      <div class="math-row"><span>Current CTR</span><span>0.18%</span></div>
+      <div class="math-row"><span>Target CTR after fix</span><span>0.38%</span></div>
+      <div class="math-row"><span>Sessions at target CTR (same impressions)</span><span>5,067</span></div>
+      <div class="math-row"><span>Additional sessions per month</span><span>2,667</span></div>
+      <div class="math-row"><span>Your CVR (e.g., 12%)</span><span>12%</span></div>
+      <div class="math-row"><span>Additional orders per month</span><span>320</span></div>
+      <div class="math-row"><span>AOV</span><span>$24</span></div>
+      <div class="math-row"><span>Additional monthly revenue</span><strong>$7,680</strong></div>
+    </div>
+
+    <p>A professional product photography session costs $300 to $800. Even at the high end, you recover the cost in the first week if the CTR improvement is even half of what is modeled above. This is why CTR fix consistently shows the highest revenue impact in ASINInsight diagnoses.</p>
+
+    <h2>When to test vs. when to act</h2>
+
+    <p>Testing is the right approach when your CTR is between 0.20% and 0.35% and you are uncertain whether the image change will help or hurt. Run a Manage Your Experiments test (available for brand-registered sellers) for 4 weeks minimum.</p>
+
+    <p>When CTR is below 0.20%, skip the test. The data already tells you the image is not working. There is no benefit to running a controlled experiment to confirm what a 0.12% CTR already proves. Get a new hero image and run it. You can test refinements later.</p>
+
+    <div class="warn-callout">
+      <p>Do not change your price at the same time as your image. If both change and CTR moves, you will not know which change caused it. Make one change. Wait one week minimum. Then evaluate.</p>
+    </div>
+
+    <h2>The hero image brief that works</h2>
+
+    <p>When briefing a photographer or making changes yourself, use this checklist:</p>
+
+    <ul class="num-list">
+      <li><span class="num">1</span>Pure white background. Photograph in a studio or use a white sweep. Do not rely on post-processing to remove a colored background.</li>
+      <li><span class="num">2</span>Product filling 85 to 92% of the image frame. No dead space in corners.</li>
+      <li><span class="num">3</span>The most visually distinctive feature of the product faces the camera. For a cooking product, this might be the non-stick surface. For a supplement, the label design.</li>
+      <li><span class="num">4</span>Soft, even lighting. No hard shadows. No reflections off glossy surfaces that obscure product detail.</li>
+      <li><span class="num">5</span>No text overlays, badges, or lifestyle props in the main image. Those go in secondary images.</li>
+      <li><span class="num">6</span>Image resolution of at least 1500 x 1500 pixels, preferably 2000 x 2000, to enable Amazon's zoom feature.</li>
+    </ul>
+
+    <p>Deliver the image in JPEG format. Upload it, give it 7 days of real traffic, then pull the Business Report and compare CTR. If it moves, keep iterating. If it does not, look at the second variable (price) rather than making another image change.</p>
+
+    <div class="cta-box">
+      <h3>Check your CTR against the critical threshold</h3>
+      <p>Upload your Business Report and ASINInsight will flag CTR instantly if it is below 0.20%. You get the specific impact in monthly revenue and the exact fix to start with.</p>
+      <form action="/checkout/free" method="post">
+        <button type="submit" class="btn" style="min-height:44px;font-size:15px;padding:0 24px;">Check my CTR free</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="foot">
+    <div class="logo" style="font-size:15px;">ASIN<span style="color:var(--blue);">Insight</span></div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <div>&copy; 2026 ASINInsight</div>
+  </div>
+</footer>
+
+</body>
+</html>
