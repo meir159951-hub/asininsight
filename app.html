@@ -463,33 +463,22 @@
   </div>
 </div>
 
-<!-- Cookie bar -->
-<div id="cookieBar" style="display:none;" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <div style="max-width:680px;">
-    <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
-    <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy">Privacy Policy</a></span>
-  </div>
-  <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font:inherit;font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
-    <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
+<!-- Lead Capture Modal -->
+<div id="leadModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="leadModalTitle">
+  <div style="position:fixed;inset:0;background:rgba(21,38,61,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeLead()">
+    <div style="background:var(--paper);border-radius:20px;padding:36px 32px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(15,23,42,.3);position:relative;text-align:center;">
+      <button onclick="closeLead()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;padding:4px;" aria-label="Close">✕</button>
+      <div style="font-size:36px;margin-bottom:10px;">📬</div>
+      <h3 id="leadModalTitle" style="font:700 20px Georgia,serif;color:var(--ink);margin:0 0 10px;">Get this fix in your inbox</h3>
+      <p style="color:var(--muted);font-size:14px;line-height:1.5;margin:0 0 20px;">Enter your email and we'll send you the full action plan plus a 30-day listing audit checklist.</p>
+      <input type="email" id="leadEmail" class="modal-input" placeholder="your@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')submitLead()">
+      <button class="btn btn-primary btn-full" id="leadSubmitBtn" onclick="submitLead()" style="margin-top:12px;">Send me the action plan →</button>
+      <p id="leadStatus" style="font-size:13px;min-height:18px;margin:10px 0 0;"></p>
+      <button onclick="closeLead()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:10px;padding:4px;font-family:inherit;">Skip for now</button>
+      <p style="font-size:11px;color:#aab4c0;margin:8px 0 0;">No spam. Unsubscribe anytime. <a href="/privacy" style="color:#aab4c0;">Privacy</a></p>
+    </div>
   </div>
 </div>
-<script>
-  (function() {
-    var consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      document.getElementById('cookieBar').style.display = 'flex';
-    }
-  })();
-  function dismissCookie() {
-    localStorage.setItem('cookieConsent', 'accepted');
-    document.getElementById('cookieBar').style.display = 'none';
-  }
-  function declineCookie() {
-    localStorage.setItem('cookieConsent', 'declined');
-    document.getElementById('cookieBar').style.display = 'none';
-  }
-</script>
 
 <script>
 // ── State ──────────────────────────────────────────────────────────────────
@@ -724,6 +713,9 @@ function renderResults(data) {
   } else {
     cnEl.hidden = true;
   }
+
+  // Show lead capture modal 1.5 s after results load (only once per session)
+  showLeadCapture();
 }
 
 function renderActionSteps(text) {
@@ -759,6 +751,67 @@ function escHtml(str) {
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
+}
+
+// ── Lead capture ─────────────────────────────────────────────────────────────
+var _leadShown = false;
+
+function showLeadCapture() {
+  if (_leadShown) return;
+  if (sessionStorage.getItem('ai_lead_captured')) return;
+  _leadShown = true;
+  setTimeout(function () {
+    document.getElementById('leadEmail').value = '';
+    document.getElementById('leadStatus').textContent = '';
+    document.getElementById('leadStatus').style.color = '';
+    document.getElementById('leadSubmitBtn').disabled = false;
+    document.getElementById('leadModal').style.display = 'block';
+    setTimeout(function () { document.getElementById('leadEmail').focus(); }, 60);
+  }, 1500);
+}
+
+function closeLead() {
+  document.getElementById('leadModal').style.display = 'none';
+}
+
+async function submitLead() {
+  const email  = document.getElementById('leadEmail').value.trim();
+  const status = document.getElementById('leadStatus');
+  const btn    = document.getElementById('leadSubmitBtn');
+
+  if (!email || !email.includes('@') || !email.split('@')[1]?.includes('.')) {
+    status.textContent = 'Please enter a valid email address.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+
+  btn.disabled = true;
+  status.textContent = 'Saving…';
+  status.style.color = 'var(--muted)';
+
+  try {
+    const resp = await fetch('/api/capture-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'tool_results' }),
+    });
+    const data = await resp.json().catch(() => ({}));
+
+    if (data.ok) {
+      status.textContent = '✓ Done! Check your inbox in a few minutes.';
+      status.style.color = 'var(--green)';
+      sessionStorage.setItem('ai_lead_captured', '1');
+      setTimeout(closeLead, 2200);
+    } else {
+      status.textContent = data.error || 'Something went wrong. Please try again.';
+      status.style.color = 'var(--red)';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    status.textContent = 'Connection error. Please try again.';
+    status.style.color = 'var(--red)';
+    btn.disabled = false;
+  }
 }
 
 // ── Reset ────────────────────────────────────────────────────────────────────
@@ -838,9 +891,9 @@ async function sendReport() {
   }
 }
 
-// Close modal on Escape key
+// Close modals on Escape key
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeEmailModal();
+  if (e.key === 'Escape') { closeEmailModal(); closeLead(); }
 });
 
 // ── URL param notices ─────────────────────────────────────────────────────────
@@ -902,6 +955,7 @@ document.addEventListener('keydown', e => {
   },true);
 })();
 </script>
+<script src="/static/analytics.js"></script>
 <script src="/static/cookie-consent.js"></script>
 </body>
 </html>

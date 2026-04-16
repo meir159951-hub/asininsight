@@ -72,6 +72,10 @@ PADDLE_CLIENT_TOKEN   = os.getenv("PADDLE_CLIENT_TOKEN", "")
 # Owner email — checkout is blocked for this address to prevent accidental self-charges
 OWNER_EMAIL = os.getenv("OWNER_EMAIL", "").lower().strip()
 
+# Google Analytics 4 measurement ID (e.g. G-XXXXXXXXXX).
+# Set GA_MEASUREMENT_ID in Railway env vars. Leave blank to disable analytics.
+GA_MEASUREMENT_ID = os.getenv("GA_MEASUREMENT_ID", "")
+
 AMAZON_CLIENT_ID     = os.getenv("AMAZON_CLIENT_ID", "")
 AMAZON_CLIENT_SECRET = os.getenv("AMAZON_CLIENT_SECRET", "")
 AMAZON_REDIRECT_URI  = os.getenv("AMAZON_REDIRECT_URI", "")
@@ -176,6 +180,21 @@ def _init_db():
                     plan            TEXT NOT NULL,
                     subscription_id TEXT NOT NULL DEFAULT '',
                     updated_at      REAL NOT NULL
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS email_leads (
+                    id         SERIAL PRIMARY KEY,
+                    email      TEXT NOT NULL,
+                    source     TEXT NOT NULL DEFAULT 'unknown',
+                    created_at REAL NOT NULL
+                )
+            """ if DATABASE_URL else """
+                CREATE TABLE IF NOT EXISTS email_leads (
+                    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email      TEXT NOT NULL,
+                    source     TEXT NOT NULL DEFAULT 'unknown',
+                    created_at REAL NOT NULL
                 )
             """)
         log.info("Database initialised")
@@ -393,11 +412,11 @@ def add_security_headers(response):
     # 'unsafe-inline' with per-file hashes or a nonce-based approach.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.paddle.com; "
+        "script-src 'self' 'unsafe-inline' https://cdn.paddle.com https://www.googletagmanager.com https://www.google-analytics.com; "
         "style-src 'self' 'unsafe-inline'; "
         "img-src 'self' data: https:; "
         "font-src 'self' data:; "
-        "connect-src 'self' https://sandbox-api.paddle.com https://api.paddle.com; "
+        "connect-src 'self' https://sandbox-api.paddle.com https://api.paddle.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; "
         "frame-src https://sandbox-buy.paddle.com https://buy.paddle.com; "
         "object-src 'none'; "
         "base-uri 'self'; "
@@ -585,6 +604,67 @@ def paddle_config():
         "ready":        bool(PADDLE_CLIENT_TOKEN and PADDLE_PRICE_PRO and PADDLE_PRICE_AGENCY),
         "owner_email":  OWNER_EMAIL,   # frontend blocks checkout for this address
     })
+
+
+# ── Site config (public, non-sensitive) ───────────────────────────────────
+
+@app.route("/api/site-config")
+def site_config():
+    """Public config used by frontend for GA4 and other non-sensitive settings."""
+    return jsonify({
+        "ga_id": GA_MEASUREMENT_ID,
+    })
+
+
+# ── Email lead capture ─────────────────────────────────────────────────────
+
+# Separate rate limit for lead capture: 5 per hour per IP
+_lead_rate: dict[str, list[float]] = {}
+LEAD_RATE_LIMIT  = 5
+LEAD_RATE_WINDOW = 3600
+
+def _check_lead_rate(ip: str) -> bool:
+    now = time.time()
+    window_start = now - LEAD_RATE_WINDOW
+    with _rate_lock:
+        hits = [t for t in _lead_rate.get(ip, []) if t > window_start]
+        if len(hits) >= LEAD_RATE_LIMIT:
+            return False
+        hits.append(now)
+        _lead_rate[ip] = hits
+    return True
+
+
+@app.route("/api/capture-email", methods=["POST"])
+def capture_email():
+    if not _csrf_valid(request):
+        return jsonify({"error": "Invalid request"}), 403
+
+    ip = _client_ip(request)
+    if not _check_lead_rate(ip):
+        return jsonify({"error": "Too many requests. Please try again later."}), 429
+
+    data  = request.get_json(silent=True) or {}
+    email = str(data.get("email", "")).strip().lower()
+    source = str(data.get("source", "unknown"))[:64]
+
+    # Basic email validation
+    if not email or "@" not in email or "." not in email.split("@")[-1]:
+        return jsonify({"error": "Please enter a valid email address."}), 400
+    if len(email) > 254:
+        return jsonify({"error": "Email address too long."}), 400
+
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"INSERT INTO email_leads (email, source, created_at) VALUES ({ph}, {ph}, {ph})",
+                (email, source, time.time())
+            )
+        log.info("Lead captured: %s (source=%s)", email, source)
+    except Exception as e:
+        log.warning("Failed to save lead email: %s", e)
+        # Don't surface DB errors to the user — just ack
+    return jsonify({"ok": True})
 
 
 # ── Free plan ──────────────────────────────────────────────────────────────

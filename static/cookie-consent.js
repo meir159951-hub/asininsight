@@ -32,7 +32,7 @@
       '<strong style="font-size:14px;font-weight:700;">We use essential cookies only.</strong> ',
       '<span style="color:rgba(255,255,255,.78);">',
         'A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. ',
-        'EU visitors: GDPR applies. California residents: CCPA applies. Other visitors: only essential cookies are used. ',
+        'EU visitors: GDPR applies. US residents: CCPA applies. Other visitors: only essential cookies are used. ',
         '<a href="/privacy" style="color:rgba(255,255,255,.85);text-decoration:underline;">Privacy Policy</a>',
       '</span>',
     '</div>',
@@ -54,7 +54,10 @@
     setTimeout(function(){ if (bar.parentNode) bar.parentNode.removeChild(bar); }, 280);
   }
 
-  bar.querySelector('#ai_cookie_accept').addEventListener('click', function(){ dismiss('accepted'); });
+  bar.querySelector('#ai_cookie_accept').addEventListener('click', function(){
+    dismiss('accepted');
+    try { document.dispatchEvent(new CustomEvent('ai:cookieAccepted')); } catch(e){}
+  });
   bar.querySelector('#ai_cookie_decline').addEventListener('click', function(){ dismiss('necessary'); });
 
   function mount() {
