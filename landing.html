@@ -309,78 +309,8 @@
   </div>
 </section>
 
-<!-- Example diagnosis -->
-<section class="section">
-  <div class="wrap">
-    <p class="section-label">Example output</p>
-    <h2>This is what you get</h2>
-    <p class="section-sub">Real diagnosis format. Your numbers, your listing. A clear problem and exactly what to fix.</p>
-
-    <div style="margin-top:28px; max-width:560px;">
-      <div class="card">
-        <div class="card-bar">
-          <span>Diagnosis · ASIN B08EXAMPLE</span>
-          <strong>CTR Issue Detected</strong>
-        </div>
-        <div class="card-body">
-          <div class="score-row">
-            <span class="score-num">41</span>
-            <span class="score-denom">/ 100</span>
-            <span class="sev-badge sev-critical">Critical</span>
-          </div>
-
-          <div class="ibox">
-            <div class="ibox-label">Why this listing is losing clicks</div>
-            <p>CTR of 0.14% is below the 0.20% critical floor. Competitors are winning clicks on the same search page without spending more. A buyer spends under 0.5 seconds scanning each result. The hero image is the only thing they evaluate before clicking or scrolling past.</p>
-          </div>
-
-          <div class="impact-box">
-            <div>
-              <div class="impact-label">Estimated monthly impact</div>
-              <p style="font-size:13px;color:var(--green);margin-top:3px;">Fixing CTR to 0.40% → ~480 more sessions → ~$1,920 in additional revenue</p>
-            </div>
-            <div class="impact-amount">$1,920</div>
-          </div>
-
-          <div class="ibox">
-            <div class="ibox-label">What to do now</div>
-            <p>1. Reshoot hero image on pure white (RGB 255/255/255), product filling 85% of frame. No text overlays.<br>2. Study your top 3 competitors' thumbnails: note the angle, lighting, and scale.<br>3. Run the new image for exactly 7 days before changing anything else.</p>
-          </div>
-
-          <div class="conf-row">High confidence · 650 sessions · 82 reviews</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- How it works -->
-<section class="section">
-  <div class="wrap">
-    <p class="section-label">How it works</p>
-    <h2>From Business Report to action plan in 30 seconds.</h2>
-    <div class="steps">
-      <div class="step-card">
-        <div class="step-num">Step 1</div>
-        <h3>Export your Business Report</h3>
-        <p>In Seller Central: <strong>Reports → Business Reports → Detail Page Sales and Traffic by Child Item.</strong> Set date range to last 30 days. Download CSV.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">Step 2</div>
-        <h3>Upload the CSV</h3>
-        <p>Drop it in the tool. ASINInsight reads every column Amazon exports (CTR, CVR, ACOS, inventory, reviews, Buy Box) and runs the diagnosis automatically.</p>
-      </div>
-      <div class="step-card">
-        <div class="step-num">Step 3</div>
-        <h3>Act on the output</h3>
-        <p>You get one primary issue with its severity level, the specific reason it's hurting you, the estimated revenue cost, and numbered steps to fix it.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Animated Demo -->
-<section class="section" style="padding-bottom:16px;">
+<!-- Animated Demo — moved here so it's the first thing seen after hero -->
+<section class="section" style="padding-top:8px;padding-bottom:16px;">
   <div class="wrap">
     <p class="section-label">See it in action</p>
     <h2>Watch it diagnose a real listing.</h2>
@@ -526,6 +456,76 @@ function resetDemo() {
   document.getElementById('demoStep1').style.display='block';
 }
 </script>
+
+<!-- Example diagnosis -->
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">Example output</p>
+    <h2>This is what you get</h2>
+    <p class="section-sub">Real diagnosis format. Your numbers, your listing. A clear problem and exactly what to fix.</p>
+
+    <div style="margin-top:28px; max-width:560px;">
+      <div class="card">
+        <div class="card-bar">
+          <span>Diagnosis · ASIN B08EXAMPLE</span>
+          <strong>CTR Issue Detected</strong>
+        </div>
+        <div class="card-body">
+          <div class="score-row">
+            <span class="score-num">41</span>
+            <span class="score-denom">/ 100</span>
+            <span class="sev-badge sev-critical">Critical</span>
+          </div>
+
+          <div class="ibox">
+            <div class="ibox-label">Why this listing is losing clicks</div>
+            <p>CTR of 0.14% is below the 0.20% critical floor. Competitors are winning clicks on the same search page without spending more. A buyer spends under 0.5 seconds scanning each result. The hero image is the only thing they evaluate before clicking or scrolling past.</p>
+          </div>
+
+          <div class="impact-box">
+            <div>
+              <div class="impact-label">Estimated monthly impact</div>
+              <p style="font-size:13px;color:var(--green);margin-top:3px;">Fixing CTR to 0.40% → ~480 more sessions → ~$1,920 in additional revenue</p>
+            </div>
+            <div class="impact-amount">$1,920</div>
+          </div>
+
+          <div class="ibox">
+            <div class="ibox-label">What to do now</div>
+            <p>1. Reshoot hero image on pure white (RGB 255/255/255), product filling 85% of frame. No text overlays.<br>2. Study your top 3 competitors' thumbnails: note the angle, lighting, and scale.<br>3. Run the new image for exactly 7 days before changing anything else.</p>
+          </div>
+
+          <div class="conf-row">High confidence · 650 sessions · 82 reviews</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">How it works</p>
+    <h2>From Business Report to action plan in 30 seconds.</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">Step 1</div>
+        <h3>Export your Business Report</h3>
+        <p>In Seller Central: <strong>Reports → Business Reports → Detail Page Sales and Traffic by Child Item.</strong> Set date range to last 30 days. Download CSV.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Step 2</div>
+        <h3>Upload the CSV</h3>
+        <p>Drop it in the tool. ASINInsight reads every column Amazon exports (CTR, CVR, ACOS, inventory, reviews, Buy Box) and runs the diagnosis automatically.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">Step 3</div>
+        <h3>Act on the output</h3>
+        <p>You get one primary issue with its severity level, the specific reason it's hurting you, the estimated revenue cost, and numbered steps to fix it.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Value props -->
 <section class="section">
