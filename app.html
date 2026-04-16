@@ -253,6 +253,27 @@
 
     /* ── Page notice bar ── */
     .notice-bar { padding: 10px 24px; font-size: 13px; font-weight: 600; text-align: center; }
+
+    /* ── Print / PDF export ── */
+    @media print {
+      .topnav, .progress-bar, .result-actions, #emailModal, #leadModal,
+      #pageNotice, .btn, footer, [id*="cookie"], [id*="Cookie"] { display: none !important; }
+      body { background: #fff; color: #000; font-size: 13px; }
+      .shell { max-width: 100%; padding: 0; }
+      .panel { border: none; border-radius: 0; box-shadow: none; padding: 0; }
+      .result-card { break-inside: avoid; border: 1px solid #ccc; }
+      .score-circle { border-width: 2px; }
+      .print-header { display: block !important; }
+    }
+    .print-header {
+      display: none;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid #ddd4c6;
+    }
+    .print-header .logo { font: 700 20px Georgia, serif; color: #15263d; }
+    .print-header .logo span { color: #1f5fa8; }
+    .print-header .print-date { font-size: 12px; color: #617184; margin-top: 4px; }
     .notice-bar.notice-ok   { background: var(--green-soft); color: var(--green); border-bottom: 1px solid #bbf7d0; }
     .notice-bar.notice-info { background: var(--blue-soft);  color: var(--blue);  border-bottom: 1px solid #bfdbfe; }
     .notice-bar.notice-err  { background: var(--red-soft);   color: var(--red);   border-bottom: 1px solid #fecaca; }
@@ -385,6 +406,12 @@
   <!-- STATE: Results -->
   <div id="stateResults" class="panel" hidden>
 
+    <!-- Print header (hidden on screen, visible when printing) -->
+    <div class="print-header">
+      <div class="logo">ASIN<span>Insight</span> — Listing Diagnosis</div>
+      <div class="print-date" id="printDate"></div>
+    </div>
+
     <!-- Context line -->
     <p class="results-context" id="resultsContext" hidden>Here's what's holding back this listing. The highest-leverage fix is below.</p>
 
@@ -439,6 +466,9 @@
     <div class="result-actions">
       <button class="btn btn-ghost btn-full" onclick="showEmailModal()">
         Email this report to me →
+      </button>
+      <button class="btn btn-ghost btn-full" onclick="exportPDF()">
+        Save as PDF →
       </button>
       <button class="btn btn-ghost btn-full" onclick="resetToUpload()">
         Diagnose another listing
@@ -760,6 +790,14 @@ function escHtml(str) {
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
+}
+
+// ── PDF export ───────────────────────────────────────────────────────────────
+function exportPDF() {
+  // Set the print date header
+  var d = document.getElementById('printDate');
+  if (d) d.textContent = 'Generated ' + new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  window.print();
 }
 
 // ── Lead capture ─────────────────────────────────────────────────────────────

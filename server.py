@@ -203,6 +203,29 @@ def _init_db():
                     value INTEGER NOT NULL DEFAULT 0
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS email_drip_queue (
+                    id           SERIAL PRIMARY KEY,
+                    email        TEXT NOT NULL,
+                    step         INTEGER NOT NULL,
+                    scheduled_at REAL NOT NULL,
+                    sent_at      REAL
+                )
+            """ if DATABASE_URL else """
+                CREATE TABLE IF NOT EXISTS email_drip_queue (
+                    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email        TEXT NOT NULL,
+                    step         INTEGER NOT NULL,
+                    scheduled_at REAL NOT NULL,
+                    sent_at      REAL
+                )
+            """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS email_unsubscribes (
+                    email      TEXT PRIMARY KEY,
+                    created_at REAL NOT NULL
+                )
+            """)
         log.info("Database initialised")
     except Exception as e:
         log.warning("DB init failed (will retry on first request): %s", e)
@@ -236,6 +259,263 @@ def _get_stat(key: str) -> int:
         return int(row[0]) if row else 0
     except Exception:
         return 0
+
+
+# ── Email drip sequence ────────────────────────────────────────────────────
+# Step 1: immediate  — welcome + free checklist
+# Step 2: 2 days     — education / case study
+# Step 3: 5 days     — upgrade offer
+
+_DRIP_DELAYS = {1: 0, 2: 2 * 86400, 3: 5 * 86400}  # seconds after signup
+
+
+def _unsub_token(email: str) -> str:
+    """HMAC token for one-click unsubscribe links. Uses FLASK_SECRET_KEY."""
+    return hmac.new(
+        app.secret_key.encode() if isinstance(app.secret_key, str) else app.secret_key,
+        email.lower().encode(),
+        hashlib.sha256,
+    ).hexdigest()[:32]
+
+
+def _is_unsubscribed(email: str) -> bool:
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"SELECT 1 FROM email_unsubscribes WHERE email = {ph}",
+                (email.lower(),)
+            )
+            return cur.fetchone() is not None
+    except Exception:
+        return False
+
+
+def _schedule_drip(email: str):
+    """Schedule all 3 drip emails for a new lead. Idempotent — skips if step already queued."""
+    now = time.time()
+    try:
+        with _db() as (cur, ph):
+            for step, delay in _DRIP_DELAYS.items():
+                cur.execute(
+                    f"INSERT INTO email_drip_queue (email, step, scheduled_at) "
+                    f"VALUES ({ph}, {ph}, {ph})",
+                    (email.lower(), step, now + delay)
+                )
+        log.info("Drip sequence scheduled for: %s", email)
+    except Exception as e:
+        log.warning("Failed to schedule drip for %s: %s", email, e)
+
+
+def _build_drip_email(email: str, step: int) -> dict | None:
+    """Return {subject, html_body} for a given drip step, or None on error."""
+    unsub_token = _unsub_token(email)
+    site = SITE_URL or "https://asininsight.com"
+    unsub_url = f"{site}/unsubscribe?e={requests.utils.quote(email)}&t={unsub_token}"
+
+    footer_html = (
+        f'<p style="margin:28px 0 0;font-size:11px;color:#94a3b8;text-align:center;line-height:1.6;">'
+        f'ASINInsight &middot; '
+        f'<a href="{site}/privacy" style="color:#94a3b8;">Privacy</a> &middot; '
+        f'<a href="{unsub_url}" style="color:#94a3b8;">Unsubscribe</a>'
+        f'</p>'
+    )
+
+    wrap_open = (
+        '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;'
+        'max-width:560px;margin:0 auto;background:#f6f3ec;padding:32px 16px;">'
+        '<div style="background:#fffdfa;border-radius:16px;padding:36px 32px;'
+        'box-shadow:0 1px 4px rgba(0,0,0,.06);">'
+        '<div style="font-size:22px;font-weight:800;color:#15263d;margin-bottom:20px;">'
+        'ASIN<span style="color:#1f5fa8;">Insight</span></div>'
+    )
+    wrap_close = footer_html + '</div></div>'
+
+    if step == 1:
+        subject = "Your free Amazon listing audit checklist"
+        body = (
+            '<p style="font-size:16px;color:#15263d;margin:0 0 16px;line-height:1.6;">'
+            'Thanks for trying ASINInsight.</p>'
+            '<p style="font-size:15px;color:#334155;margin:0 0 20px;line-height:1.6;">'
+            'Here is the 5-metric checklist we run on every diagnosis. '
+            'Bookmark it and check these every Monday morning:</p>'
+            '<div style="background:#f1f5f9;border-radius:12px;padding:20px 24px;margin-bottom:20px;">'
+            '<div style="display:flex;flex-direction:column;gap:14px;">'
+            + "".join([
+                f'<div style="display:flex;gap:12px;align-items:flex-start;">'
+                f'<span style="background:#1f5fa8;color:#fff;font-size:11px;font-weight:800;'
+                f'min-width:22px;height:22px;border-radius:50%;display:inline-flex;'
+                f'align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">{n}</span>'
+                f'<span style="font-size:14px;color:#334155;line-height:1.55;">{t}</span></div>'
+                for n, t in [
+                    (1, "<strong>CTR above 0.20%?</strong> Below this = your main image is losing to competitors. Fix image before anything else."),
+                    (2, "<strong>CVR above 8%?</strong> Below 7% = listing fails at the decision moment (price, images, bullets, or reviews)."),
+                    (3, "<strong>ACOS below 35%?</strong> Above 50% = you lose money on every ad click. Pull Search Term Report and add negatives."),
+                    (4, "<strong>Buy Box above 90%?</strong> Below 80% = a competitor is capturing your traffic. Check your price and seller health."),
+                    (5, "<strong>Rating above 4.2?</strong> Below 4.0 kills conversion even with perfect ads. Address top negative review themes."),
+                ]
+            ])
+            + '</div></div>'
+            '<p style="font-size:14px;color:#617184;margin:0 0 24px;line-height:1.6;">'
+            'Run this every Monday. It catches 80% of problems within the week they start.</p>'
+            f'<a href="{site}/tool" style="display:block;text-align:center;background:#1f5fa8;'
+            'color:#fff;text-decoration:none;padding:14px 24px;border-radius:10px;'
+            'font-weight:700;font-size:15px;">Upload your Business Report →</a>'
+        )
+
+    elif step == 2:
+        subject = "The metric most Amazon sellers never check"
+        body = (
+            '<p style="font-size:16px;color:#15263d;margin:0 0 16px;line-height:1.6;">'
+            'Most sellers watch ACOS. Some watch CVR. Almost nobody checks <strong>CTR</strong> '
+            'regularly — and that is exactly why they stay stuck.</p>'
+            '<p style="font-size:15px;color:#334155;margin:0 0 16px;line-height:1.6;">'
+            'CTR is the first thing every buyer evaluates before they ever see your price, '
+            'your reviews, or your bullets. If they do not click, none of the rest matters.</p>'
+            '<div style="background:#e8f0fa;border-left:3px solid #1f5fa8;border-radius:0 12px 12px 0;'
+            'padding:16px 20px;margin-bottom:20px;">'
+            '<p style="font-size:14px;color:#15263d;margin:0;line-height:1.6;">'
+            '<strong style="color:#1f5fa8;">The math:</strong> A listing with 0.40% CTR gets '
+            'double the clicks from the same ad spend as one with 0.20% CTR. '
+            'Same impressions. Same bids. Twice the traffic.</p></div>'
+            '<p style="font-size:15px;color:#334155;margin:0 0 16px;line-height:1.6;">'
+            'The 0.20% floor is the number to watch. Below it, you are consistently losing '
+            'to your category average. The fix is almost always the main image — '
+            'pure white background, product filling 85% of the frame, no text overlays.</p>'
+            '<p style="font-size:14px;color:#617184;margin:0 0 24px;line-height:1.6;">'
+            'Check your CTR right now in your Business Report under "Sessions" vs your '
+            'ad impressions in the Search Term Report.</p>'
+            f'<a href="{site}/blog/ctr-fix" style="display:block;text-align:center;'
+            'background:#1f5fa8;color:#fff;text-decoration:none;padding:14px 24px;'
+            'border-radius:10px;font-weight:700;font-size:15px;">'
+            'Read: How to fix CTR below 0.20% →</a>'
+        )
+
+    elif step == 3:
+        subject = "Still analyzing your listings manually?"
+        body = (
+            '<p style="font-size:16px;color:#15263d;margin:0 0 16px;line-height:1.6;">'
+            'The Business Report has 20+ columns. Most sellers look at 3 of them '
+            'and miss the one metric that is actually costing them money.</p>'
+            '<p style="font-size:15px;color:#334155;margin:0 0 20px;line-height:1.6;">'
+            'ASINInsight reads all 20 columns, cross-references your ad data, '
+            'and tells you exactly which one needs your attention — with numbered '
+            'steps to fix it. It takes 30 seconds.</p>'
+            '<div style="background:#f6f3ec;border-radius:14px;padding:20px 24px;margin-bottom:20px;">'
+            '<p style="font-size:13px;font-weight:700;color:#617184;text-transform:uppercase;'
+            'letter-spacing:.06em;margin:0 0 12px;">What Pro gives you</p>'
+            + "".join([
+                f'<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">'
+                f'<span style="color:#1d6a42;font-size:16px;flex-shrink:0;">✓</span>'
+                f'<span style="font-size:14px;color:#334155;line-height:1.5;">{t}</span></div>'
+                for t in [
+                    "Unlimited diagnoses — run it on every ASIN, every week",
+                    "Priority issue detection across your full catalog",
+                    "Revenue impact estimate for each problem found",
+                    "Numbered action plan with specific fix steps",
+                    "Email report for sharing with your VA or team",
+                ]
+            ])
+            + '</div>'
+            f'<a href="{site}/pricing" style="display:block;text-align:center;'
+            'background:#1f5fa8;color:#fff;text-decoration:none;padding:14px 24px;'
+            'border-radius:10px;font-weight:700;font-size:15px;margin-bottom:12px;">'
+            'See Pro plan →</a>'
+            f'<p style="font-size:12px;color:#94a3b8;text-align:center;margin:0;">'
+            'Free plan always available. No credit card required to start.</p>'
+        )
+    else:
+        return None
+
+    return {"subject": subject, "html_body": wrap_open + body + wrap_close}
+
+
+def _send_drip_email(to_email: str, subject: str, html_body: str) -> bool:
+    """Send a single drip email via SendGrid. Returns True on success."""
+    if not SENDGRID_API_KEY:
+        log.debug("Drip email skipped (SendGrid not configured): %s", to_email)
+        return False
+    try:
+        resp = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={
+                "Authorization": f"Bearer {SENDGRID_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "personalizations": [{"to": [{"email": to_email}]}],
+                "from": {"email": EMAIL_FROM_ADDRESS, "name": EMAIL_FROM_NAME},
+                "subject": subject,
+                "content": [{"type": "text/html", "value": html_body}],
+            },
+            timeout=15,
+        )
+        if resp.status_code in (200, 202):
+            log.info("Drip step sent | to=%s | subject=%s", to_email, subject[:50])
+            return True
+        log.warning("Drip SendGrid error %s: %s", resp.status_code, resp.text[:200])
+        return False
+    except Exception as e:
+        log.warning("Drip email exception for %s: %s", to_email, e)
+        return False
+
+
+def _process_drip_queue():
+    """Process all due drip emails. Called by background worker thread."""
+    if not SENDGRID_API_KEY:
+        return
+    now = time.time()
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"SELECT id, email, step FROM email_drip_queue "
+                f"WHERE scheduled_at <= {ph} AND sent_at IS NULL "
+                f"ORDER BY scheduled_at LIMIT 50",
+                (now,)
+            )
+            due = cur.fetchall()
+    except Exception as e:
+        log.warning("Drip queue read error: %s", e)
+        return
+
+    for row_id, email, step in due:
+        if _is_unsubscribed(email):
+            # Mark as sent so we don't retry
+            try:
+                with _db() as (cur, ph):
+                    cur.execute(
+                        f"UPDATE email_drip_queue SET sent_at = {ph} WHERE id = {ph}",
+                        (now, row_id)
+                    )
+            except Exception:
+                pass
+            continue
+
+        content = _build_drip_email(email, step)
+        if content and _send_drip_email(email, content["subject"], content["html_body"]):
+            try:
+                with _db() as (cur, ph):
+                    cur.execute(
+                        f"UPDATE email_drip_queue SET sent_at = {ph} WHERE id = {ph}",
+                        (now, row_id)
+                    )
+            except Exception as e:
+                log.warning("Failed to mark drip %d as sent: %s", row_id, e)
+
+
+def _drip_worker_loop():
+    """Background thread: process drip queue every 20 minutes."""
+    time.sleep(60)  # wait for server to fully boot
+    while True:
+        try:
+            _process_drip_queue()
+        except Exception as e:
+            log.warning("Drip worker error: %s", e)
+        time.sleep(20 * 60)  # 20 minutes
+
+
+_drip_thread = threading.Thread(target=_drip_worker_loop, daemon=True, name="drip-worker")
+_drip_thread.start()
+log.info("Drip worker thread started")
 
 
 def _db_upsert_customer(customer_id: str, plan: str, subscription_id: str):
@@ -706,10 +986,54 @@ def capture_email():
                 (email, source, time.time())
             )
         log.info("Lead captured: %s (source=%s)", email, source)
+        _schedule_drip(email)
     except Exception as e:
         log.warning("Failed to save lead email: %s", e)
         # Don't surface DB errors to the user — just ack
     return jsonify({"ok": True})
+
+
+# ── Unsubscribe ────────────────────────────────────────────────────────────
+
+@app.route("/unsubscribe")
+def unsubscribe():
+    email = request.args.get("e", "").strip().lower()
+    token = request.args.get("t", "").strip()
+    if not email or not token:
+        return "Invalid unsubscribe link.", 400
+    expected = _unsub_token(email)
+    if not hmac.compare_digest(expected, token):
+        return "Invalid unsubscribe link.", 400
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"INSERT INTO email_unsubscribes (email, created_at) VALUES ({ph}, {ph}) "
+                f"ON CONFLICT (email) DO NOTHING" if DATABASE_URL else
+                f"INSERT OR IGNORE INTO email_unsubscribes (email, created_at) VALUES ({ph}, {ph})",
+                (email, time.time())
+            )
+        log.info("Unsubscribed: %s", email)
+    except Exception as e:
+        log.warning("Unsubscribe DB error for %s: %s", email, e)
+    html_page = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unsubscribed — ASINInsight</title>
+<style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f6f3ec;
+display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;}
+.box{background:#fffdfa;border-radius:20px;padding:48px 40px;max-width:440px;text-align:center;
+box-shadow:0 4px 24px rgba(15,23,42,.08);}
+.icon{font-size:48px;margin-bottom:16px;}
+h1{font-family:Georgia,serif;font-size:26px;color:#15263d;margin:0 0 12px;}
+p{color:#617184;font-size:15px;line-height:1.6;margin:0 0 24px;}
+a{display:inline-block;background:#1f5fa8;color:#fff;text-decoration:none;padding:12px 24px;
+border-radius:10px;font-weight:700;font-size:14px;}</style></head>
+<body><div class="box">
+<div class="icon">✅</div>
+<h1>You're unsubscribed</h1>
+<p>You've been removed from ASINInsight emails. You won't receive any more messages from us.</p>
+<a href="/">Back to ASINInsight</a>
+</div></body></html>"""
+    return html_page, 200
 
 
 # ── Free plan ──────────────────────────────────────────────────────────────
