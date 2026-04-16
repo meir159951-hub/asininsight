@@ -126,7 +126,7 @@
     <div class="nav-links">
       <a href="/" class="nav-link">Home</a>
       <form action="/checkout/free" method="post" style="display:inline;">
-        <button type="submit" class="btn btn-primary" style="min-height:40px;padding:0 18px;font-size:14px;">Start free — no card</button>
+        <button type="submit" class="btn btn-primary" style="min-height:40px;padding:0 18px;font-size:14px;">Start free, no card</button>
       </form>
     </div>
   </div>
@@ -140,7 +140,7 @@
 <section class="hero">
   <div class="wrap">
     <h1>Start free. Pay only when it's worth it.</h1>
-    <p>Run your first diagnosis at no cost. Upgrade when the tool earns more than it costs — which usually happens on the first fix.</p>
+    <p>Run your first diagnosis at no cost. Upgrade when the tool earns more than it costs. Most sellers see payback on their first fix.</p>
   </div>
 </section>
 
@@ -171,14 +171,14 @@
         <div class="price">$49 <small>/ mo</small></div>
         <ul>
           <li>Unlimited diagnoses</li>
-          <li>Full action plan — all steps</li>
+          <li>Full action plan, all steps</li>
           <li>Email reports</li>
           <li>Connect Amazon account</li>
           <li>Revenue impact estimates</li>
         </ul>
         <button class="btn btn-primary" id="proBtn" type="button" style="gap:8px;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          Get Pro — $49/mo
+          Get Pro $49/mo
         </button>
         <div class="checkout-err" id="proErr">Checkout failed. Please try again or contact support.</div>
         <p class="guarantee">7-day money-back guarantee · Cancel anytime</p>
@@ -201,7 +201,7 @@
         </ul>
         <button class="btn btn-secondary" id="agencyBtn" type="button" style="gap:8px;">
           <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          Get Agency — $199/mo
+          Get Agency $199/mo
         </button>
         <div class="checkout-err" id="agencyErr">Checkout failed. Please try again or contact support.</div>
         <p class="guarantee">7-day money-back guarantee · Cancel anytime</p>
@@ -263,9 +263,9 @@
       <div class="value-row"><span>Seller spending $500/mo on PPC at 75% ACOS</span><span class="value-amount">-$350/mo wasted</span></div>
       <div class="value-row"><span>Cutting ACOS to 30% by pausing bad keywords (takes 1 hour)</span><span class="value-amount" style="color:var(--green);">+$225/mo saved</span></div>
       <div class="value-row"><span>CTR fix: new hero image recovers 300 sessions/mo at $4 AOV</span><span class="value-amount" style="color:var(--green);">+$180/mo revenue</span></div>
-      <div class="value-row"><span style="color:var(--green);">Total monthly recovery — cost of Pro</span><span class="value-amount" style="color:var(--green);">$405 − $49 = $356 net gain</span></div>
+      <div class="value-row"><span style="color:var(--green);">Total monthly recovery vs. cost of Pro</span><span class="value-amount" style="color:var(--green);">$405 − $49 = $356 net gain</span></div>
     </div>
-    <p style="font-size:13px;color:var(--muted);margin-top:12px;">These are real numbers from the sample diagnoses — not projections. Your actual numbers will differ, but the principle is the same: <strong>one fix identified by ASINInsight typically covers months of subscription.</strong></p>
+    <p style="font-size:13px;color:var(--muted);margin-top:12px;">These are real numbers from the sample diagnoses, not projections. Your actual numbers will differ, but the principle is the same: <strong>one fix identified by ASINInsight typically covers months of subscription.</strong></p>
   </div>
 </section>
 
@@ -278,7 +278,7 @@
       <div class="pfaq-item">
         <div class="pfaq-q" onclick="togglePfaq(this)">Can I cancel any time?
           <svg class="pfaq-chevron" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="pfaq-a">Yes — cancel from your account settings or by emailing support@asininsight.com. No questions asked. If you cancel within 7 days of your first charge and haven't recovered the cost, we'll refund it.</div>
+        <div class="pfaq-a">Yes. Cancel from your account settings or by emailing support@asininsight.com. No questions asked. If you cancel within 7 days of your first charge and haven't recovered the cost, we'll refund it.</div>
       </div>
       <div class="pfaq-item">
         <div class="pfaq-q" onclick="togglePfaq(this)">What counts as one "diagnosis"?
@@ -379,18 +379,18 @@
         closeCallback: function () {
           // User closed overlay without completing — reset button
           btn.disabled    = false;
-          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro $49/mo →' : 'Get Agency $199/mo →';
         },
         errorCallback: function (err) {
           btn.disabled    = false;
-          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+          btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro $49/mo →' : 'Get Agency $199/mo →';
           errEl.style.display = 'block';
           console.error('Paddle checkout error:', err);
         },
       });
     } catch (e) {
       btn.disabled    = false;
-      btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro — $49/mo →' : 'Get Agency — $199/mo →';
+      btn.textContent = btn === document.getElementById('proBtn') ? 'Get Pro $49/mo →' : 'Get Agency $199/mo →';
       errEl.style.display = 'block';
     }
   }

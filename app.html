@@ -291,7 +291,7 @@
   <!-- STATE: Upload -->
   <div id="stateUpload" class="panel">
 
-    <p class="panel-intro">Upload your <strong>Seller Central Business Report</strong> and get the exact metric holding back your listing — with numbered steps to fix it. Takes under a minute.</p>
+    <p class="panel-intro">Upload your <strong>Seller Central Business Report</strong> and get the exact metric holding back your listing, with numbered steps to fix it. Takes under a minute.</p>
 
     <div
       class="upload-zone"
@@ -333,7 +333,7 @@
           <li>In Seller Central, go to <span class="csv-path">Reports → Business Reports</span></li>
           <li>Click <strong>"By Child Item"</strong> under "Detail Page Sales and Traffic"</li>
           <li>Set the date range to <strong>last 30 days</strong></li>
-          <li>Click <strong>Download (.csv)</strong> — the file downloads automatically</li>
+          <li>Click <strong>Download (.csv)</strong> and the file downloads automatically</li>
         </ol>
         <div class="csv-guide-tip">
           <strong>Tip:</strong> Any 30-day period works. Shorter windows give less reliable results.
@@ -354,7 +354,7 @@
     <p class="error-msg" id="uploadError" hidden></p>
 
     <p style="margin-top:16px;font-size:12px;color:var(--muted);text-align:center;line-height:1.6;">
-      🔒 Your file is analyzed on our server and deleted immediately after — never stored, never shared.
+      🔒 Your file is analyzed on our server and deleted immediately. Never stored, never shared.
       <a href="/privacy">Privacy Policy</a>
     </p>
   </div>
@@ -376,7 +376,7 @@
   <div id="stateResults" class="panel" hidden>
 
     <!-- Context line -->
-    <p class="results-context" id="resultsContext" hidden>Here's what's holding back this listing — and the highest-leverage fix.</p>
+    <p class="results-context" id="resultsContext" hidden>Here's what's holding back this listing. The highest-leverage fix is below.</p>
 
     <!-- Score + headline -->
     <div class="score-header">
@@ -444,7 +444,7 @@
     <div class="modal-box" onclick="event.stopPropagation()">
       <button class="modal-close" onclick="closeEmailModal()" aria-label="Close">✕</button>
       <h3 id="modalTitle">Get this diagnosis in your inbox</h3>
-      <p>We'll email you a full copy — useful for sharing with a VA or coming back to later.</p>
+      <p>We'll email you a full copy. Useful for sharing with a VA or coming back to later.</p>
       <input
         type="email"
         id="emailInput"
@@ -527,7 +527,7 @@ csvInput.addEventListener('change', () => {
 function onFileSelected(file) {
   clearUploadError();
   if (!file.name.toLowerCase().endsWith('.csv') && file.type !== 'text/csv') {
-    showUploadError('Please use a .csv file — the Business Report downloads as CSV from Seller Central.');
+    showUploadError('Please use a .csv file. The Business Report downloads as CSV from Seller Central.');
     return;
   }
   if (file.size > 2 * 1024 * 1024) {
@@ -645,7 +645,7 @@ async function startAnalysis() {
   } catch (err) {
     stopLoadingAnimation();
     showState('upload');
-    showUploadError('Could not reach the server — check your connection and try again.');
+    showUploadError('Could not reach the server. Check your connection and try again.');
   }
 }
 
@@ -661,9 +661,9 @@ function renderResults(data) {
   // Context line — tone shifts with severity
   const ctxEl = document.getElementById('resultsContext');
   if (score < 50) {
-    ctxEl.textContent = 'This listing has a significant problem — here\'s exactly what it is and how to fix it.';
+    ctxEl.textContent = 'This listing has a significant problem. Here\'s exactly what it is and how to fix it.';
   } else if (score < 70) {
-    ctxEl.textContent = 'Here\'s what\'s holding back this listing — and the highest-leverage fix.';
+    ctxEl.textContent = 'Here\'s what\'s holding back this listing. The highest-leverage fix is below.';
   } else {
     ctxEl.textContent = 'This listing is performing well. Here\'s where the remaining opportunity is.';
   }
