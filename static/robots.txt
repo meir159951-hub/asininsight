@@ -4,5 +4,8 @@ Disallow: /api/
 Disallow: /webhook/
 Disallow: /amazon/
 Disallow: /checkout/
+Disallow: /tool
+Disallow: /success
+Disallow: /cancel
 
 Sitemap: https://asininsight.com/sitemap.xml
