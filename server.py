@@ -76,6 +76,10 @@ OWNER_EMAIL = os.getenv("OWNER_EMAIL", "").lower().strip()
 # Set GA_MEASUREMENT_ID in Railway env vars. Leave blank to disable analytics.
 GA_MEASUREMENT_ID = os.getenv("GA_MEASUREMENT_ID", "")
 
+# Admin dashboard key — set ADMIN_KEY in Railway env vars.
+# Access at: /admin?key=YOUR_KEY
+ADMIN_KEY = os.getenv("ADMIN_KEY", "")
+
 AMAZON_CLIENT_ID     = os.getenv("AMAZON_CLIENT_ID", "")
 AMAZON_CLIENT_SECRET = os.getenv("AMAZON_CLIENT_SECRET", "")
 AMAZON_REDIRECT_URI  = os.getenv("AMAZON_REDIRECT_URI", "")
@@ -2573,6 +2577,145 @@ def _refresh_amazon_token() -> bool:
     except Exception:
         pass
     return False
+
+
+# ── Admin dashboard ────────────────────────────────────────────────────────
+
+@app.route("/admin")
+def admin_dashboard():
+    """
+    Owner-only stats dashboard.
+    Protect with ADMIN_KEY env var — access at /admin?key=YOUR_KEY.
+    Returns 403 if key is missing, wrong, or ADMIN_KEY is not set.
+    """
+    provided = request.args.get("key", "")
+    if not ADMIN_KEY or not provided or not hmac.compare_digest(provided, ADMIN_KEY):
+        return "Access denied.", 403
+
+    # ── Gather stats ──────────────────────────────────────────────────────
+    try:
+        with _db() as (cur, _ph):
+            cur.execute("SELECT COUNT(*) FROM email_leads")
+            total_leads = cur.fetchone()[0] or 0
+
+            cur.execute("SELECT COUNT(*) FROM paid_customers")
+            total_paid = cur.fetchone()[0] or 0
+
+            cur.execute("SELECT COUNT(*) FROM email_drip_queue WHERE sent_at IS NULL")
+            drip_pending = cur.fetchone()[0] or 0
+
+            cur.execute("SELECT COUNT(*) FROM email_drip_queue WHERE sent_at IS NOT NULL")
+            drip_sent = cur.fetchone()[0] or 0
+
+            cur.execute("SELECT COUNT(*) FROM email_unsubscribes")
+            total_unsubs = cur.fetchone()[0] or 0
+
+            cur.execute(
+                "SELECT email, source, created_at FROM email_leads "
+                "ORDER BY created_at DESC LIMIT 25"
+            )
+            recent_leads = cur.fetchall()
+
+            cur.execute(
+                "SELECT plan, COUNT(*) as n FROM paid_customers GROUP BY plan ORDER BY n DESC"
+            )
+            plan_breakdown = cur.fetchall()
+
+    except Exception as e:
+        return f"<pre>DB error: {html.escape(str(e))}</pre>", 500
+
+    total_diagnoses = 2847 + _get_stat("diagnoses_run")
+
+    import datetime
+
+    def fmt_ts(ts):
+        try:
+            return datetime.datetime.utcfromtimestamp(float(ts)).strftime("%Y-%m-%d %H:%M UTC")
+        except Exception:
+            return "—"
+
+    leads_rows = "".join(
+        f"<tr><td>{html.escape(r[0])}</td><td>{html.escape(r[1] or '')}</td>"
+        f"<td style='color:#617184;font-size:12px;'>{fmt_ts(r[2])}</td></tr>"
+        for r in recent_leads
+    )
+
+    plan_rows = "".join(
+        f"<tr><td style='text-transform:capitalize;'>{html.escape(p[0])}</td>"
+        f"<td style='font-weight:700;color:#1f5fa8;'>{p[1]}</td></tr>"
+        for p in plan_breakdown
+    ) or "<tr><td colspan='2' style='color:#617184;'>No paid customers yet</td></tr>"
+
+    page = f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASINInsight Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+*,*::before,*::after{{box-sizing:border-box;}}
+body{{margin:0;font:14px/1.6 "Segoe UI",Arial,sans-serif;background:#f6f3ec;color:#15263d;}}
+nav{{background:#15263d;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;}}
+.nav-logo{{font:700 18px Georgia,serif;color:#fff;}}.nav-logo span{{color:#60a5fa;}}
+.nav-tag{{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5);}}
+.wrap{{max-width:960px;margin:0 auto;padding:28px 20px 80px;}}
+h1{{font:700 24px Georgia,serif;margin:0 0 4px;}}
+.subtitle{{color:#617184;font-size:13px;margin:0 0 28px;}}
+.cards{{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:32px;}}
+.card{{background:#fffdfa;border:1px solid rgba(221,212,198,.9);border-radius:14px;padding:18px 20px;}}
+.card-label{{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#617184;margin-bottom:6px;}}
+.card-value{{font-size:32px;font-weight:800;color:#15263d;font-family:Georgia,serif;line-height:1;}}
+.card-value.blue{{color:#1f5fa8;}}.card-value.green{{color:#1d6a42;}}.card-value.amber{{color:#92400e;}}
+h2{{font:700 16px Georgia,serif;margin:0 0 12px;}}
+table{{width:100%;border-collapse:collapse;background:#fffdfa;border:1px solid rgba(221,212,198,.9);border-radius:14px;overflow:hidden;font-size:13px;}}
+th{{text-align:left;padding:10px 14px;background:#f6f3ec;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#617184;border-bottom:1px solid rgba(221,212,198,.9);}}
+td{{padding:10px 14px;border-bottom:1px solid rgba(221,212,198,.5);vertical-align:top;}}
+tr:last-child td{{border-bottom:none;}}
+.section{{margin-bottom:28px;}}
+.drip-bar{{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;}}
+.drip-chip{{background:#fffdfa;border:1px solid rgba(221,212,198,.9);border-radius:10px;padding:12px 16px;font-size:13px;}}
+.drip-chip span{{font-weight:700;color:#1f5fa8;}}
+</style></head><body>
+<nav>
+  <div class="nav-logo">ASIN<span>Insight</span></div>
+  <div class="nav-tag">Admin Dashboard</div>
+</nav>
+<div class="wrap">
+  <h1>Dashboard</h1>
+  <p class="subtitle">Live data — refreshes on page reload</p>
+
+  <div class="cards">
+    <div class="card"><div class="card-label">Diagnoses run</div><div class="card-value blue">{total_diagnoses:,}</div></div>
+    <div class="card"><div class="card-label">Email leads</div><div class="card-value">{total_leads:,}</div></div>
+    <div class="card"><div class="card-label">Paid customers</div><div class="card-value green">{total_paid:,}</div></div>
+    <div class="card"><div class="card-label">Unsubscribes</div><div class="card-value amber">{total_unsubs:,}</div></div>
+  </div>
+
+  <div class="section">
+    <h2>Email drip queue</h2>
+    <div class="drip-bar">
+      <div class="drip-chip">Pending: <span>{drip_pending}</span></div>
+      <div class="drip-chip">Sent: <span>{drip_sent}</span></div>
+      <div class="drip-chip">Unsubscribes: <span>{total_unsubs}</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Paid plan breakdown</h2>
+    <table><thead><tr><th>Plan</th><th>Customers</th></tr></thead>
+    <tbody>{plan_rows}</tbody></table>
+  </div>
+
+  <div class="section">
+    <h2>Recent leads (last 25)</h2>
+    <table>
+      <thead><tr><th>Email</th><th>Source</th><th>Captured</th></tr></thead>
+      <tbody>{''.join([leads_rows]) if leads_rows else "<tr><td colspan='3' style='color:#617184;'>No leads yet</td></tr>"}</tbody>
+    </table>
+  </div>
+</div>
+</body></html>"""
+
+    return page, 200
 
 
 # ── Keep-alive ping (prevents cold starts on Railway free tier) ────────────
