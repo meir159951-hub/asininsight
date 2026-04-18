@@ -1,55 +1,42 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" role="img" aria-label="Ariel Outdoor Renovation">
-  <defs>
-    <style>
-      .navy { fill: #1f3a8a; }
-      .red  { fill: #d82b2b; }
-      .red-stroke { stroke: #d82b2b; fill: none; stroke-linecap: round; }
-    </style>
-  </defs>
 
   <!-- Buildings (navy skyscrapers) -->
-  <g class="navy">
-    <!-- tall center building -->
-    <polygon points="260,60 300,60 300,300 260,300" />
-    <!-- left medium -->
-    <rect x="215" y="120" width="45" height="180" />
-    <!-- right medium with slanted top -->
-    <polygon points="300,110 345,90 345,300 300,300" />
-    <!-- rightmost shorter -->
-    <rect x="345" y="150" width="40" height="150" />
-    <!-- small stepped building far right -->
-    <polygon points="385,180 415,180 415,300 385,300" />
-  </g>
-
-  <!-- Red house roof (chevron) -->
-  <polygon class="red" points="180,320 300,230 420,320 420,340 300,260 180,340" />
-
-  <!-- House body (white with outline implied by roof) -->
-  <rect x="260" y="320" width="80" height="60" fill="#ffffff" stroke="#1f3a8a" stroke-width="3" />
-  <!-- Window (4 panes) -->
   <g fill="#1f3a8a">
-    <rect x="272" y="332" width="24" height="18" />
-    <rect x="304" y="332" width="24" height="18" />
-    <rect x="272" y="354" width="24" height="18" />
-    <rect x="304" y="354" width="24" height="18" />
+    <rect x="215" y="120" width="45" height="180" />
+    <polygon points="260,60 300,60 300,300 260,300" />
+    <polygon points="300,110 345,90 345,300 300,300" />
+    <rect x="345" y="150" width="40" height="150" />
+    <rect x="385" y="180" width="30" height="120" />
   </g>
 
   <!-- Red curved arrows (renovation arcs) -->
-  <path class="red-stroke" stroke-width="14" d="M160,330 Q300,470 440,330" />
-  <!-- Left arrow head -->
-  <polygon class="red" points="150,320 180,315 170,345" />
-  <!-- Right arrow head -->
-  <polygon class="red" points="450,320 420,315 430,345" />
+  <path d="M150,330 Q300,500 450,330"
+        fill="none" stroke="#d82b2b" stroke-width="16" stroke-linecap="round" />
+  <polygon points="130,318 180,318 160,355" fill="#d82b2b" />
+  <polygon points="470,318 420,318 440,355" fill="#d82b2b" />
+
+  <!-- Red house roof (chevron) -->
+  <polygon fill="#d82b2b" points="180,325 300,230 420,325 420,345 300,260 180,345" />
+
+  <!-- House body -->
+  <rect x="260" y="320" width="80" height="62" fill="#ffffff" stroke="#1f3a8a" stroke-width="3" />
+  <!-- Window (4 panes) -->
+  <g fill="#1f3a8a">
+    <rect x="272" y="332" width="24" height="19" />
+    <rect x="304" y="332" width="24" height="19" />
+    <rect x="272" y="355" width="24" height="19" />
+    <rect x="304" y="355" width="24" height="19" />
+  </g>
 
   <!-- ARIEL text -->
   <text x="300" y="495" text-anchor="middle"
         font-family="Arial Black, Helvetica, sans-serif"
         font-weight="900" font-size="96" letter-spacing="4"
-        class="navy">ARIEL</text>
+        fill="#1f3a8a">ARIEL</text>
 
   <!-- OUTDOOR RENOVATION text -->
   <text x="300" y="545" text-anchor="middle"
         font-family="Arial, Helvetica, sans-serif"
         font-weight="700" font-size="34" letter-spacing="6"
-        class="red">OUTDOOR RENOVATION</text>
+        fill="#d82b2b">OUTDOOR RENOVATION</text>
 </svg>

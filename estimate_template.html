@@ -14,40 +14,41 @@
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #f3f4f6; color: var(--ink);
-    font-family: "Helvetica Neue", Arial, sans-serif; font-size: 12pt; line-height: 1.45; }
+    font-family: "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.35; }
   .page {
-    width: 8.5in; min-height: 11in; margin: 24px auto; padding: 0.6in 0.7in;
+    width: 8.5in; min-height: 11in; margin: 24px auto; padding: 0.45in 0.6in;
     background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
   }
 
   /* Header */
   .header { text-align: center; }
-  .header .logo { width: 190px; height: auto; margin: 0 auto 6px; display: block; }
-  .header .company { color: var(--navy); font-weight: 800; font-size: 20pt; margin: 4px 0 6px; }
-  .header .meta { color: var(--muted); font-size: 10.5pt; margin: 2px 0; }
-  .rule { height: 2px; background: var(--navy); margin: 14px 0 18px; border-radius: 2px; }
+  .header .logo { width: 150px; height: auto; margin: 0 auto 2px; display: block; }
+  .header .meta { color: var(--muted); font-size: 10pt; margin: 1px 0; }
+  .rule { height: 2px; background: var(--navy); margin: 8px 0 10px; border-radius: 2px; }
+
+  p { margin: 3px 0; }
 
   /* Prepared for */
-  .row { display: flex; justify-content: space-between; gap: 24px; margin-bottom: 14px; }
-  .label { color: var(--navy); font-weight: 700; margin-bottom: 4px; }
-  .block p { margin: 2px 0; }
+  .label { color: var(--navy); font-weight: 700; margin-bottom: 2px; }
+  .block { margin: 6px 0 10px; }
+  .block p { margin: 1px 0; }
 
   /* Line items table */
-  table.items { width: 100%; border-collapse: collapse; margin: 14px 0 18px; }
+  table.items { width: 100%; border-collapse: collapse; margin: 8px 0 10px; }
   table.items th, table.items td {
-    border: 1px solid var(--line); padding: 10px 12px; vertical-align: top; text-align: left;
+    border: 1px solid var(--line); padding: 7px 10px; vertical-align: top; text-align: left;
   }
   table.items th { background: var(--band); color: var(--navy); font-weight: 700; }
   table.items td.total { white-space: nowrap; text-align: right; font-weight: 600; }
 
-  h3 { color: var(--navy); font-size: 12pt; margin: 16px 0 6px; }
-  ul.tight { margin: 4px 0 10px; padding-left: 20px; }
-  ul.tight li { margin: 2px 0; }
+  h3 { color: var(--navy); font-size: 11pt; margin: 10px 0 4px; }
+  ul.tight { margin: 2px 0 6px; padding-left: 18px; }
+  ul.tight li { margin: 1px 0; }
 
-  .about { margin-top: 10px; }
-  .about p { margin: 6px 0; }
+  .about { margin-top: 6px; }
+  .about p { margin: 4px 0; }
 
-  .total-price { color: var(--navy); font-weight: 800; font-size: 14pt; margin-top: 18px; }
+  .total-price { color: var(--navy); font-weight: 800; font-size: 13pt; margin-top: 10px; }
 
   /* Print */
   @page { size: Letter; margin: 0.4in; }
@@ -81,7 +82,6 @@
   <!-- ── Header ──────────────────────────────────────────────────── -->
   <div class="header">
     <img class="logo" src="ariel_logo.svg" alt="Ariel Outdoor Renovation">
-    <div class="company">Ariel Outdoor Renovation</div>
     <div class="meta">16350 Ventura Blvd #149 · Encino, CA 91436</div>
     <div class="meta">License: CSLB #1129259 · B – General Building Contractor</div>
   </div>
