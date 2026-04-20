@@ -8,6 +8,9 @@
       "title": "Insulated Water Bottle",
       "category": "Sports & Outdoors",
       "price": 24.99,
+      "cogs": 6.50,
+      "fba_fees": 4.20,
+      "buy_box_pct": 85,
       "sessions_30d": 5200,
       "units_ordered_30d": 114,
       "conversion_rate": 0.0219,
@@ -22,13 +25,20 @@
       "ad_spend_30d": 680,
       "ad_sales_30d": 1210,
       "acos": 0.56,
-      "organic_rank_top_keyword": 39
+      "organic_rank_top_keyword": 39,
+      "sessions_30d_prev": 6000,
+      "conversion_rate_prev": 0.0240,
+      "acos_prev": 0.48,
+      "organic_rank_prev": 35
     },
     {
       "asin": "B0DEMO002",
       "title": "Silicone Baking Mat Set",
       "category": "Home & Kitchen",
       "price": 16.49,
+      "cogs": 4.00,
+      "fba_fees": 3.80,
+      "buy_box_pct": 95,
       "sessions_30d": 3100,
       "units_ordered_30d": 167,
       "conversion_rate": 0.0539,
@@ -43,13 +53,20 @@
       "ad_spend_30d": 240,
       "ad_sales_30d": 1190,
       "acos": 0.20,
-      "organic_rank_top_keyword": 11
+      "organic_rank_top_keyword": 11,
+      "sessions_30d_prev": 3200,
+      "conversion_rate_prev": 0.0520,
+      "acos_prev": 0.22,
+      "organic_rank_prev": 12
     },
     {
       "asin": "B0DEMO003",
       "title": "Cord Organizer for Kitchen Appliances 6 Pack Self Adhesive Holder Clips for Cables",
       "category": "Home & Kitchen",
       "price": 11.99,
+      "cogs": 3.00,
+      "fba_fees": 2.80,
+      "buy_box_pct": 60,
       "sessions_30d": 6700,
       "units_ordered_30d": 96,
       "conversion_rate": 0.0143,
@@ -64,7 +81,11 @@
       "ad_spend_30d": 920,
       "ad_sales_30d": 980,
       "acos": 0.94,
-      "organic_rank_top_keyword": 57
+      "organic_rank_top_keyword": 57,
+      "sessions_30d_prev": 9000,
+      "conversion_rate_prev": 0.0180,
+      "acos_prev": 0.65,
+      "organic_rank_prev": 40
     }
   ]
 }

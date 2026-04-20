@@ -1,2 +1,2 @@
-ASIN,title,category,sessions_30d,units_ordered_30d,conversion_rate,ctr,review_count,rating,days_of_cover,ad_spend_30d,ad_sales_30d,acos,images_count,bullet_count,has_a_plus,organic_rank_top_keyword,price
-B0EXAMPLE01,Example Product,Example Category,0,0,0,0,0,0,0,0,0,0,0,0,false,0,0
+asin,title,category,sessions_30d,units_ordered_30d,conversion_rate,ctr,review_count,rating,days_of_cover,ad_spend_30d,ad_sales_30d,acos,images_count,bullet_count,has_a_plus,organic_rank_top_keyword,price,cogs,fba_fees,buy_box_pct,sessions_30d_prev,conversion_rate_prev,acos_prev,organic_rank_prev
+B0EXAMPLE01,Example Product Name,Home & Kitchen,1000,22,0.022,0.0035,50,4.2,25,150.00,430.00,0.35,7,5,true,22,24.99,6.50,4.20,85,1100,0.024,0.32,20

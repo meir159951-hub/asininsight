@@ -1,9 +1,9 @@
-ASIN,title,category,sessions_30d,units_ordered_30d,conversion_rate,ctr,review_count,rating,days_of_cover,ad_spend_30d,ad_sales_30d,acos,images_count,bullet_count,has_a_plus,organic_rank_top_keyword,price
-B0DEMO001,Insulated Water Bottle,Sports & Outdoors,5200,114,0.0219,0.0031,47,4.1,11,680,1210,0.56,4,3,false,39,24.99
-B0DEMO002,Silicone Baking Mat Set,Home & Kitchen,3100,167,0.0539,0.0049,182,4.5,48,240,1190,0.20,7,5,true,11,16.49
-B0DEMO003,Cord Organizer for Kitchen Appliances 6 Pack,Home & Kitchen,6700,96,0.0143,0.0024,19,3.8,6,920,980,0.94,5,4,false,57,11.99
-B0DEMO004,Resistance Bands Set,Fitness,8800,132,0.0150,0.0046,326,4.4,37,540,2010,0.27,7,5,true,18,29.99
-B0DEMO005,Wall Mounted Spice Rack Organizer,Home & Kitchen,4200,173,0.0412,0.0026,88,4.3,24,410,980,0.42,6,5,true,27,18.99
-B0DEMO006,Portable Blender Bottle,Kitchen,6100,121,0.0198,0.0039,14,3.7,29,360,840,0.43,6,4,false,33,27.49
-B0DEMO007,Pet Grooming Glove,Pet Supplies,2900,154,0.0531,0.0054,241,4.6,51,150,910,0.16,7,5,true,9,14.99
-B0DEMO008,Car Seat Gap Filler Organizer,Automotive,7600,143,0.0188,0.0029,61,4.0,9,870,1320,0.66,5,3,false,44,19.49
+asin,title,category,sessions_30d,units_ordered_30d,conversion_rate,ctr,review_count,rating,days_of_cover,ad_spend_30d,ad_sales_30d,acos,images_count,bullet_count,has_a_plus,organic_rank_top_keyword,price,cogs,fba_fees,buy_box_pct,sessions_30d_prev,conversion_rate_prev,acos_prev,organic_rank_prev
+B0DEMO001,Insulated Water Bottle,Sports & Outdoors,5200,114,0.0219,0.0031,47,4.1,11,680,1210,0.56,4,3,false,39,24.99,6.50,4.20,85,6000,0.0240,0.48,35
+B0DEMO002,Silicone Baking Mat Set,Home & Kitchen,3100,167,0.0539,0.0049,182,4.5,48,240,1190,0.20,7,5,true,11,16.49,4.00,3.80,95,3200,0.0520,0.22,12
+B0DEMO003,Cord Organizer for Kitchen Appliances 6 Pack,Home & Kitchen,6700,96,0.0143,0.0024,19,3.8,6,920,980,0.94,5,4,false,57,11.99,3.00,2.80,60,9000,0.0180,0.65,40
+B0DEMO004,Resistance Bands Set,Fitness,8800,132,0.0150,0.0046,326,4.4,37,540,2010,0.27,7,5,true,18,29.99,8.00,5.50,88,8500,0.0155,0.30,20
+B0DEMO005,Wall Mounted Spice Rack Organizer,Home & Kitchen,4200,173,0.0412,0.0026,88,4.3,24,410,980,0.42,6,5,true,27,18.99,5.50,4.20,92,3800,0.0395,0.40,28
+B0DEMO006,Portable Blender Bottle,Kitchen,6100,121,0.0198,0.0039,14,3.7,29,360,840,0.43,6,4,false,33,27.49,8.00,5.20,78,6300,0.0230,0.40,32
+B0DEMO007,Pet Grooming Glove,Pet Supplies,2900,154,0.0531,0.0054,241,4.6,51,150,910,0.16,7,5,true,9,14.99,3.50,3.50,97,2800,0.0520,0.16,10
+B0DEMO008,Car Seat Gap Filler Organizer,Automotive,7600,143,0.0188,0.0029,61,4.0,9,870,1320,0.66,5,3,false,44,19.49,5.00,4.00,72,7200,0.0210,0.42,25
