@@ -145,6 +145,175 @@ def _underinvested_winner(product: dict[str, Any]) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Pattern 6: Reviews Killing Conversion
+#   Low product rating combined with meaningful session volume.
+#   Traffic reaches the listing but bleeds out on the detail page because
+#   review sentiment shakes shopper confidence. Fix the drivers of low
+#   ratings before spending more on traffic.
+# ---------------------------------------------------------------------------
+
+def _reviews_killing_conversion(product: dict[str, Any]) -> bool:
+    if not _has(product, "rating", "sessions_30d"):
+        return False
+    rating = _num(product, "rating")
+    sessions = _num(product, "sessions_30d")
+    return rating < 4.0 and sessions > 500
+
+
+# ---------------------------------------------------------------------------
+# Pattern 7: Unit Economics Loss
+#   Per-unit contribution is negative or near-zero once COGS, FBA fees,
+#   and PPC attribution at the current ACoS are deducted from the sale
+#   price. Every sale loses money or breaks even. Fix pricing or cost
+#   structure before any marketing or scaling work.
+# ---------------------------------------------------------------------------
+
+def _unit_economics_loss(product: dict[str, Any]) -> bool:
+    if not _has(product, "price", "cogs", "fba_fees", "acos"):
+        return False
+    price = _num(product, "price")
+    cogs = _num(product, "cogs")
+    fba = _num(product, "fba_fees")
+    acos = _num(product, "acos")
+    per_unit_profit = price - cogs - fba - (acos * price)
+    return per_unit_profit <= 0
+
+
+# ---------------------------------------------------------------------------
+# Pattern 8: Inventory Trap (Dead Stock)
+#   Days-of-cover is very high while conversion rate is weak. Working
+#   capital is tied up in stock that does not move. Stop scaling ad
+#   spend on this ASIN; consider a price promotion or liquidation
+#   before the next purchase order.
+# ---------------------------------------------------------------------------
+
+def _inventory_trap(product: dict[str, Any]) -> bool:
+    if not _has(product, "days_of_cover", "conversion_rate"):
+        return False
+    doc = _num(product, "days_of_cover")
+    cr = _num(product, "conversion_rate")
+    return doc > 90 and cr < 0.015
+
+
+# ---------------------------------------------------------------------------
+# Pattern 9: Restock Urgency
+#   Days-of-cover is low while the ASIN converts actively. A stockout
+#   does not just stop sales - it typically costs organic rank for
+#   weeks after restock. Pause PPC scaling and replenish stock before
+#   adding more traffic.
+# ---------------------------------------------------------------------------
+
+def _restock_urgency(product: dict[str, Any]) -> bool:
+    if not _has(product, "days_of_cover", "conversion_rate"):
+        return False
+    doc = _num(product, "days_of_cover")
+    cr = _num(product, "conversion_rate")
+    return doc < 14 and cr > 0.02
+
+
+# ---------------------------------------------------------------------------
+# Pattern 10: PPC Addiction (Paid Traffic Without Organic Lift)
+#   Meaningful ad spend is being deployed while organic rank on the
+#   main keyword is still buried (> 30). Paid traffic is renting
+#   visibility, not building it. The ACoS floor will not drop until
+#   organic rank improves.
+# ---------------------------------------------------------------------------
+
+def _ppc_addiction(product: dict[str, Any]) -> bool:
+    if not _has(product, "ad_spend_30d", "organic_rank_top_keyword"):
+        return False
+    spend = _num(product, "ad_spend_30d")
+    rank = _num(product, "organic_rank_top_keyword")
+    return spend > 300 and rank > 30
+
+
+# ---------------------------------------------------------------------------
+# Pattern 11: Buy Box War on a Ranked ASIN
+#   The ASIN ranks in the top 10 organically but Buy Box share is
+#   soft. Rank is pulling shoppers to the listing; an aggressive FBM
+#   competitor or price war is peeling off the sale at the last moment.
+#   Investigate competitor pricing and any FBM offers on the listing.
+# ---------------------------------------------------------------------------
+
+def _buy_box_war_on_ranked(product: dict[str, Any]) -> bool:
+    if not _has(product, "organic_rank_top_keyword", "buy_box_pct"):
+        return False
+    rank = _num(product, "organic_rank_top_keyword")
+    buy_box = _num(product, "buy_box_pct")
+    return rank <= 10 and buy_box < 80
+
+
+# ---------------------------------------------------------------------------
+# Pattern 12: Weak Listing Foundation
+#   Sessions, organic rank, and review count are all weak together.
+#   This is not an optimisation problem: the listing lacks every
+#   ingredient a first-page ASIN needs. Treat as a relaunch (main
+#   image, title, keywords, compliant review generation), not a tweak.
+# ---------------------------------------------------------------------------
+
+def _weak_listing_foundation(product: dict[str, Any]) -> bool:
+    if not _has(product, "sessions_30d", "organic_rank_top_keyword", "review_count"):
+        return False
+    sessions = _num(product, "sessions_30d")
+    rank = _num(product, "organic_rank_top_keyword")
+    reviews = _num(product, "review_count")
+    return sessions < 300 and rank > 50 and reviews < 15
+
+
+# ---------------------------------------------------------------------------
+# Pattern 13: Review Starvation
+#   Conversion is healthy but the review count is far below the level
+#   shoppers use as a trust anchor. The ASIN converts despite the gap;
+#   closing it usually unlocks additional conversion gains and allows
+#   PPC to scale more efficiently.
+# ---------------------------------------------------------------------------
+
+def _review_starvation(product: dict[str, Any]) -> bool:
+    if not _has(product, "conversion_rate", "review_count"):
+        return False
+    cr = _num(product, "conversion_rate")
+    reviews = _num(product, "review_count")
+    return cr > 0.025 and reviews < 20
+
+
+# ---------------------------------------------------------------------------
+# Pattern 14: Overbidding on a Weak Listing
+#   ACoS is high while the detail page is weak - either low conversion
+#   or low rating. Every extra dollar of ad spend magnifies a problem
+#   that lives on the listing. Fix the listing before touching bids.
+# ---------------------------------------------------------------------------
+
+def _overbid_weak_listing(product: dict[str, Any]) -> bool:
+    if not _has(product, "acos"):
+        return False
+    acos = _num(product, "acos")
+    if acos <= 0.50:
+        return False
+    cr = _num(product, "conversion_rate")
+    rating = _num(product, "rating")
+    weak_cr = cr is not None and cr < 0.015
+    weak_rating = rating is not None and rating < 4.0
+    return weak_cr or weak_rating
+
+
+# ---------------------------------------------------------------------------
+# Pattern 15: Discontinuation Candidate
+#   Conversion, rating, and review count are all weak together. This
+#   ASIN is a candidate for sunset, not optimisation. Keep it only if
+#   there is a strategic reason (bundling, catalog coverage); otherwise
+#   the operating cost likely outweighs the margin it produces.
+# ---------------------------------------------------------------------------
+
+def _discontinuation_candidate(product: dict[str, Any]) -> bool:
+    if not _has(product, "conversion_rate", "rating", "review_count"):
+        return False
+    cr = _num(product, "conversion_rate")
+    rating = _num(product, "rating")
+    reviews = _num(product, "review_count")
+    return cr < 0.015 and rating < 4.0 and reviews < 25
+
+
+# ---------------------------------------------------------------------------
 # Registered patterns
 #   audit_engine.py imports CROSS_METRIC_PATTERNS and iterates over it.
 #   Order in this list is also the default presentation order.
@@ -212,6 +381,130 @@ CROSS_METRIC_PATTERNS: list[CrossMetricPattern] = [
         ),
         conditions=_underinvested_winner,
         impact_type="traffic",
+        confidence="medium",
+    ),
+    CrossMetricPattern(
+        name="reviews_killing_conversion",
+        description=(
+            "Low product rating combined with meaningful session "
+            "volume. Traffic reaches the listing but bleeds out on "
+            "the detail page because review sentiment shakes shopper "
+            "confidence. Fix the drivers of low ratings before "
+            "spending more on traffic."
+        ),
+        conditions=_reviews_killing_conversion,
+        impact_type="reviews",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="unit_economics_loss",
+        description=(
+            "Per-unit profit is negative or near-zero after COGS, FBA "
+            "fees, and PPC attribution at the current ACoS. Every sale "
+            "loses money or breaks even. Fix pricing or cost structure "
+            "before any marketing or scaling work."
+        ),
+        conditions=_unit_economics_loss,
+        impact_type="pricing",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="inventory_trap",
+        description=(
+            "Days-of-cover is very high while conversion rate is weak. "
+            "Working capital is tied up in stock that does not move. "
+            "Stop scaling ad spend on this ASIN; consider a price "
+            "promotion or liquidation before the next purchase order."
+        ),
+        conditions=_inventory_trap,
+        impact_type="inventory",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="restock_urgency",
+        description=(
+            "Inventory cover is low while the ASIN converts actively. "
+            "A stockout will not only stop sales but typically costs "
+            "organic rank for weeks. Pause PPC scaling and replenish "
+            "stock before adding more traffic."
+        ),
+        conditions=_restock_urgency,
+        impact_type="inventory",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="ppc_addiction",
+        description=(
+            "Meaningful ad spend is being deployed while organic rank "
+            "on the main keyword is still buried. Paid traffic is "
+            "renting visibility, not building it. The ACoS floor will "
+            "not drop until organic rank improves."
+        ),
+        conditions=_ppc_addiction,
+        impact_type="ads",
+        confidence="medium",
+    ),
+    CrossMetricPattern(
+        name="buy_box_war_on_ranked",
+        description=(
+            "The ASIN ranks in the top 10 organically but Buy Box "
+            "share is soft. Rank is pulling shoppers in; an aggressive "
+            "FBM competitor or a price war is peeling off the sale "
+            "at the last moment. Investigate competitor pricing and "
+            "any FBM offers on the listing."
+        ),
+        conditions=_buy_box_war_on_ranked,
+        impact_type="pricing",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="weak_listing_foundation",
+        description=(
+            "Sessions, organic rank, and review count are all weak "
+            "together. This is not an optimisation problem - the "
+            "listing lacks every ingredient a first-page ASIN needs. "
+            "Treat as a relaunch (main image, title, keywords, "
+            "compliant review generation), not a tweak."
+        ),
+        conditions=_weak_listing_foundation,
+        impact_type="listing",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="review_starvation",
+        description=(
+            "Conversion is healthy but the review count is far below "
+            "the level shoppers use as a trust anchor. The ASIN "
+            "converts despite the gap; closing it usually unlocks "
+            "additional conversion and lets PPC scale further."
+        ),
+        conditions=_review_starvation,
+        impact_type="reviews",
+        confidence="medium",
+    ),
+    CrossMetricPattern(
+        name="overbid_weak_listing",
+        description=(
+            "ACoS is high while the detail page is weak - either low "
+            "conversion or low rating. Every extra dollar of ad spend "
+            "magnifies a problem that lives on the listing. Fix the "
+            "listing first; do not raise bids."
+        ),
+        conditions=_overbid_weak_listing,
+        impact_type="ads",
+        confidence="high",
+    ),
+    CrossMetricPattern(
+        name="discontinuation_candidate",
+        description=(
+            "Conversion, rating, and review count are all weak "
+            "together. This ASIN is a candidate for sunset, not "
+            "optimisation. Keep it only if there is a strategic reason "
+            "(bundling, catalog coverage); otherwise operating cost "
+            "likely outweighs margin."
+        ),
+        conditions=_discontinuation_candidate,
+        impact_type="portfolio",
         confidence="medium",
     ),
 ]
