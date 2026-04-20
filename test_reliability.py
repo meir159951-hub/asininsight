@@ -107,11 +107,15 @@ EXPECTED_TOP_KEYS = {
 
 EXPECTED_SUMMARY_KEYS = {
     "score", "readiness",
-    "patterns_triggered", "signals_raised", "total_findings",
+    "core_problem", "narrative_theme",
+    "patterns_triggered", "patterns_active",
+    "patterns_suppressed", "patterns_grouped",
+    "signals_raised", "total_findings",
     "aggregate_impact_min", "aggregate_impact_max",
     "aggregate_impact_display", "aggregate_by_driver",
+    "aggregate_by_category", "primary_display_key",
     "naive_sum_impact_min", "naive_sum_impact_max",
-    "biggest_single_opportunity", "caveat",
+    "biggest_single_opportunity", "caveat", "sanity_notes",
 }
 
 EXPECTED_DQ_KEYS = {
@@ -528,6 +532,104 @@ for idx in range(1, len(r["priority_blockers"])):
     curr = r["priority_blockers"][idx]
     check(f"tie-break: rank {curr['rank']} respects priority order",
           curr["priority_score"] <= prev["priority_score"] + 1e-9)
+
+
+# ---------------------------------------------------------------------------
+# 9. Refinement-pass guarantees (single source of truth, confidence
+#    justification, readability, realism)
+# ---------------------------------------------------------------------------
+
+section("9. Refinement-pass guarantees")
+
+# --- 9a. core_problem is the single source of truth --------------------
+r = run_full_audit(weak_converter_with_reviews)
+core = r["summary"].get("core_problem")
+check("core_problem present when findings exist", core is not None)
+if core is not None and r["priority_blockers"]:
+    check("core_problem.name matches priority_blockers[0]",
+          core["name"] == r["priority_blockers"][0]["name"])
+    check("core_problem.action_title matches action_plan[0]",
+          core["action_title"] == r["action_plan"][0]["title"])
+    check("core_problem carries why_this_one text",
+          bool(core.get("why_this_one")))
+
+# Empty fixture -> core_problem is None, not missing.
+r_empty = run_full_audit({"asin": "B0X", "title": "x"})
+check("core_problem key always present (None when no findings OK)",
+      "core_problem" in r_empty["summary"])
+
+# --- 9b. Narrative theme --------------------------------------------------
+if core is not None:
+    theme = r["summary"].get("narrative_theme")
+    check("narrative_theme is populated when a core_problem exists",
+          isinstance(theme, str) and len(theme) > 0,
+          f"got {theme!r}")
+
+# --- 9c. priority_blockers capped at 3 -----------------------------------
+for label, product in [("weak", weak_converter_with_reviews), ("demo", WEAK_CONVERTER)]:
+    r = run_full_audit(product)
+    check(f"priority_blockers <= 3 ({label})",
+          len(r["priority_blockers"]) <= 3,
+          f"got {len(r['priority_blockers'])}")
+    # Ranks are 1..N in the truncated list (no gaps).
+    ranks = [b["rank"] for b in r["priority_blockers"]]
+    check(f"priority_blockers ranks are 1..N ({label})",
+          ranks == list(range(1, len(ranks) + 1)),
+          f"got {ranks}")
+
+# --- 9d. Confidence justification on every finding ---------------------
+r = run_full_audit(weak_converter_with_reviews)
+for p in r["patterns"]:
+    cr = p.get("confidence_reason")
+    check(f"pattern {p['name']} has confidence_reason",
+          isinstance(cr, str) and len(cr) > 10,
+          f"got {cr!r}")
+for s in r["signals"]:
+    cr = s.get("confidence_reason")
+    check(f"signal {s['name']} has confidence_reason",
+          isinstance(cr, str) and len(cr) > 10,
+          f"got {cr!r}")
+
+# --- 9e. sanity_notes is always a list -----------------------------------
+for label, product in [
+    ("normal", weak_converter_with_reviews),
+    ("empty", {"asin": "B0X", "title": "x"}),
+    ("low-volume", {**weak_converter_with_reviews, "sessions_30d": 50, "units_ordered_30d": 1}),
+]:
+    r = run_full_audit(product)
+    notes = r["summary"].get("sanity_notes")
+    check(f"sanity_notes is a list ({label})",
+          isinstance(notes, list),
+          f"got {type(notes).__name__}")
+
+# Low-volume scenario should produce at least one sanity note.
+low_vol_r = run_full_audit({**weak_converter_with_reviews, "sessions_30d": 50, "units_ordered_30d": 1})
+check("low-volume: sanity_notes non-empty",
+      len(low_vol_r["summary"]["sanity_notes"]) >= 1)
+
+# --- 9f. Cross-layer consistency ----------------------------------------
+r = run_full_audit(weak_converter_with_reviews)
+if r["priority_blockers"] and r["action_plan"]:
+    check("consistency: action_plan[0].title == priority_blockers[0].action_title",
+          r["action_plan"][0]["title"] == r["priority_blockers"][0]["action_title"])
+
+# Whenever a pattern is suppressed by discontinuation, the core
+# problem must NOT be the suppressed pattern's name.
+r = run_full_audit(discontinuation_fixture)
+suppressed_names = {p["name"] for p in r["patterns"] if p.get("suppressed_by")}
+if r["summary"].get("core_problem") and suppressed_names:
+    check("consistency: core_problem is not a suppressed pattern",
+          r["summary"]["core_problem"]["name"] not in suppressed_names,
+          f"core={r['summary']['core_problem']['name']}, "
+          f"suppressed={suppressed_names}")
+
+# Whenever a pattern is grouped under a sibling, the core problem
+# must NOT be one of the grouped (loser) patterns.
+r = run_full_audit(weak_converter_with_reviews)
+grouped_names = {p["name"] for p in r["patterns"] if p.get("grouped_under")}
+if r["summary"].get("core_problem") and grouped_names:
+    check("consistency: core_problem is not a grouped sibling",
+          r["summary"]["core_problem"]["name"] not in grouped_names)
 
 
 # ---------------------------------------------------------------------------

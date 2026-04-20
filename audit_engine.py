@@ -673,6 +673,219 @@ def _enriched_triggered_by(
 
 
 # ---------------------------------------------------------------------------
+# Confidence justification
+#
+# Every actionable finding carries a `confidence_reason` alongside its
+# confidence label so a reader can tell why the label was assigned. For
+# patterns the reason is synthesised from the triggered metric reads;
+# for signals it is a curated line that names the underlying evidence.
+# ---------------------------------------------------------------------------
+
+_SIGNAL_CONFIDENCE_REASONS: dict[str, str] = {
+    "buy_box": (
+        "Buy Box share is below the 90% healthy threshold; the gap "
+        "between current share and 100% is the proportion of clicks "
+        "converting for a competitor on the listing."
+    ),
+    "suppression_risk": (
+        "Traffic pattern is inconsistent with a normally-served "
+        "listing. This is a hypothesis from indirect indicators; "
+        "confirmation requires a Seller Central check."
+    ),
+    "true_profit_margin": (
+        "Margin is computed directly from price, COGS, FBA fees, and "
+        "ACoS in the uploaded row - no projection or modelling."
+    ),
+    "trend_sessions": (
+        "Current vs prior 30-day session counts show a drop larger "
+        "than typical month-to-month noise."
+    ),
+    "trend_conversion": (
+        "Conversion rate dropped meaningfully versus the prior 30 "
+        "days; not explained by the small-sample range."
+    ),
+    "trend_acos": (
+        "ACoS climbed materially versus the prior 30 days, outside "
+        "typical bid-adjustment drift."
+    ),
+    "trend_rank": (
+        "Organic rank on the main keyword fell more than 10 "
+        "positions in 30 days - a meaningful structural move."
+    ),
+}
+
+
+def _confidence_reason_pattern(finding: dict[str, Any]) -> str:
+    """
+    Synthesise a one-line justification from the pattern's triggered
+    metrics and their interpreted reads.
+    """
+    enriched = finding.get("triggered_by_interpreted", {})
+    parts: list[str] = []
+    for field, view in enriched.items():
+        if not isinstance(view, dict) or view.get("value") is None:
+            continue
+        pretty = field.replace("_30d", " (30d)").replace("_", " ")
+        parts.append(f"{pretty} is {view['display']} ({view['read']})")
+    if not parts:
+        return "Pattern matched on the fields available in the row."
+    return "Matched because " + "; ".join(parts) + "."
+
+
+def _confidence_reason_signal(finding: dict[str, Any]) -> str:
+    return _SIGNAL_CONFIDENCE_REASONS.get(
+        finding.get("name", ""),
+        finding.get("explanation", "")[:180] or "Signal matched on its own evidence.",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Core problem + sanity
+# ---------------------------------------------------------------------------
+
+def _build_core_problem(ranked: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """
+    The single dominant issue the seller should act on first. Always
+    matches priority_blockers[0] and action_plan[0]; adds a short
+    `why_this_one` so the reader understands why it outranked the rest.
+    """
+    if not ranked:
+        return None
+    top = ranked[0]
+    why = _explain_core_selection(ranked)
+    return {
+        "name":                 top["name"],
+        "source":                top["source"],
+        "severity":              top["severity"],
+        "driver":                top.get("driver"),
+        "action_title":          top["action_title"],
+        "headline":              top["headline"],
+        "monthly_impact_range":  top.get("monthly_impact_range"),
+        "priority_score":        top["priority_score"],
+        "why_this_one":          why,
+    }
+
+
+def _explain_core_selection(ranked: list[dict[str, Any]]) -> str:
+    top = ranked[0]
+    if len(ranked) == 1:
+        return (
+            f"Only one active finding ({top['severity']} severity); "
+            f"it is the focus by default."
+        )
+    gap = top["priority_score"] - ranked[1]["priority_score"]
+    if gap >= 2:
+        return (
+            f"Dominant: priority score {top['priority_score']:.1f} "
+            f"vs next-highest {ranked[1]['priority_score']:.1f}."
+        )
+    return (
+        f"Selected on severity ({top['severity']}) and priority score "
+        f"{top['priority_score']:.1f}; next finding scores "
+        f"{ranked[1]['priority_score']:.1f}."
+    )
+
+
+def _derive_narrative_theme(core: dict[str, Any] | None) -> str | None:
+    """
+    One-word theme for the seller-facing headline of the audit, drawn
+    from the core problem's driver or signal name.
+    """
+    if core is None:
+        return None
+    driver = core.get("driver")
+    theme_map = {
+        "cr_uplift":          "conversion",
+        "traffic_uplift":     "traffic",
+        "ppc_savings":        "ads",
+        "buy_box_recovery":   "pricing",
+        "unit_economics":     "unit economics",
+        "revenue_protection": "inventory",
+        "listing_relaunch":   "listing",
+        "sunset_savings":     "portfolio",
+    }
+    if driver and driver in theme_map:
+        return theme_map[driver]
+    # Signals
+    name = core.get("name", "")
+    if name.startswith("trend_"):
+        return "trend"
+    signal_theme = {
+        "buy_box":            "pricing",
+        "suppression_risk":   "visibility",
+        "true_profit_margin": "unit economics",
+    }
+    return signal_theme.get(name)
+
+
+def _sanity_notes(
+    asin_data: dict[str, Any],
+    patterns: list[dict[str, Any]],
+    summary: dict[str, Any],
+) -> list[str]:
+    """
+    Final realism pass. Emits notes only when a number could feel
+    exaggerated to an experienced seller relative to the ASIN's
+    current size or data quality.
+    """
+    notes: list[str] = []
+
+    def _n(k: str) -> float | None:
+        v = asin_data.get(k)
+        if v is None or v == "":
+            return None
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    sessions = _n("sessions_30d")
+    units = _n("units_ordered_30d")
+    price = _n("price")
+    cr = _n("conversion_rate")
+
+    current_revenue: float | None = None
+    if units is not None and price is not None:
+        current_revenue = units * price
+    elif sessions is not None and cr is not None and price is not None:
+        current_revenue = sessions * cr * price
+
+    if current_revenue is not None and current_revenue > 0:
+        combined_max = (
+            summary.get("aggregate_by_category", {}).get("combined_upper_bound_max")
+        )
+        if combined_max is not None and combined_max > current_revenue * 2:
+            notes.append(
+                f"Combined upper-bound opportunity (${combined_max:,.0f}/mo) "
+                f"exceeds current monthly revenue (${current_revenue:,.0f}); "
+                f"treat the combined number as an upper bound, not a "
+                f"realistic single-month gain."
+            )
+
+        for p in patterns:
+            if p.get("suppressed_by") or p.get("grouped_under"):
+                continue
+            roi_max = p["roi"].get("max_monthly")
+            if roi_max is not None and roi_max > current_revenue * 1.5:
+                notes.append(
+                    f"{p['name']} projects ${roi_max:,.0f}/mo at the top "
+                    f"of its range, which is >1.5x current monthly "
+                    f"revenue; verify inputs before acting on the high end."
+                )
+
+    if summary.get("low_volume_note"):
+        notes.append(
+            "Low data volume reduces reliability; treat impact ranges as "
+            "directional, not precise."
+        )
+
+    if asin_data.get("asin") is None and asin_data.get("ASIN") is None:
+        notes.append("No ASIN in the uploaded row; results cannot be matched back to the listing.")
+
+    return notes
+
+
+# ---------------------------------------------------------------------------
 # Post-processing: suppression, grouping, severity, confidence
 # ---------------------------------------------------------------------------
 
@@ -871,7 +1084,7 @@ def _build_pattern_findings(asin_data: dict[str, Any]) -> list[dict[str, Any]]:
         roi = calculate_roi({"name": pattern.name}, asin_data)
         severity = _pattern_severity(pattern.name, roi)
         assumption_keys = PATTERN_ASSUMPTIONS.get(pattern.name, ["impact_type"])
-        findings.append({
+        finding = {
             "source":         "pattern",
             "name":           pattern.name,
             "impact_type":    pattern.impact_type,
@@ -900,7 +1113,9 @@ def _build_pattern_findings(asin_data: dict[str, Any]) -> list[dict[str, Any]]:
                 "range_display":  _fmt_range(roi.min_impact, roi.max_impact),
             },
             "_priority": _priority_score_pattern(severity, roi),
-        })
+        }
+        finding["confidence_reason"] = _confidence_reason_pattern(finding)
+        findings.append(finding)
     return findings
 
 
@@ -910,17 +1125,19 @@ def _build_signal_findings(asin_data: dict[str, Any]) -> list[dict[str, Any]]:
     for signal in detect_all_signals(asin_data):
         if signal.severity == "ok":
             continue
-        findings.append({
-            "source": "signal",
-            "name": signal.name,
-            "severity": signal.severity,
+        finding = {
+            "source":       "signal",
+            "name":         signal.name,
+            "severity":     signal.severity,
             "impact_score": signal.impact_score,
-            "explanation": signal.explanation,
+            "explanation":  signal.explanation,
             "action_title": SIGNAL_ACTION_TITLES.get(
                 signal.name, signal.name.replace("_", " ").title()
             ),
-            "_priority": float(signal.impact_score),
-        })
+            "_priority":    float(signal.impact_score),
+        }
+        finding["confidence_reason"] = _confidence_reason_signal(finding)
+        findings.append(finding)
     return findings
 
 
@@ -1075,9 +1292,17 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
         patterns = _downgrade_confidence(patterns)
     patterns = _recompute_priorities(patterns)
 
-    # ---- 5. Unified ranking and action plan on active findings. ------
-    ranked = _build_priority_ranking(patterns, signals)
+    # ---- 5. Unified ranking and action plan on active findings.
+    #         Ranking is capped at top-3 so the seller sees a short,
+    #         scan-in-10-seconds list. Core problem is blockers[0].
+    ranked_full = _build_priority_ranking(patterns, signals)
+    ranked = ranked_full[:3]
+    # Re-number ranks 1..N so slot == position in the truncated list.
+    for idx, blk in enumerate(ranked, start=1):
+        blk["rank"] = idx
     action_plan = _build_action_plan(ranked)
+    core_problem = _build_core_problem(ranked)
+    narrative_theme = _derive_narrative_theme(core_problem)
 
     # ---- 6. Naive sum (transparency only; may double-count). ---------
     raw_mins = [
@@ -1122,6 +1347,9 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
     summary = {
         "score":               score,
         "readiness":           _readiness_label(score),
+        # Core problem: single source of truth. Matches blockers[0].
+        "core_problem":        core_problem,
+        "narrative_theme":     narrative_theme,
         "patterns_triggered":  len(patterns),
         "patterns_active":     active_patterns_count,
         "patterns_suppressed": sum(1 for p in patterns if p.get("suppressed_by")),
@@ -1154,6 +1382,12 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
             "Sample size is thin (sessions < 200 or units < 10); all "
             "pattern confidences have been downgraded one level."
         )
+
+    # Final realism pass: surface only notes that would materially
+    # affect how a seller reads the numbers (exaggerated ROI vs
+    # current size, thin sample, unidentifiable row).
+    sanity_notes = _sanity_notes(sanitized, patterns, summary)
+    summary["sanity_notes"] = sanity_notes
 
     return {
         "asin":     sanitized.get("asin") or sanitized.get("ASIN"),
