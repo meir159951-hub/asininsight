@@ -160,6 +160,35 @@ def _insufficient(pattern_name: str, missing: list[str]) -> ROIImpact:
     )
 
 
+def _margin_nonpositive_fallback(
+    pattern_name: str,
+    product: dict[str, Any],
+    monthly_units: float | None = None,
+) -> ROIImpact:
+    """
+    Uplift calculators multiply a metric lift by margin-per-unit. When
+    margin is zero or negative (price <= COGS + FBA) projecting a
+    positive uplift is misleading - fixing CR or CTR on a negative-
+    margin product only amplifies the bleed. This fallback returns a
+    $0-$0 range with an explicit seller-facing explanation so the
+    pattern still appears in the audit but its ROI is honest.
+    """
+    if monthly_units is None:
+        monthly_units = _monthly_units(product)
+    return ROIImpact(
+        pattern_name=pattern_name,
+        min_impact=0.0,
+        max_impact=0.0,
+        monthly_units=monthly_units,
+        confidence="low",
+        explanation=(
+            "Contribution margin is zero or negative after COGS and "
+            "FBA fees. Revenue-uplift projections are not meaningful "
+            "until the pricing or cost structure is fixed first."
+        ),
+    )
+
+
 # ---------------------------------------------------------------------------
 # Per-pattern calculators (Batch 1: patterns 1-8)
 #
@@ -187,6 +216,9 @@ def _roi_listing_over_promise(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("listing_over_promise", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("listing_over_promise", product)
 
     # Conservative CR lift: +0.5 to +1.5 absolute percentage points.
     lift_lo, lift_hi = 0.005, 0.015
@@ -224,6 +256,9 @@ def _roi_hidden_winner(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("hidden_winner", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("hidden_winner", product)
 
     # Back out impressions from sessions / CTR, then model a CTR lift.
     impressions = sessions / ctr
@@ -284,6 +319,9 @@ def _roi_buy_box_loss_healthy_stock(product: dict[str, Any]) -> ROIImpact:
     if missing:
         return _insufficient("buy_box_loss_healthy_stock", missing)
 
+    if margin <= 0:
+        return _margin_nonpositive_fallback("buy_box_loss_healthy_stock", product)
+
     # Units you lost because Buy Box was off.
     lost_units = units * (100.0 - bb) / bb
     # Typical recovery: 40-70% of the lost units in the first 1-2 months.
@@ -318,6 +356,9 @@ def _roi_underinvested_winner(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("underinvested_winner", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("underinvested_winner", product)
 
     # Scaling assumptions: +50% to +150% sessions via PPC and SEO.
     # Net contribution = extra_units * (margin - target_acos * price).
@@ -355,6 +396,9 @@ def _roi_reviews_killing_conversion(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("reviews_killing_conversion", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("reviews_killing_conversion", product)
 
     # Lift range depends on how bad the rating is. Below 3.8 the upside
     # is larger because the trust hit is steeper.
@@ -475,6 +519,9 @@ def _roi_restock_urgency(product: dict[str, Any]) -> ROIImpact:
     if missing:
         return _insufficient("restock_urgency", missing)
 
+    if margin <= 0:
+        return _margin_nonpositive_fallback("restock_urgency", product)
+
     # Risk window: 0.5 to 1.5 months of lost contribution (lost sales
     # plus the 2-6 weeks of rank recovery after restock).
     base = units * margin
@@ -532,6 +579,9 @@ def _roi_buy_box_war_on_ranked(product: dict[str, Any]) -> ROIImpact:
     if missing:
         return _insufficient("buy_box_war_on_ranked", missing)
 
+    if margin <= 0:
+        return _margin_nonpositive_fallback("buy_box_war_on_ranked", product)
+
     # Ranked ASINs already pull the clicks, but a price war is harder
     # to fully win back. Recovery: 30-60% of the diverted units.
     lost_units = units * (100.0 - bb) / bb
@@ -565,6 +615,9 @@ def _roi_weak_listing_foundation(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("weak_listing_foundation", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("weak_listing_foundation", product)
 
     # Realistic relaunch: 1.2x-2.5x current sessions at 1.5-2.5% CR
     # within a quarter. Hard-capped at $2,500/mo so the number stays
@@ -606,6 +659,9 @@ def _roi_review_starvation(product: dict[str, Any]) -> ROIImpact:
         missing.append("price/cogs/fba_fees")
     if missing:
         return _insufficient("review_starvation", missing)
+
+    if margin <= 0:
+        return _margin_nonpositive_fallback("review_starvation", product)
 
     # Closing the review-trust gap typically lifts CR by 0.3-1.0
     # absolute points on an ASIN that already converts.
