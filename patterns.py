@@ -107,9 +107,9 @@ def _hidden_winner(product: dict[str, Any]) -> bool:
 def _ppc_waste_on_organic(product: dict[str, Any]) -> bool:
     if not _has(product, "acos", "organic_rank_top_keyword"):
         return False
-    acos = _num(product, "acos")              # fraction, e.g. 0.35 == 35%
+    acos = _num(product, "acos")              # fraction, e.g. 0.45 == 45%
     rank = _num(product, "organic_rank_top_keyword")
-    return acos > 0.35 and rank <= 15
+    return acos > 0.45 and rank <= 15
 
 
 # ---------------------------------------------------------------------------
@@ -291,7 +291,7 @@ def _overbid_weak_listing(product: dict[str, Any]) -> bool:
         return False
     cr = _num(product, "conversion_rate")
     rating = _num(product, "rating")
-    weak_cr = cr is not None and cr < 0.015
+    weak_cr = cr is not None and cr < 0.02
     weak_rating = rating is not None and rating < 4.0
     return weak_cr or weak_rating
 
