@@ -38,12 +38,7 @@
         "priceCurrency": "USD",
         "billingIncrement": "P1M"
       }
-    ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "reviewCount": "47"
-    }
+    ]
   }
   </script>
   <meta property="og:type"        content="website">
@@ -170,18 +165,30 @@
     .trust-bar { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 28px; padding: 16px 20px; background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 14px; }
     .trust-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
     .trust-item svg { flex-shrink: 0; }
-    .stats-row { display: flex; gap: 32px; flex-wrap: wrap; margin-top: 20px; }
-    .stat-item { display: flex; flex-direction: column; gap: 2px; }
-    .stat-num { font-size: 22px; font-weight: 800; color: var(--blue); font-family: Georgia, serif; line-height: 1; }
-    .stat-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .early-access-banner {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-top: 20px; padding: 12px 16px;
+      background: #fef3c7; border: 1px solid #fde68a; border-radius: 12px;
+      font-size: 13px; color: #92400e; max-width: 620px;
+    }
+    .early-access-banner .ea-dot {
+      flex-shrink: 0; margin-top: 5px;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #d97706;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, .2);
+    }
+    .early-access-banner .ea-text { line-height: 1.5; }
+    .early-access-banner strong { color: #7c2d12; }
 
     /* ── Testimonials ── */
-    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
-    .testi { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 18px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
-    .testi-stars { color: #f59e0b; font-size: 15px; letter-spacing: 1px; }
-    .testi-text { font-size: 14px; color: #2d3f55; line-height: 1.65; flex: 1; }
-    .testi-author { font-size: 13px; color: var(--muted); font-weight: 600; }
-    .testi-author span { display: block; font-weight: 400; font-size: 12px; margin-top: 2px; }
+    .ea-panel {
+      margin-top: 24px; padding: 28px 30px;
+      background: var(--paper); border: 1px solid rgba(221,212,198,.9);
+      border-radius: 18px; max-width: 760px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .ea-panel p { font-size: 15px; line-height: 1.65; color: #2d3f55; }
+    .ea-panel strong { color: #15263d; }
 
     /* ── FAQ ── */
     .faq-list { display: grid; gap: 10px; margin-top: 24px; max-width: 720px; }
@@ -219,16 +226,17 @@
 
     /* ── Responsive ── */
     @media (max-width: 760px) {
-      .steps, .props, .testi-grid { grid-template-columns: 1fr; }
+      .steps, .props { grid-template-columns: 1fr; }
+      .ea-panel { padding: 22px 20px; }
       .outputs { grid-template-columns: 1fr; }
       .btn-row { flex-direction: column; }
       .btn { width: 100%; }
       .cta-band { padding: 32px 24px; }
       .impact-box { flex-direction: column; align-items: flex-start; }
       .trust-bar { gap: 14px; }
+      .early-access-banner { font-size: 12px; padding: 10px 14px; }
       .hero { padding: 48px 0 28px; }
       .hero-sub { font-size: 16px; }
-      .stats-row { gap: 20px; }
       .section { padding: 24px 0 40px; }
       .foot { flex-direction: column; align-items: flex-start; gap: 12px; }
       .foot-links { flex-wrap: wrap; gap: 14px; }
@@ -243,7 +251,6 @@
       .section h2 { font-size: 24px; }
       .cta-band h2 { font-size: 22px; }
       .cta-band { padding: 28px 20px; }
-      .stat-num { font-size: 20px; }
     }
   </style>
 </head>
@@ -288,19 +295,13 @@
     </div>
     <p class="hero-note">Free plan included. No credit card. Reads the same Business Report you already pull from Seller Central.</p>
 
-    <div class="stats-row">
-      <div class="stat-item">
-        <span class="stat-num" id="diagCounter">2,847</span>
-        <span class="stat-label">listings diagnosed</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num">$280</span>
-        <span class="stat-label">avg. monthly impact found</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num">30s</span>
-        <span class="stat-label">to your first diagnosis</span>
-      </div>
+    <div class="early-access-banner" role="status" aria-label="Product status">
+      <span class="ea-dot" aria-hidden="true"></span>
+      <span class="ea-text">
+        <strong>Early access</strong> &mdash; first sellers are testing the
+        diagnostic engine now. Results and numbers below are examples from
+        the engine, not aggregated customer data.
+      </span>
     </div>
 
     <div class="trust-bar">
@@ -668,32 +669,30 @@ function resetDemo() {
   </div>
 </section>
 
-<!-- Testimonials -->
+<!-- Early-access status (testimonials removed until real ones exist) -->
 <section class="section">
   <div class="wrap">
-    <p class="section-label">What sellers say</p>
-    <h2>Real feedback from Amazon sellers.</h2>
-    <div class="testi-grid">
-      <div class="testi">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"I knew my ACOS was high but couldn't figure out why. ASINInsight told me exactly which keywords were bleeding budget and gave me 4 steps to fix it. Followed them and cut ACOS from 74% to 31% in 3 weeks."</p>
-        <div class="testi-author">Jason M.
-          <span>7-figure Amazon seller · Home &amp; Kitchen</span>
-        </div>
-      </div>
-      <div class="testi">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"I was convinced my conversion rate was the problem. Turns out my CTR was the real issue: 0.18% when it should be above 0.30%. The hero image fix took one afternoon. Sessions up 40% the next week."</p>
-        <div class="testi-author">Rachel T.
-          <span>Private label seller · Beauty &amp; Personal Care</span>
-        </div>
-      </div>
-      <div class="testi">
-        <div class="testi-stars">★★★★★</div>
-        <p class="testi-text">"I manage 12 ASINs for clients. I run every Business Report through ASINInsight before our weekly calls. It shows me exactly what to focus on so I'm not wasting time explaining dashboards. Worth 10x the price."</p>
-        <div class="testi-author">Daniel K.
-          <span>Amazon PPC agency owner</span>
-        </div>
+    <p class="section-label">Where we are</p>
+    <h2>Early access. First sellers on board.</h2>
+    <div class="ea-panel">
+      <p>
+        ASINInsight is in early access. The diagnostic engine, ROI model,
+        and action plan are live and run on every upload, but we are
+        <strong>not yet displaying customer testimonials or aggregate
+        stats</strong> - only real ones will appear here, and only once
+        early sellers have approved their own quotes.
+      </p>
+      <p>
+        If you are serious about Amazon and want to shape what the
+        product does next, the free plan runs a full diagnosis on one
+        ASIN - no card required. Your feedback directly drives the
+        roadmap during this phase.
+      </p>
+      <div class="btn-row" style="margin-top: 18px;">
+        <form action="/checkout/free" method="post">
+          <button type="submit" class="btn btn-primary">Run a free diagnosis</button>
+        </form>
+        <a href="/pricing" class="btn btn-secondary">See pricing</a>
       </div>
     </div>
   </div>
@@ -902,43 +901,9 @@ function toggleFaq(el) {
 </div>
 
 <script>
-// ── Animated diagnose counter ─────────────────────────────────────────────
-(function () {
-  var el = document.getElementById('diagCounter');
-  if (!el) return;
-
-  function countUp(target, duration) {
-    var start = Math.max(0, target - 300);
-    var startTime = null;
-    function step(ts) {
-      if (!startTime) startTime = ts;
-      var progress = Math.min((ts - startTime) / duration, 1);
-      var ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      var current = Math.round(start + (target - start) * ease);
-      el.textContent = current.toLocaleString();
-      if (progress < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-  }
-
-  // Fetch real count from server, fall back to static number
-  fetch('/api/stats')
-    .then(function (r) { return r.json(); })
-    .then(function (d) {
-      var n = d.diagnoses_run || 2847;
-      // Animate when element scrolls into view
-      var obs = new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting) {
-          countUp(n, 1600);
-          obs.disconnect();
-        }
-      }, { threshold: 0.5 });
-      obs.observe(el);
-    })
-    .catch(function () {
-      // Static fallback already in the HTML
-    });
-})();
+// Animated diagnose counter removed - no fabricated metrics on the
+// landing page. When real, audited numbers exist they can be rendered
+// directly from /api/stats without an inflated fallback.
 
 // ── Exit intent popup ─────────────────────────────────────────────────────
 (function () {
