@@ -121,6 +121,106 @@ SIGNAL_ACTION_TITLES: dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
+# Data-quality contract
+#
+# These two lists define what the CSV must contain for a full audit
+# and what it may contain for additional signals. The audit runs on
+# partial data, but the report explicitly names what was missing so
+# the seller never mistakes a thin audit for a thorough one.
+# ---------------------------------------------------------------------------
+
+REQUIRED_CSV_FIELDS: list[str] = [
+    "asin", "title",
+    "sessions_30d", "conversion_rate", "ctr",
+    "price", "cogs", "fba_fees",
+    "buy_box_pct", "acos", "ad_spend_30d",
+    "rating", "review_count",
+    "days_of_cover", "organic_rank_top_keyword",
+]
+
+OPTIONAL_CSV_FIELDS: list[str] = [
+    "category", "units_ordered_30d",
+    "sessions_30d_prev", "conversion_rate_prev",
+    "acos_prev", "organic_rank_prev",
+]
+
+
+# ---------------------------------------------------------------------------
+# Anti-double-counting
+#
+# Several patterns target the same underlying lever (e.g. multiple
+# patterns all move conversion rate). When aggregating monthly impact
+# we group findings by their driver and keep only the largest ROI per
+# driver, then sum across distinct drivers. The naive sum is also
+# surfaced so callers can see the difference.
+# ---------------------------------------------------------------------------
+
+PATTERN_DRIVER: dict[str, str] = {
+    "listing_over_promise":        "cr_uplift",
+    "reviews_killing_conversion":  "cr_uplift",
+    "review_starvation":           "cr_uplift",
+    "hidden_winner":               "traffic_uplift",
+    "underinvested_winner":        "traffic_uplift",
+    "ppc_waste_on_organic":        "ppc_savings",
+    "ppc_addiction":               "ppc_savings",
+    "overbid_weak_listing":        "ppc_savings",
+    "inventory_trap":              "ppc_savings",
+    "buy_box_loss_healthy_stock":  "buy_box_recovery",
+    "buy_box_war_on_ranked":       "buy_box_recovery",
+    "unit_economics_loss":         "unit_economics",
+    "restock_urgency":             "revenue_protection",
+    "weak_listing_foundation":     "listing_relaunch",
+    "discontinuation_candidate":   "sunset_savings",
+}
+
+
+# ---------------------------------------------------------------------------
+# Explainability
+#
+# For every pattern, this map lists the metrics whose current value
+# caused the match. audit_engine attaches these values under
+# `triggered_by` on each pattern finding so the UI can answer
+# "why did this fire?" without re-reading the product dict.
+# ---------------------------------------------------------------------------
+
+PATTERN_TRIGGER_FIELDS: dict[str, list[str]] = {
+    "listing_over_promise":        ["ctr", "conversion_rate"],
+    "hidden_winner":               ["ctr", "conversion_rate"],
+    "ppc_waste_on_organic":        ["acos", "organic_rank_top_keyword"],
+    "buy_box_loss_healthy_stock":  ["buy_box_pct", "days_of_cover"],
+    "underinvested_winner":        ["conversion_rate", "sessions_30d"],
+    "reviews_killing_conversion":  ["rating", "sessions_30d"],
+    "unit_economics_loss":         ["price", "cogs", "fba_fees", "acos"],
+    "inventory_trap":              ["days_of_cover", "conversion_rate"],
+    "restock_urgency":             ["days_of_cover", "conversion_rate"],
+    "ppc_addiction":               ["ad_spend_30d", "organic_rank_top_keyword"],
+    "buy_box_war_on_ranked":       ["organic_rank_top_keyword", "buy_box_pct"],
+    "weak_listing_foundation":     ["sessions_30d", "organic_rank_top_keyword", "review_count"],
+    "review_starvation":           ["conversion_rate", "review_count"],
+    "overbid_weak_listing":        ["acos", "conversion_rate", "rating"],
+    "discontinuation_candidate":   ["conversion_rate", "rating", "review_count"],
+}
+
+
+# ---------------------------------------------------------------------------
+# Model assumptions exposed in every audit output. Documents what the
+# ROI numbers represent without requiring the reader to open the
+# calculator source.
+# ---------------------------------------------------------------------------
+
+MODEL_ASSUMPTIONS: dict[str, str] = {
+    "cr_lift_range":        "0.3-1.5 absolute percentage points",
+    "ppc_savings_range":    "15-50% of current ad spend",
+    "traffic_scaling":      "50-150% session growth modelled at 25% target ACoS",
+    "buy_box_recovery":     "30-70% of diverted units in the first 1-2 months",
+    "relaunch_cap":         "weak_listing_foundation hard-capped at $2,500/mo",
+    "trend_window":         "30-day current vs 30-day prior (optional *_prev fields)",
+    "impact_type":          "monthly profit contribution, not revenue",
+    "aggregation":          "deduplicated by driver; naive sum also exposed for comparison",
+}
+
+
+# ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 
@@ -190,6 +290,77 @@ def _readiness_label(score: int) -> str:
     return "Critical"
 
 
+def _data_quality(asin_data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Report which required / optional CSV fields are present. A thin
+    audit must never masquerade as a thorough one, so the result is
+    surfaced in every output under the ``data_quality`` key.
+    """
+    def _missing(key: str) -> bool:
+        v = asin_data.get(key)
+        return v is None or v == ""
+
+    missing_required = [f for f in REQUIRED_CSV_FIELDS if _missing(f)]
+    missing_optional = [f for f in OPTIONAL_CSV_FIELDS if _missing(f)]
+    total_req = len(REQUIRED_CSV_FIELDS)
+    present_req = total_req - len(missing_required)
+    quality_score = round((present_req / total_req) * 100) if total_req else 0
+    if quality_score >= 90:
+        label = "full"
+    elif quality_score >= 60:
+        label = "partial"
+    else:
+        label = "minimal"
+    return {
+        "label": label,
+        "quality_score": quality_score,
+        "required_total": total_req,
+        "required_present": present_req,
+        "missing_required_fields": missing_required,
+        "missing_optional_fields": missing_optional,
+    }
+
+
+def _triggered_by(pattern_name: str, asin_data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Snapshot the metric values that caused a pattern to match.
+    Values are returned verbatim (no rounding or scaling) so the
+    reader can sanity-check the match.
+    """
+    fields = PATTERN_TRIGGER_FIELDS.get(pattern_name, [])
+    return {f: asin_data.get(f) for f in fields}
+
+
+def _deduped_aggregate(
+    patterns: list[dict[str, Any]],
+) -> tuple[float | None, float | None, dict[str, float]]:
+    """
+    Prevent ROI double-counting by grouping patterns under a shared
+    driver and keeping only the largest impact per driver.
+
+    Returns
+    -------
+    (agg_min, agg_max, per_driver_max)
+        agg_* are None when no pattern has a numeric ROI.
+    """
+    by_driver_max: dict[str, float] = {}
+    by_driver_min: dict[str, float] = {}
+    for p in patterns:
+        driver = PATTERN_DRIVER.get(p["name"], p["name"])
+        roi = p["roi"]
+        hi = roi.get("max_monthly")
+        if hi is None:
+            continue
+        if driver not in by_driver_max or hi > by_driver_max[driver]:
+            by_driver_max[driver] = hi
+            by_driver_min[driver] = roi.get("min_monthly") or 0.0
+    if not by_driver_max:
+        return None, None, {}
+    agg_min = sum(by_driver_min.values())
+    agg_max = sum(by_driver_max.values())
+    return agg_min, agg_max, by_driver_max
+
+
 # ---------------------------------------------------------------------------
 # Stage builders
 # ---------------------------------------------------------------------------
@@ -212,9 +383,11 @@ def _build_pattern_findings(asin_data: dict[str, Any]) -> list[dict[str, Any]]:
             "source": "pattern",
             "name": pattern.name,
             "impact_type": pattern.impact_type,
+            "driver": PATTERN_DRIVER.get(pattern.name, pattern.name),
             "severity": severity,
             "confidence": pattern.confidence,
             "description": pattern.description,
+            "triggered_by": _triggered_by(pattern.name, asin_data),
             "action_title": PATTERN_ACTION_TITLES.get(
                 pattern.name, pattern.name.replace("_", " ").title()
             ),
@@ -256,12 +429,24 @@ def _build_priority_ranking(
     signals: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     """
-    Sort everything into a unified ranking by priority score (desc),
-    then return a lean record per entry suitable for the priority
-    panel in the UI.
+    Sort everything into a unified ranking. Tie-breakers (in order):
+        1. priority score (descending)
+        2. severity rank   (descending)
+        3. pattern ROI max (descending; signals contribute 0)
+        4. name            (alphabetical, for total determinism)
+
+    The tie-breaker chain guarantees byte-identical output for a
+    given input across runs and machines.
     """
+    def _key(f: dict[str, Any]) -> tuple[float, float, float, str]:
+        severity_weight = SEVERITY_RANK.get(f.get("severity", ""), 0.0)
+        roi_max = 0.0
+        if f["source"] == "pattern":
+            roi_max = float(f.get("roi", {}).get("max_monthly") or 0.0)
+        return (-f["_priority"], -severity_weight, -roi_max, f.get("name", ""))
+
     combined = [*patterns, *signals]
-    combined.sort(key=lambda f: f["_priority"], reverse=True)
+    combined.sort(key=_key)
 
     ranked: list[dict[str, Any]] = []
     for idx, f in enumerate(combined, start=1):
@@ -348,14 +533,18 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
     ranked   = _build_priority_ranking(patterns, signals)
     action_plan = _build_action_plan(ranked)
 
-    # Aggregate dollar view across pattern ROIs.
-    mins = [p["roi"]["min_monthly"] for p in patterns if p["roi"]["min_monthly"] is not None]
-    maxes = [p["roi"]["max_monthly"] for p in patterns if p["roi"]["max_monthly"] is not None]
-    aggregate_min = sum(mins) if mins else None
-    aggregate_max = sum(maxes) if maxes else None
-    biggest = max(maxes) if maxes else None
+    # Naive sum across pattern ROIs (transparency only; may double-count).
+    raw_mins = [p["roi"]["min_monthly"] for p in patterns if p["roi"]["min_monthly"] is not None]
+    raw_maxes = [p["roi"]["max_monthly"] for p in patterns if p["roi"]["max_monthly"] is not None]
+    naive_sum_min = sum(raw_mins) if raw_mins else None
+    naive_sum_max = sum(raw_maxes) if raw_maxes else None
+
+    # Preferred aggregate: deduped by driver (no double-counting).
+    agg_min, agg_max, per_driver_max = _deduped_aggregate(patterns)
+    biggest = max(raw_maxes) if raw_maxes else None
 
     score = _compute_score(patterns, signals)
+    quality = _data_quality(asin_data)
 
     # Strip the private _priority key before returning.
     for p in patterns:
@@ -369,24 +558,32 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
         "category": asin_data.get("category"),
         "run_at":   datetime.now().isoformat(timespec="seconds"),
         "summary": {
-            "score": score,
-            "readiness": _readiness_label(score),
+            "score":              score,
+            "readiness":          _readiness_label(score),
             "patterns_triggered": len(patterns),
             "signals_raised":     len(signals),
             "total_findings":     len(patterns) + len(signals),
-            "aggregate_impact_min": aggregate_min,
-            "aggregate_impact_max": aggregate_max,
-            "aggregate_impact_display": _fmt_range(aggregate_min, aggregate_max),
+            # Primary (deduped by driver): the number we lead with.
+            "aggregate_impact_min":     agg_min,
+            "aggregate_impact_max":     agg_max,
+            "aggregate_impact_display": _fmt_range(agg_min, agg_max),
+            "aggregate_by_driver":      per_driver_max,
+            # Naive sum retained for transparency only.
+            "naive_sum_impact_min":     naive_sum_min,
+            "naive_sum_impact_max":     naive_sum_max,
             "biggest_single_opportunity": biggest,
             "caveat": (
-                "Pattern impacts may overlap; the aggregate is an "
-                "upper bound, not a strict sum of recoverable profit."
+                "aggregate_impact_* deduplicates overlapping ROI by "
+                "driver (e.g. multiple CR-lift patterns count once). "
+                "naive_sum_* is exposed only to show the delta."
             ),
         },
-        "patterns":          patterns,
-        "signals":           signals,
-        "priority_blockers": ranked,
-        "action_plan":       action_plan,
+        "data_quality":       quality,
+        "assumptions_used":   MODEL_ASSUMPTIONS,
+        "patterns":           patterns,
+        "signals":            signals,
+        "priority_blockers":  ranked,
+        "action_plan":        action_plan,
     }
 
 
