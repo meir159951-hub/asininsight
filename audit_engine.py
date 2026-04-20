@@ -715,11 +715,199 @@ _SIGNAL_CONFIDENCE_REASONS: dict[str, str] = {
 }
 
 
-def _confidence_reason_pattern(finding: dict[str, Any]) -> str:
-    """
-    Synthesise a one-line justification from the pattern's triggered
-    metrics and their interpreted reads.
-    """
+# ---------------------------------------------------------------------------
+# Plain-English mechanics (what the seller is actually experiencing)
+#
+# Metric-based reasoning ("CTR is 0.6% (strong), CR is 1.8% (weak)") is
+# the audit trail; this dict provides the human translation of what
+# that combination means in the seller's day-to-day business language.
+# ---------------------------------------------------------------------------
+
+PATTERN_PLAIN_REASON: dict[str, str] = {
+    "listing_over_promise":
+        "Customers are clicking your listing in search but not buying "
+        "once they see the detail page. The click is winning; the sale "
+        "is not.",
+    "hidden_winner":
+        "The detail page converts well for the few shoppers who reach "
+        "it, but most shoppers never click through from search. The "
+        "listing converts - it just isn't being seen.",
+    "ppc_waste_on_organic":
+        "You're paying for ad clicks on keywords where you already "
+        "show up in the top 15 organically. Shoppers who would have "
+        "found you for free are being re-bought through paid ads.",
+    "buy_box_loss_healthy_stock":
+        "Your stock is healthy but competitors are winning the Buy "
+        "Box on your own listing. Shoppers who land on the page are "
+        "checking out with someone else.",
+    "underinvested_winner":
+        "This listing already converts at a strong rate - the only "
+        "limit is visibility. Every additional shopper who sees it "
+        "buys at your current rate.",
+    "reviews_killing_conversion":
+        "You're sending enough shoppers to the page, but low ratings "
+        "are making them walk away at the moment of purchase.",
+    "unit_economics_loss":
+        "Every sale is losing money once COGS, FBA fees and ad spend "
+        "are counted. Selling more of this product deepens the loss.",
+    "inventory_trap":
+        "Inventory is sitting; you're paying to store it and paying "
+        "for ad clicks that don't produce sales to clear it.",
+    "restock_urgency":
+        "Stock will run out before the next shipment lands, which "
+        "will stop sales and drop organic rank for weeks after restock.",
+    "ppc_addiction":
+        "Ad spend is carrying the listing while organic rank stays "
+        "buried. Cut the ads and sales will drop; keep spending and "
+        "the ACoS floor never falls.",
+    "buy_box_war_on_ranked":
+        "You rank on page 1 so shoppers reach the listing, but a "
+        "competitor wins the actual checkout by undercutting price or "
+        "fulfilment.",
+    "weak_listing_foundation":
+        "The listing lacks the basics a first-page ASIN needs - "
+        "traffic, rank, and reviews are all thin. Small tweaks won't "
+        "move it; it needs a relaunch.",
+    "review_starvation":
+        "The product converts well enough, but the review count is "
+        "too low to convince the next wave of shoppers to buy.",
+    "overbid_weak_listing":
+        "You're raising ad bids on a detail page that isn't converting. "
+        "Each extra dollar magnifies the problem on the page.",
+    "discontinuation_candidate":
+        "Traffic is weak, reviews are thin, and conversion is poor "
+        "together. This is not a listing to optimise - it's a listing "
+        "to retire.",
+}
+
+SIGNAL_PLAIN_REASON: dict[str, str] = {
+    "buy_box":
+        "Shoppers are reaching your listing, but a competitor is "
+        "winning the actual sale at the Buy Box.",
+    "suppression_risk":
+        "The listing shows signs of being invisible or demoted by "
+        "Amazon - unusual for a healthy product.",
+    "true_profit_margin":
+        "After COGS, FBA fees and ads, there's very little profit "
+        "left in each sale - or you're losing money on each unit.",
+    "trend_sessions":
+        "Traffic to the listing has dropped noticeably in the last 30 "
+        "days compared with the prior month.",
+    "trend_conversion":
+        "Fewer of your shoppers are buying now than did a month ago.",
+    "trend_acos":
+        "Your ads are costing more relative to sales than a month "
+        "ago; something shifted in bids, competition, or the listing.",
+    "trend_rank":
+        "Your organic position on the main keyword has slipped "
+        "materially in 30 days, which shrinks free traffic.",
+}
+
+
+# ---------------------------------------------------------------------------
+# Business-level "why this one" - the commercial reasoning for why a
+# given finding belongs at the top of the seller's action list. This
+# is not a ranking trace; it's the commercial argument.
+# ---------------------------------------------------------------------------
+
+PATTERN_BUSINESS_WHY: dict[str, str] = {
+    "listing_over_promise":
+        "This is the cheapest leak to close: you already have the "
+        "traffic and the clicks. Fixing the on-page experience "
+        "converts visitors you're paying for into sales.",
+    "hidden_winner":
+        "The unit economics already work; the constraint is "
+        "visibility. Every additional session converts at your "
+        "current rate, which makes this the highest-leverage growth "
+        "move on the ASIN.",
+    "ppc_waste_on_organic":
+        "Ad dollars are buying traffic that would arrive for free. "
+        "Redirecting this spend is pure margin recovery with no "
+        "downside on sales.",
+    "buy_box_loss_healthy_stock":
+        "Buy Box is where sales are actually won or lost. Recovering "
+        "share directly converts clicks you're already paying for "
+        "into your sales instead of a competitor's.",
+    "underinvested_winner":
+        "Strong-converting ASINs are rare. Scaling traffic here "
+        "returns more profit per invested dollar than any other fix "
+        "on the audit.",
+    "reviews_killing_conversion":
+        "Traffic is reaching the page but conversion is bleeding out "
+        "because of trust. Ratings are a precondition for scale - "
+        "spending more on traffic before fixing this amplifies the "
+        "leak.",
+    "unit_economics_loss":
+        "Selling more of a money-losing product is never the answer. "
+        "Every other improvement must wait until each sale is at "
+        "least break-even.",
+    "inventory_trap":
+        "Capital and ad spend are tied up in stock that isn't moving. "
+        "Stopping both recovers cash and ad budget for products that "
+        "actually sell.",
+    "restock_urgency":
+        "A stockout costs more than lost sales - it costs the rank "
+        "you've already paid to build. Replenishing now protects the "
+        "compounding value of the listing.",
+    "ppc_addiction":
+        "A listing that can't stand on organic is a listing with a "
+        "permanent ad tax. Building organic rank is the only way to "
+        "lower the long-term cost of sale.",
+    "buy_box_war_on_ranked":
+        "You've already paid in SEO to get the clicks; losing the "
+        "Buy Box means handing the outcome to a competitor at the "
+        "last step. This is the cheapest dollar you can recover.",
+    "weak_listing_foundation":
+        "A listing missing every ingredient for success won't climb "
+        "by tweaking pieces. A clean relaunch is the fastest path to "
+        "any return at all.",
+    "review_starvation":
+        "Conversion is already working; the ceiling on growth is "
+        "trust. Growing review count lifts both CR and your ability "
+        "to scale PPC profitably.",
+    "overbid_weak_listing":
+        "Every extra ad dollar spent on a weak detail page widens "
+        "the loss. Trimming bids is immediate cash back; the listing "
+        "fix comes next.",
+    "discontinuation_candidate":
+        "Keeping a weak ASIN alive drains attention and budget from "
+        "ASINs that could scale. The fastest way to free those "
+        "resources is to sunset this one.",
+}
+
+SIGNAL_BUSINESS_WHY: dict[str, str] = {
+    "buy_box":
+        "Buy Box share is where clicks become sales. Every point "
+        "below 90% is sales leaking to a competitor on your own "
+        "listing - the cheapest conversion to recover.",
+    "suppression_risk":
+        "A suppressed or invisible listing cannot be improved with "
+        "marketing. Ruling this out first prevents wasted effort on "
+        "other fixes.",
+    "true_profit_margin":
+        "If margin is too thin, no growth fix produces real profit. "
+        "Protecting unit economics is the precondition for every "
+        "other action to pay back.",
+    "trend_sessions":
+        "A traffic drop compounds fast: fewer sessions mean fewer "
+        "sales, fewer reviews, and slipping rank. Investigating the "
+        "cause now limits the damage.",
+    "trend_conversion":
+        "A conversion drop usually signals a real change on the "
+        "listing or in the market. Diagnosing it early is cheaper "
+        "than working around it for months.",
+    "trend_acos":
+        "Rising ACoS compresses margin on every sale. Catching the "
+        "cause before it becomes the new normal protects "
+        "profitability.",
+    "trend_rank":
+        "Organic rank erosion silently shrinks free traffic. The "
+        "earlier you act, the less ad spend you need to replace it.",
+}
+
+
+def _metric_evidence_line(finding: dict[str, Any]) -> str:
+    """Low-level metric trail: what numbers actually triggered the match."""
     enriched = finding.get("triggered_by_interpreted", {})
     parts: list[str] = []
     for field, view in enriched.items():
@@ -728,15 +916,40 @@ def _confidence_reason_pattern(finding: dict[str, Any]) -> str:
         pretty = field.replace("_30d", " (30d)").replace("_", " ")
         parts.append(f"{pretty} is {view['display']} ({view['read']})")
     if not parts:
-        return "Pattern matched on the fields available in the row."
-    return "Matched because " + "; ".join(parts) + "."
+        return ""
+    return "Evidence: " + "; ".join(parts) + "."
+
+
+def _confidence_reason_pattern(finding: dict[str, Any]) -> str:
+    """
+    Human-readable confidence reason for a pattern finding:
+    plain-English mechanics first, metric evidence second. The
+    seller reads what's happening in the business before they read
+    the numbers.
+    """
+    name = finding.get("name", "")
+    plain = PATTERN_PLAIN_REASON.get(name, "")
+    evidence = _metric_evidence_line(finding)
+    if plain and evidence:
+        return f"{plain} {evidence}"
+    if plain:
+        return plain
+    if evidence:
+        return evidence
+    return "Pattern matched on the fields available in the row."
 
 
 def _confidence_reason_signal(finding: dict[str, Any]) -> str:
-    return _SIGNAL_CONFIDENCE_REASONS.get(
-        finding.get("name", ""),
-        finding.get("explanation", "")[:180] or "Signal matched on its own evidence.",
-    )
+    """
+    Human-readable confidence reason for a signal: plain-English
+    interpretation first, source-data rationale second.
+    """
+    name = finding.get("name", "")
+    plain = SIGNAL_PLAIN_REASON.get(name, "")
+    technical = _SIGNAL_CONFIDENCE_REASONS.get(name, "")
+    if plain and technical:
+        return f"{plain} {technical}"
+    return plain or technical or finding.get("explanation", "")[:180]
 
 
 # ---------------------------------------------------------------------------
@@ -746,44 +959,107 @@ def _confidence_reason_signal(finding: dict[str, Any]) -> str:
 def _build_core_problem(ranked: list[dict[str, Any]]) -> dict[str, Any] | None:
     """
     The single dominant issue the seller should act on first. Always
-    matches priority_blockers[0] and action_plan[0]; adds a short
-    `why_this_one` so the reader understands why it outranked the rest.
+    matches priority_blockers[0] and action_plan[0]. Every field here
+    is seller-facing: why_this_one is the commercial argument for
+    prioritising this one, not the technical ranking trace.
     """
     if not ranked:
         return None
     top = ranked[0]
-    why = _explain_core_selection(ranked)
     return {
         "name":                 top["name"],
-        "source":                top["source"],
-        "severity":              top["severity"],
-        "driver":                top.get("driver"),
-        "action_title":          top["action_title"],
-        "headline":              top["headline"],
-        "monthly_impact_range":  top.get("monthly_impact_range"),
-        "priority_score":        top["priority_score"],
-        "why_this_one":          why,
+        "source":               top["source"],
+        "severity":             top["severity"],
+        "driver":               top.get("driver"),
+        "action_title":         top["action_title"],
+        "headline":             top["headline"],
+        "monthly_impact_range": top.get("monthly_impact_range"),
+        "priority_score":       top["priority_score"],
+        "why_this_one":         _business_why_for(top),
+        "one_thing_this_week": (
+            f"If you fix only one thing this week, do this: "
+            f"{top['action_title']}."
+        ),
     }
 
 
-def _explain_core_selection(ranked: list[dict[str, Any]]) -> str:
-    top = ranked[0]
-    if len(ranked) == 1:
-        return (
-            f"Only one active finding ({top['severity']} severity); "
-            f"it is the focus by default."
+def _business_why_for(item: dict[str, Any]) -> str:
+    """
+    Commercial reasoning for why this finding belongs at the top of
+    the action list. Named per-pattern / per-signal so the wording
+    reads like a seller would write it to another seller - not like
+    a system trace.
+    """
+    name = item.get("name", "")
+    if item.get("source") == "pattern":
+        return PATTERN_BUSINESS_WHY.get(
+            name,
+            "Addressing this first unblocks the other improvements "
+            "this audit suggests.",
         )
-    gap = top["priority_score"] - ranked[1]["priority_score"]
-    if gap >= 2:
-        return (
-            f"Dominant: priority score {top['priority_score']:.1f} "
-            f"vs next-highest {ranked[1]['priority_score']:.1f}."
-        )
-    return (
-        f"Selected on severity ({top['severity']}) and priority score "
-        f"{top['priority_score']:.1f}; next finding scores "
-        f"{ranked[1]['priority_score']:.1f}."
+    return SIGNAL_BUSINESS_WHY.get(
+        name,
+        "This is a precondition for the other fixes to produce real "
+        "profit.",
     )
+
+
+def _build_top_headline(
+    core: dict[str, Any] | None,
+    agg_by_cat: dict[str, Any] | None,
+) -> str | None:
+    """
+    The single sentence a seller sees before anything else. Leads
+    with dollars lost + the underlying cause. Never cold, never
+    passive.
+    """
+    if core is None:
+        return None
+    # Prefer the category that actually carries the core problem's
+    # money so the dollar number matches the cause described.
+    impact_range = core.get("monthly_impact_range")
+    if impact_range and impact_range != "n/a":
+        cause = _cause_phrase_for(core)
+        return (
+            f"You are likely leaving {impact_range} on the table due "
+            f"to {cause}."
+        )
+    # Signals often carry no dollar range; lead with the signal itself.
+    if core.get("source") == "signal":
+        return (
+            f"Your top issue is {_cause_phrase_for(core)} - fix this "
+            f"before anything else in the audit."
+        )
+    return None
+
+
+def _cause_phrase_for(item: dict[str, Any]) -> str:
+    """Short, seller-facing phrase naming the commercial cause."""
+    driver = item.get("driver")
+    if item.get("source") == "pattern":
+        driver_phrase = {
+            "cr_uplift":          "traffic reaching the listing but not converting",
+            "traffic_uplift":     "too few shoppers reaching a listing that already converts",
+            "ppc_savings":        "ad spend that isn't earning its keep",
+            "buy_box_recovery":   "the Buy Box being won by a competitor",
+            "unit_economics":     "each sale losing money after fees",
+            "revenue_protection": "a coming stockout that will hit sales and rank",
+            "listing_relaunch":   "a listing missing the basics for first-page performance",
+            "sunset_savings":     "an ASIN that is a drain rather than a contributor",
+        }.get(driver, "")
+        if driver_phrase:
+            return driver_phrase
+    name = item.get("name", "")
+    signal_phrase = {
+        "buy_box":            "Buy Box loss on your own listing",
+        "suppression_risk":   "possible listing visibility block",
+        "true_profit_margin": "thin or negative unit profit",
+        "trend_sessions":     "a sharp drop in traffic",
+        "trend_conversion":   "a sharp drop in conversion",
+        "trend_acos":         "rising ad cost vs sales",
+        "trend_rank":         "an organic rank slide",
+    }.get(name)
+    return signal_phrase or item.get("action_title", "the main issue on this ASIN").lower()
 
 
 def _derive_narrative_theme(core: dict[str, Any] | None) -> str | None:
@@ -1199,14 +1475,24 @@ def _build_priority_ranking(
     return ranked
 
 
+_URGENCY_LABELS: list[tuple[str, str]] = [
+    ("primary",    "THIS WEEK - do this first"),
+    ("secondary",  "Next - after the primary fix is underway"),
+    ("supporting", "Then - worth addressing once the top two move"),
+]
+
+
 def _build_action_plan(ranked: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """
     Turn the top priority blockers into a numbered, do-this-first
     plan in seller language - deduping by driver so the top 3 steps
     always target 3 distinct commercial levers.
 
-    A signal without a driver is treated as its own lever and is
-    always admissible regardless of any pattern driver seen before.
+    Every step is tagged with urgency (primary / secondary /
+    supporting) and an urgency_label so the UI can visually separate
+    "do this now" from "nice to have this month". Step 1 is always
+    primary, the others are explicitly secondary, so the plan never
+    reads as three equally-weighted options.
     """
     seen_drivers: set[str] = set()
     plan: list[dict[str, Any]] = []
@@ -1216,12 +1502,17 @@ def _build_action_plan(ranked: list[dict[str, Any]]) -> list[dict[str, Any]]:
             if driver in seen_drivers:
                 continue
             seen_drivers.add(driver)
+        slot = len(plan)
+        urgency, urgency_label = _URGENCY_LABELS[min(slot, len(_URGENCY_LABELS) - 1)]
         plan.append({
-            "step": len(plan) + 1,
-            "title": item["action_title"],
-            "why": item["headline"],
+            "step":             slot + 1,
+            "title":            item["action_title"],
+            "why":              item["headline"],
             "estimated_impact": item.get("monthly_impact_range") or "see signal above",
-            "severity": item["severity"],
+            "severity":         item["severity"],
+            "urgency":          urgency,
+            "urgency_label":    urgency_label,
+            "is_primary":       urgency == "primary",
         })
         if len(plan) >= 3:
             break
@@ -1303,6 +1594,7 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
     action_plan = _build_action_plan(ranked)
     core_problem = _build_core_problem(ranked)
     narrative_theme = _derive_narrative_theme(core_problem)
+    # headline built after we have the category split; see step 8.
 
     # ---- 6. Naive sum (transparency only; may double-count). ---------
     raw_mins = [
@@ -1324,6 +1616,7 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
 
     # ---- 8. Aggregate split by commercial category. ------------------
     aggregate_by_category = _split_aggregate(patterns)
+    top_headline = _build_top_headline(core_problem, aggregate_by_category)
 
     # ---- 9. Score. ----------------------------------------------------
     #          Suppressed / grouped patterns do not penalize the score
@@ -1347,6 +1640,8 @@ def run_full_audit(asin_data: dict[str, Any]) -> dict[str, Any]:
     summary = {
         "score":               score,
         "readiness":           _readiness_label(score),
+        # Top-level impact hook: first line the seller reads.
+        "headline":            top_headline,
         # Core problem: single source of truth. Matches blockers[0].
         "core_problem":        core_problem,
         "narrative_theme":     narrative_theme,

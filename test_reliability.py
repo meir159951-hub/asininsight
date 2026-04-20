@@ -107,6 +107,7 @@ EXPECTED_TOP_KEYS = {
 
 EXPECTED_SUMMARY_KEYS = {
     "score", "readiness",
+    "headline",
     "core_problem", "narrative_theme",
     "patterns_triggered", "patterns_active",
     "patterns_suppressed", "patterns_grouped",
@@ -630,6 +631,93 @@ grouped_names = {p["name"] for p in r["patterns"] if p.get("grouped_under")}
 if r["summary"].get("core_problem") and grouped_names:
     check("consistency: core_problem is not a grouped sibling",
           r["summary"]["core_problem"]["name"] not in grouped_names)
+
+
+# ---------------------------------------------------------------------------
+# 10. Final-quality pass: items A-E
+# ---------------------------------------------------------------------------
+
+section("10. Final-quality pass (A-E)")
+
+# Use weak_converter_with_reviews as the primary fixture; it exercises
+# multiple drivers and signals without hitting the discontinuation
+# dominance path.
+r = run_full_audit(weak_converter_with_reviews)
+core = r["summary"].get("core_problem")
+plan = r.get("action_plan", [])
+
+# --- A. Business-level why_this_one -------------------------------------
+if core is not None:
+    why = core.get("why_this_one", "")
+    check("A: why_this_one is business-level (no score/priority jargon)",
+          all(tok not in why.lower() for tok in ["priority score", "severity", "rank"]),
+          f"got: {why[:120]}")
+    check("A: why_this_one reads as commercial reasoning (>= 60 chars)",
+          len(why) >= 60,
+          f"len={len(why)}")
+
+# --- B. Human-readable confidence_reason --------------------------------
+for p in r["patterns"]:
+    if p.get("suppressed_by") or p.get("grouped_under"):
+        continue
+    cr = p.get("confidence_reason", "")
+    check(f"B: pattern {p['name']} confidence_reason leads with plain English",
+          len(cr) >= 60 and cr[0].isupper(),
+          f"got: {cr[:100]}")
+for s in r["signals"]:
+    cr = s.get("confidence_reason", "")
+    check(f"B: signal {s['name']} confidence_reason leads with plain English",
+          len(cr) >= 40 and cr[0].isupper(),
+          f"got: {cr[:100]}")
+
+# --- C. Top-level impact hook -------------------------------------------
+headline = r["summary"].get("headline")
+check("C: top-level headline present when core_problem exists",
+      core is None or (isinstance(headline, str) and len(headline) > 20),
+      f"got: {headline!r}")
+if headline and core:
+    # Dollar range is present OR the signal-led headline names the cause.
+    has_dollars = "$" in headline
+    names_cause = any(k in headline.lower() for k in
+                      ["converting", "conversion", "traffic", "buy box",
+                       "ad ", "margin", "rank", "stockout", "visibility",
+                       "listing", "asin"])
+    check("C: headline names dollars or a concrete cause",
+          has_dollars or names_cause,
+          f"got: {headline}")
+
+# --- D. Decision urgency -------------------------------------------------
+if core is not None:
+    one_thing = core.get("one_thing_this_week", "")
+    check("D: core_problem carries a decisive 'fix one thing' line",
+          "fix only one thing" in one_thing.lower() or
+          "if you fix only one" in one_thing.lower(),
+          f"got: {one_thing[:120]}")
+if plan:
+    check("D: action step 1 is flagged is_primary=True",
+          plan[0].get("is_primary") is True)
+
+# --- E. Priority clarity -------------------------------------------------
+if plan:
+    check("E: step 1 urgency == 'primary'",
+          plan[0].get("urgency") == "primary",
+          f"got {plan[0].get('urgency')}")
+    check("E: step 1 urgency_label signals 'this week / first'",
+          "first" in (plan[0].get("urgency_label") or "").lower() or
+          "this week" in (plan[0].get("urgency_label") or "").lower())
+    if len(plan) > 1:
+        check("E: step 2 urgency != 'primary'",
+              plan[1].get("urgency") != "primary",
+              f"got {plan[1].get('urgency')}")
+    if len(plan) > 2:
+        check("E: step 3 urgency != 'primary'",
+              plan[2].get("urgency") != "primary")
+    # Every step carries both urgency and urgency_label.
+    for idx, step in enumerate(plan):
+        check(f"E: step {idx+1} carries urgency + urgency_label",
+              isinstance(step.get("urgency"), str) and
+              isinstance(step.get("urgency_label"), str) and
+              len(step["urgency_label"]) > 5)
 
 
 # ---------------------------------------------------------------------------

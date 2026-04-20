@@ -294,6 +294,25 @@ def _is_unsubscribed(email: str) -> bool:
         return False
 
 
+def _mask_email(email: str | None) -> str:
+    """
+    Redact an email for logging. Keeps the domain and the first + last
+    character of the local part so an operator can spot trends without
+    leaking raw PII into log files.
+
+    Examples:
+        a@b.com           -> "a***@b.com"
+        jonathan@foo.com  -> "j******n@foo.com"
+        (no "@")          -> "***"
+    """
+    if not email or "@" not in email:
+        return "***"
+    local, _, domain = email.partition("@")
+    if len(local) <= 2:
+        return f"{local[:1]}***@{domain}"
+    return f"{local[0]}***{local[-1]}@{domain}"
+
+
 def _schedule_drip(email: str):
     """Schedule all 3 drip emails for a new lead. Idempotent — skips if step already queued."""
     now = time.time()
@@ -305,9 +324,9 @@ def _schedule_drip(email: str):
                     f"VALUES ({ph}, {ph}, {ph})",
                     (email.lower(), step, now + delay)
                 )
-        log.info("Drip sequence scheduled for: %s", email)
+        log.info("Drip sequence scheduled for: %s", _mask_email(email))
     except Exception as e:
-        log.warning("Failed to schedule drip for %s: %s", email, e)
+        log.warning("Failed to schedule drip for %s: %s", _mask_email(email), e)
 
 
 def _build_drip_email(email: str, step: int) -> dict | None:
@@ -436,7 +455,7 @@ def _build_drip_email(email: str, step: int) -> dict | None:
 def _send_drip_email(to_email: str, subject: str, html_body: str) -> bool:
     """Send a single drip email via SendGrid. Returns True on success."""
     if not SENDGRID_API_KEY:
-        log.debug("Drip email skipped (SendGrid not configured): %s", to_email)
+        log.debug("Drip email skipped (SendGrid not configured): %s", _mask_email(to_email))
         return False
     try:
         resp = requests.post(
@@ -454,12 +473,12 @@ def _send_drip_email(to_email: str, subject: str, html_body: str) -> bool:
             timeout=15,
         )
         if resp.status_code in (200, 202):
-            log.info("Drip step sent | to=%s | subject=%s", to_email, subject[:50])
+            log.info("Drip step sent | to=%s | subject=%s", _mask_email(to_email), subject[:50])
             return True
         log.warning("Drip SendGrid error %s: %s", resp.status_code, resp.text[:200])
         return False
     except Exception as e:
-        log.warning("Drip email exception for %s: %s", to_email, e)
+        log.warning("Drip email exception for %s: %s", _mask_email(to_email), e)
         return False
 
 
@@ -989,7 +1008,7 @@ def capture_email():
                 f"INSERT INTO email_leads (email, source, created_at) VALUES ({ph}, {ph}, {ph})",
                 (email, source, time.time())
             )
-        log.info("Lead captured: %s (source=%s)", email, source)
+        log.info("Lead captured: %s (source=%s)", _mask_email(email), source)
         _schedule_drip(email)
     except Exception as e:
         log.warning("Failed to save lead email: %s", e)
@@ -1016,9 +1035,9 @@ def unsubscribe():
                 f"INSERT OR IGNORE INTO email_unsubscribes (email, created_at) VALUES ({ph}, {ph})",
                 (email, time.time())
             )
-        log.info("Unsubscribed: %s", email)
+        log.info("Unsubscribed: %s", _mask_email(email))
     except Exception as e:
-        log.warning("Unsubscribe DB error for %s: %s", email, e)
+        log.warning("Unsubscribe DB error for %s: %s", _mask_email(email), e)
     html_page = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Unsubscribed — ASINInsight</title>
@@ -1161,6 +1180,9 @@ def paddle_webhook():
 
 @app.route("/api/paddle/activate", methods=["POST"])
 def paddle_activate():
+    if not _csrf_valid(request):
+        return jsonify({"ok": False, "error": "Invalid CSRF token."}), 403
+
     ip = _client_ip(request)
     if not _check_activate_rate(ip):
         return jsonify({"ok": False, "error": "Too many requests. Please wait and try again."}), 429
@@ -1197,6 +1219,9 @@ def paddle_activate():
 
 @app.route("/api/send-report", methods=["POST"])
 def send_report():
+    if not _csrf_valid(request):
+        return jsonify({"ok": False, "error": "Invalid CSRF token."}), 403
+
     client_ip = _client_ip(request)
     if not _check_email_rate(client_ip):
         return jsonify({"ok": False, "error": "Too many requests. Please try again later."}), 429
@@ -2115,6 +2140,12 @@ def api_diagnose():
     # This stops anonymous API scraping and brute-force data extraction.
     if not session.get("plan"):
         return jsonify({"error": "Authentication required."}), 401
+
+    # CSRF — the same-origin guard alone is not enough; a compromised
+    # extension or proxy can forge Origin. Require the double-submit
+    # token that every form/fetch on the site attaches.
+    if not _csrf_valid(request):
+        return jsonify({"error": "Invalid CSRF token."}), 403
 
     # Same-origin guard — block cross-site AJAX calls from other domains
     if not _is_same_origin(request):
