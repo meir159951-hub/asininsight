@@ -382,30 +382,57 @@ def _roi_reviews_killing_conversion(product: dict[str, Any]) -> ROIImpact:
 def _roi_unit_economics_loss(product: dict[str, Any]) -> ROIImpact:
     units = _monthly_units(product)
     per_unit = _per_unit_profit_after_ppc(product)
+    price = _num(product, "price")
 
     missing = []
     if units is None:
         missing.append("units_ordered_30d or sessions_30d+conversion_rate")
     if per_unit is None:
         missing.append("price/cogs/fba_fees/acos")
+    if price is None:
+        missing.append("price")
     if missing:
         return _insufficient("unit_economics_loss", missing)
 
-    # Loss prevention: each month you do nothing, you bleed this much.
-    monthly_loss = abs(min(per_unit, 0)) * units
-    lo = monthly_loss * 0.5    # partial fix (e.g. +5% price or -10% ACoS)
-    hi = monthly_loss * 1.0    # full fix (back to break-even or better)
+    # Three cases the pattern can fire under:
+    #   per_unit < 0  -> real, measurable bleed.
+    #   per_unit == 0 -> break-even; no loss but no margin to reinvest.
+    #   per_unit > 0  -> defensive path (pattern should not have fired).
+    if per_unit < 0:
+        monthly_loss = abs(per_unit) * units
+        lo = monthly_loss * 0.60      # partial fix (e.g. +5% price OR -10 pts ACoS)
+        hi = monthly_loss * 1.20      # full fix + modest healthy-margin gain
+        detail = (
+            f"Each sale currently loses ${abs(per_unit):.2f} after COGS, "
+            f"FBA, and PPC. Stopping the bleed on ~{units:,.0f} units/mo "
+            f"preserves ${lo:,.0f}-${hi:,.0f}/mo in profit."
+        )
+        conf = "high"
+    elif per_unit == 0:
+        # Break-even: fix target is moving to a healthy 2-5% margin band.
+        lo = (price * 0.02) * units
+        hi = (price * 0.05) * units
+        detail = (
+            f"Breaking even on ~{units:,.0f} units/mo leaves nothing to "
+            f"reinvest. Moving to a 2-5% healthy margin adds "
+            f"${lo:,.0f}-${hi:,.0f}/mo."
+        )
+        conf = "medium"
+    else:
+        lo, hi = 0.0, 0.0
+        detail = (
+            "Per-unit economics are currently positive; no bleed to "
+            "stop on this ASIN."
+        )
+        conf = "high"
+
     return ROIImpact(
         pattern_name="unit_economics_loss",
         min_impact=lo,
         max_impact=hi,
         monthly_units=units,
-        confidence="high",
-        explanation=(
-            f"Each sale currently loses ${abs(per_unit):.2f} after "
-            f"COGS, FBA, and PPC. Stopping the bleed on ~{units:,.0f} "
-            f"units/mo preserves ${lo:,.0f}-${hi:,.0f} in monthly profit."
-        ),
+        confidence=conf,
+        explanation=detail,
     )
 
 
@@ -539,13 +566,17 @@ def _roi_weak_listing_foundation(product: dict[str, Any]) -> ROIImpact:
     if missing:
         return _insufficient("weak_listing_foundation", missing)
 
-    # A proper relaunch can realistically reach 1.5x-4x current
-    # sessions and a 2.0-3.0% CR within a quarter. Very speculative.
+    # Realistic relaunch: 1.2x-2.5x current sessions at 1.5-2.5% CR
+    # within a quarter. Hard-capped at $2,500/mo so the number stays
+    # credible on speculative projections. The cap is applied to the
+    # max first, then min is clamped to the capped max so the range
+    # never inverts on very high-volume ASINs.
+    MAX_MONTHLY_CAP = 2500.0
     current_contribution = sessions * cr * margin
-    lo_projected = (sessions * 1.5) * 0.02 * margin
-    hi_projected = (sessions * 4.0) * 0.03 * margin
-    lo = max(lo_projected - current_contribution, 0.0)
-    hi = max(hi_projected - current_contribution, 0.0)
+    lo_projected = (sessions * 1.2) * 0.015 * margin
+    hi_projected = (sessions * 2.5) * 0.025 * margin
+    hi = min(max(hi_projected - current_contribution, 0.0), MAX_MONTHLY_CAP)
+    lo = min(max(lo_projected - current_contribution, 0.0), hi)
     return ROIImpact(
         pattern_name="weak_listing_foundation",
         min_impact=lo,
@@ -553,9 +584,10 @@ def _roi_weak_listing_foundation(product: dict[str, Any]) -> ROIImpact:
         monthly_units=sessions * cr,
         confidence="low",
         explanation=(
-            f"A full relaunch (hero, title, keywords, reviews plan) "
-            f"typically reaches 1.5x-4x sessions at 2-3% CR. Incremental "
-            f"monthly profit over today: ${lo:,.0f}-${hi:,.0f}."
+            f"A full relaunch (hero, title, keywords, reviews) typically "
+            f"reaches 1.2x-2.5x sessions at 1.5-2.5% CR. Incremental "
+            f"monthly profit over today: ${lo:,.0f}-${hi:,.0f} "
+            f"(capped to stay realistic on speculative projections)."
         ),
     )
 
