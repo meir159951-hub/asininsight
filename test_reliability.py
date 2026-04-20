@@ -356,6 +356,181 @@ check("fuzz: 500 random products, schema always stable",
 
 
 # ---------------------------------------------------------------------------
+# 8. Trust-breaker guarantees (hardening pass)
+# ---------------------------------------------------------------------------
+
+section("8. Trust-breaker guarantees")
+
+# --- 8a. Discontinuation dominance --------------------------------------
+discontinuation_fixture = {
+    "asin": "B0X", "title": "x", "category": "Home",
+    "price": 20.0, "cogs": 5.0, "fba_fees": 4.0,
+    "sessions_30d": 800, "conversion_rate": 0.012, "ctr": 0.003,
+    "acos": 0.40, "ad_spend_30d": 150, "buy_box_pct": 90,
+    "rating": 3.5, "review_count": 20, "days_of_cover": 30,
+    "organic_rank_top_keyword": 60, "units_ordered_30d": 10,
+}
+r = run_full_audit(discontinuation_fixture)
+pat_names = [p["name"] for p in r["patterns"]]
+active = [p["name"] for p in r["patterns"]
+          if not p.get("suppressed_by") and not p.get("grouped_under")]
+if "discontinuation_candidate" in pat_names:
+    check("discontinuation: sunset pattern is active",
+          "discontinuation_candidate" in active)
+    improvements = {"reviews_killing_conversion", "listing_over_promise",
+                    "review_starvation", "hidden_winner", "underinvested_winner",
+                    "buy_box_loss_healthy_stock", "buy_box_war_on_ranked",
+                    "weak_listing_foundation", "unit_economics_loss",
+                    "restock_urgency"}
+    suppressed_improvements = [p for p in r["patterns"]
+        if p["name"] in improvements and p.get("suppressed_by") == "discontinuation_candidate"]
+    present_improvements = [p["name"] for p in r["patterns"] if p["name"] in improvements]
+    check("discontinuation: every co-firing improvement is suppressed",
+          len(suppressed_improvements) == len(present_improvements),
+          f"present={present_improvements}, suppressed={[p['name'] for p in suppressed_improvements]}")
+    plan_titles = {s["title"] for s in r["action_plan"]}
+    check("discontinuation: 'Sunset this ASIN' is in the action plan",
+          "Sunset this ASIN" in plan_titles)
+    check("discontinuation: 'Repair the product rating' is NOT in the plan",
+          "Repair the product rating" not in plan_titles)
+
+
+# --- 8b. Sibling grouping: priority_blockers never has same driver twice
+weak_converter_with_reviews = {
+    "asin": "B0W", "title": "W", "price": 24.99, "cogs": 6.50, "fba_fees": 4.20,
+    "sessions_30d": 5000, "conversion_rate": 0.018, "ctr": 0.006,
+    "acos": 0.50, "ad_spend_30d": 680, "buy_box_pct": 85,
+    "rating": 3.9, "review_count": 15, "days_of_cover": 25,
+    "organic_rank_top_keyword": 35, "units_ordered_30d": 90,
+}
+r = run_full_audit(weak_converter_with_reviews)
+drivers_in_blockers = [b.get("driver") for b in r["priority_blockers"]
+                       if b["source"] == "pattern" and b.get("driver")]
+check("sibling: blocker list has no duplicate pattern driver",
+      len(drivers_in_blockers) == len(set(drivers_in_blockers)),
+      f"drivers={drivers_in_blockers}")
+
+action_drivers = [b.get("driver") for s in r["action_plan"]
+                  for b in r["priority_blockers"] if b["action_title"] == s["title"]
+                  and b["source"] == "pattern" and b.get("driver")]
+check("action plan: distinct driver on every pattern step",
+      len(action_drivers) == len(set(action_drivers)))
+
+
+# --- 8c. Aggregate split is present and internally consistent ---------
+agg = r["summary"].get("aggregate_by_category")
+check("aggregate split present", agg is not None)
+if agg is not None:
+    cats = agg.get("by_category", {})
+    check("aggregate split has 3 categories",
+          set(cats.keys()) == {"profit_gain", "cost_savings", "loss_prevention"})
+    # Combined upper bound must equal sum of category maxes (ignoring None).
+    cat_maxes = [v.get("max") for v in cats.values() if v.get("max") is not None]
+    combined = agg.get("combined_upper_bound_max")
+    if cat_maxes:
+        expected_sum = sum(cat_maxes)
+        check("combined equals sum of category maxes",
+              combined is not None and abs(combined - expected_sum) < 1e-6,
+              f"{combined} vs {expected_sum}")
+
+
+# --- 8d. Low-volume guard -----------------------------------------------
+low_vol = {**weak_converter_with_reviews, "sessions_30d": 50, "units_ordered_30d": 1}
+r = run_full_audit(low_vol)
+check("low volume flag set",
+      r["data_quality"].get("low_volume_flag") is True)
+check("low volume note surfaced in summary",
+      "low_volume_note" in r["summary"])
+# Confidence downgraded on each active pattern.
+for p in r["patterns"]:
+    if p.get("suppressed_by") or p.get("grouped_under"):
+        continue
+    check(f"low volume: {p['name']} confidence not 'high'",
+          p["confidence"] in ("medium", "low"))
+
+
+# --- 8e. Conditional severity on tiny-velocity restock -----------------
+tiny_velocity = {
+    "asin": "B0T", "title": "t", "price": 25.0, "cogs": 7.0, "fba_fees": 4.0,
+    "sessions_30d": 300, "conversion_rate": 0.025, "ctr": 0.004,
+    "acos": 0.30, "ad_spend_30d": 50, "buy_box_pct": 95,
+    "rating": 4.2, "review_count": 30, "days_of_cover": 13,
+    "organic_rank_top_keyword": 25, "units_ordered_30d": 7,
+}
+r = run_full_audit(tiny_velocity)
+for p in r["patterns"]:
+    if p["name"] == "restock_urgency":
+        max_m = p["roi"].get("max_monthly") or 0
+        if max_m < 500:
+            check("tiny-velocity restock: severity is 'medium' (not 'critical')",
+                  p["severity"] == "medium",
+                  f"got {p['severity']}, max_impact={max_m}")
+
+
+# --- 8f. Bounds clamping ------------------------------------------------
+out_of_bounds = {
+    **weak_converter_with_reviews,
+    "buy_box_pct": 150, "rating": 7.5, "acos": -0.2,
+}
+r = run_full_audit(out_of_bounds)
+notes = r["data_quality"].get("clamp_notes", [])
+check("bounds clamping: notes recorded",
+      any("buy_box_pct" in n for n in notes) and
+      any("rating" in n for n in notes) and
+      any("acos" in n for n in notes),
+      f"notes={notes}")
+
+
+# --- 8g. Consistency warnings ------------------------------------------
+bad_inputs = {
+    **weak_converter_with_reviews,
+    "units_ordered_30d": 10000,       # > sessions (5000)
+    "ad_sales_30d": 0, "ad_spend_30d": 500,
+    "cogs": 30.0, "price": 24.99,     # cogs > price
+}
+r = run_full_audit(bad_inputs)
+warnings = r["data_quality"].get("consistency_warnings", [])
+check("consistency: units > sessions flagged",
+      any("exceeds sessions" in w for w in warnings))
+check("consistency: ad_spend with zero ad_sales flagged",
+      any("ad_sales_30d=$0" in w for w in warnings))
+check("consistency: cogs > price flagged",
+      any("cogs" in w and "exceeds price" in w for w in warnings))
+
+
+# --- 8h. triggered_by_interpreted shape --------------------------------
+r = run_full_audit(weak_converter_with_reviews)
+for p in r["patterns"]:
+    if p.get("suppressed_by") or p.get("grouped_under"):
+        continue
+    enriched = p.get("triggered_by_interpreted") or {}
+    check(f"{p['name']}: triggered_by_interpreted present",
+          len(enriched) > 0)
+    for field, view in enriched.items():
+        check(f"{p['name']}.{field}: has value/display/read",
+              isinstance(view, dict) and
+              {"value", "display", "read"}.issubset(view.keys()))
+
+
+# --- 8i. assumptions_applied per pattern --------------------------------
+for p in r["patterns"]:
+    check(f"{p['name']}: assumptions_applied is a non-empty list",
+          isinstance(p.get("assumptions_applied"), list)
+          and len(p["assumptions_applied"]) > 0)
+
+
+# --- 8j. Signals vs patterns tie-break ---------------------------------
+# When a high-impact signal ties on priority with a pattern, the
+# signal's impact_score must drive tie-break (not pattern ROI).
+# Sanity check: the ranking never violates its own sort key.
+for idx in range(1, len(r["priority_blockers"])):
+    prev = r["priority_blockers"][idx - 1]
+    curr = r["priority_blockers"][idx]
+    check(f"tie-break: rank {curr['rank']} respects priority order",
+          curr["priority_score"] <= prev["priority_score"] + 1e-9)
+
+
+# ---------------------------------------------------------------------------
 # 7. Real demo store end-to-end
 # ---------------------------------------------------------------------------
 

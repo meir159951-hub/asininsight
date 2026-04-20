@@ -163,16 +163,22 @@ def detect_suppression_risk(product: dict[str, Any]) -> StandaloneSignal | None:
     if not flags:
         return None
 
-    severity = "high" if len(flags) >= 2 else "medium"
-    impact = 7.5 if severity == "high" else 5.0
+    # These are indirect heuristics, not confirmation from Seller
+    # Central. Cap severity at "medium" so the signal reads as a
+    # hypothesis to investigate, not a confirmed defect. Two or more
+    # flags stay at "medium" but raise impact_score so it still
+    # surfaces in priority ranking.
+    severity = "medium"
+    impact = 6.0 if len(flags) >= 2 else 4.5
     return StandaloneSignal(
         name="suppression_risk",
         severity=severity,
         explanation=(
-            "Possible suppression, image rejection, or policy flag: "
+            "Visibility-block hypothesis (not confirmed without a "
+            "Seller Central check): "
             + "; ".join(flags)
-            + ". Check Account Health and the listing status in Seller "
-            "Central before any marketing work."
+            + ". These are indirect indicators; verify Account Health "
+            "and the live listing state before any marketing work."
         ),
         impact_score=impact,
     )

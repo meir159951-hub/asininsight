@@ -559,7 +559,10 @@ def _roi_ppc_addiction(product: dict[str, Any]) -> ROIImpact:
         explanation=(
             f"Building organic rank typically lets you pull back "
             f"15-30% of the ${spend:,.0f}/mo ad spend over 3-6 months "
-            f"(${lo:,.0f}-${hi:,.0f}/mo at steady state)."
+            f"(${lo:,.0f}-${hi:,.0f}/mo at steady state). This saving "
+            f"is conditional on organic rank actually improving; if "
+            f"organic does not move, cutting PPC will reduce sales, "
+            f"not costs."
         ),
     )
 
@@ -624,12 +627,18 @@ def _roi_weak_listing_foundation(product: dict[str, Any]) -> ROIImpact:
     # credible on speculative projections. The cap is applied to the
     # max first, then min is clamped to the capped max so the range
     # never inverts on very high-volume ASINs.
+    #
+    # When the pattern fires with meaningful traffic (>100 sessions),
+    # floor the min at $100/mo to avoid the $0 lower bound reading as
+    # "no downside" - there is always some cost to doing nothing.
     MAX_MONTHLY_CAP = 2500.0
     current_contribution = sessions * cr * margin
     lo_projected = (sessions * 1.2) * 0.015 * margin
     hi_projected = (sessions * 2.5) * 0.025 * margin
     hi = min(max(hi_projected - current_contribution, 0.0), MAX_MONTHLY_CAP)
     lo = min(max(lo_projected - current_contribution, 0.0), hi)
+    if sessions > 100 and hi >= 100 and lo < 100:
+        lo = min(100.0, hi)
     return ROIImpact(
         pattern_name="weak_listing_foundation",
         min_impact=lo,
