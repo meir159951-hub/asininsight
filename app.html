@@ -52,6 +52,7 @@
     .logo span { color: var(--blue); }
     .nav-back { font-size: 13px; color: var(--muted); }
     .nav-back:hover { color: var(--blue); }
+    .nav-history { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 14px; }
 
     /* ── Progress steps ── */
     .progress-bar {
@@ -278,6 +279,26 @@
     .notice-bar.notice-info { background: var(--blue-soft);  color: var(--blue);  border-bottom: 1px solid #bfdbfe; }
     .notice-bar.notice-err  { background: var(--red-soft);   color: var(--red);   border-bottom: 1px solid #fecaca; }
 
+    /* ── Batch ASIN table ── */
+    .batch-wrap { overflow-x: auto; margin: 0 -1px; }
+    .batch-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .batch-table th {
+      text-align: left; padding: 9px 14px;
+      background: #f6f3ec; font-size: 11px; font-weight: 800;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid rgba(221,212,198,.9);
+    }
+    .batch-table td { padding: 9px 14px; border-bottom: 1px solid rgba(221,212,198,.4); vertical-align: middle; }
+    .batch-table tr:last-child td { border-bottom: none; }
+    .batch-table tr:hover td { background: #fdfaf4; }
+    .batch-sc { font-size: 15px; font-weight: 800; font-family: Georgia, serif; }
+    .batch-sc.crit { color: var(--red); }
+    .batch-sc.high { color: var(--amber); }
+    .batch-sc.ok   { color: var(--green); }
+    .batch-asin { font-size: 11px; font-family: monospace; color: var(--muted); }
+    .batch-title { font-size: 12px; color: #2d3f55; }
+    .batch-issue { font-size: 12px; color: #2d3f55; }
+
     @media (max-width: 640px) {
       .shell { padding: 20px 12px 80px; }
       .panel { padding: 20px 16px; }
@@ -302,7 +323,10 @@
 <!-- Top nav -->
 <header class="topnav">
   <a href="/" class="logo">ASIN<span>Insight</span></a>
-  <a href="/" class="nav-back">← Back to home</a>
+  <div class="nav-history">
+    <a href="/dashboard" class="nav-back">My diagnoses</a>
+    <a href="/" class="nav-back">← Home</a>
+  </div>
 </header>
 
 <!-- Progress steps -->
@@ -424,6 +448,30 @@
       <div class="score-text">
         <h2 id="headline">Analyzing…</h2>
         <span class="conf-badge" id="confBadge">medium confidence</span>
+      </div>
+    </div>
+
+    <!-- Batch overview (hidden for single-ASIN, shown for multi-ASIN uploads) -->
+    <div id="batchSection" hidden>
+      <div class="result-card" style="margin-bottom:12px;">
+        <div class="result-card-head">
+          <span class="label">All ASINs — <span id="batchCount">0</span> analyzed</span>
+        </div>
+        <div class="result-card-body" style="padding:0;">
+          <div class="batch-wrap">
+            <table class="batch-table">
+              <thead>
+                <tr>
+                  <th>ASIN / Title</th>
+                  <th>Score</th>
+                  <th>Top Issue</th>
+                  <th>Severity</th>
+                </tr>
+              </thead>
+              <tbody id="batchTableBody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -661,6 +709,18 @@ async function startAnalysis() {
       window.location.href = '/';
       return;
     }
+    if (resp.status === 403) {
+      showState('upload');
+      const el = document.getElementById('uploadError');
+      const msg = data.error || 'Monthly limit reached.';
+      el.innerHTML = msg.replace(
+        'Upgrade to Pro',
+        '<a href="/pricing" style="color:#1f5fa8;font-weight:700;text-decoration:underline;">Upgrade to Pro →</a>'
+      );
+      el.hidden = false;
+      document.getElementById('analyzeBtn').disabled = true;
+      return;
+    }
     if (!resp.ok || data.error) {
       showState('upload');
       showUploadError(data.error || 'Something went wrong. Please try again.');
@@ -751,6 +811,36 @@ function renderResults(data) {
     cnEl.hidden = false;
   } else {
     cnEl.hidden = true;
+  }
+
+  // Batch ASIN table (only when per_asin has >1 entries)
+  const perAsin = Array.isArray(data.per_asin) ? data.per_asin : [];
+  const batchSec = document.getElementById('batchSection');
+  if (perAsin.length > 1) {
+    document.getElementById('batchCount').textContent = perAsin.length;
+    const tbody = document.getElementById('batchTableBody');
+    tbody.innerHTML = '';
+    perAsin.forEach(function(row) {
+      const sc = row.score ?? 0;
+      const scoreCls = sc < 50 ? 'crit' : (sc < 70 ? 'high' : 'ok');
+      const sev = (row.severity || 'none').toLowerCase();
+      const sevMap = { critical: 'sev-critical', high: 'sev-high', medium: 'sev-medium', low: 'sev-low', none: 'sev-low' };
+      const sevCls = sevMap[sev] || 'sev-low';
+      const sevLabel = sev === 'none' ? 'ok' : sev;
+      const titleHtml = row.title
+        ? `<div class="batch-title">${escHtml((row.title || '').substring(0, 55))}${(row.title || '').length > 55 ? '…' : ''}</div>`
+        : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        `<td><div class="batch-asin">${escHtml(row.asin || '')}</div>${titleHtml}</td>` +
+        `<td><span class="batch-sc ${scoreCls}">${sc}</span><span style="font-size:10px;color:var(--muted);margin-left:1px;">/100</span></td>` +
+        `<td class="batch-issue">${escHtml(row.top_issue || '—')}</td>` +
+        `<td><span class="sev-badge ${sevCls}">${escHtml(sevLabel)}</span></td>`;
+      tbody.appendChild(tr);
+    });
+    batchSec.hidden = false;
+  } else {
+    batchSec.hidden = true;
   }
 
   // Show lead capture modal 1.5 s after results load (only once per session)
@@ -907,11 +997,15 @@ async function sendReport() {
   // Build a minimal report summary for the email
   const report = {};
   if (_lastReport) {
-    const p = _lastReport.problems?.[0];
-    report.total_asins    = 1;
+    const perAsin = Array.isArray(_lastReport.per_asin) ? _lastReport.per_asin : [];
+    // Find worst ASIN by score; fall back to first problem title
+    const worstAsin = perAsin.length
+      ? perAsin.reduce((a, b) => ((a.score ?? 100) <= (b.score ?? 100) ? a : b))
+      : null;
+    report.total_asins    = perAsin.length || 1;
     report.critical_count = (_lastReport.problems || []).filter(x => x.severity === 'critical').length;
     report.weakest_score  = _lastReport.overall_score ?? 0;
-    report.weakest_asin   = p?.title || _lastReport.headline?.split(' ').slice(-3).join(' ') || 'Your ASIN';
+    report.weakest_asin   = worstAsin?.asin || worstAsin?.title || 'Your ASIN';
     report.top_blockers   = (_lastReport.problems || []).slice(0, 3).map(x => x.title);
   }
 

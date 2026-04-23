@@ -116,6 +116,9 @@ _diagnose_rate: dict[str, list[float]] = {}
 DIAGNOSE_RATE_LIMIT  = 30
 DIAGNOSE_RATE_WINDOW = 3600
 
+# Free plan: max diagnoses per calendar month per session
+FREE_MONTHLY_LIMIT = 3
+
 # Hard cap on CSV upload size — prevents memory exhaustion from huge files
 _MAX_CSV_BYTES = 2 * 1024 * 1024  # 2 MB
 # Hard cap on ASINs per request — prevents multi-minute CPU spikes
@@ -230,6 +233,29 @@ def _init_db():
                     created_at REAL NOT NULL
                 )
             """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS analyses (
+                    id            SERIAL PRIMARY KEY,
+                    session_key   TEXT NOT NULL,
+                    created_at    REAL NOT NULL,
+                    score         INTEGER NOT NULL,
+                    headline      TEXT NOT NULL,
+                    asin_count    INTEGER NOT NULL DEFAULT 1,
+                    primary_issue TEXT NOT NULL DEFAULT '',
+                    severity      TEXT NOT NULL DEFAULT 'medium'
+                )
+            """ if DATABASE_URL else """
+                CREATE TABLE IF NOT EXISTS analyses (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    session_key   TEXT NOT NULL,
+                    created_at    REAL NOT NULL,
+                    score         INTEGER NOT NULL,
+                    headline      TEXT NOT NULL,
+                    asin_count    INTEGER NOT NULL DEFAULT 1,
+                    primary_issue TEXT NOT NULL DEFAULT '',
+                    severity      TEXT NOT NULL DEFAULT 'medium'
+                )
+            """)
         log.info("Database initialised")
     except Exception as e:
         log.warning("DB init failed (will retry on first request): %s", e)
@@ -265,6 +291,35 @@ def _get_stat(key: str) -> int:
         return 0
 
 
+def _get_session_key() -> str:
+    """Return a stable opaque identifier for the current browser session.
+
+    Used to associate analysis runs with a user's history without requiring
+    account creation. Stored in the Flask session (signed cookie).
+    """
+    if not session.get("_sk"):
+        session["_sk"] = secrets.token_hex(16)
+        session.permanent = True
+    return session["_sk"]
+
+
+def _save_analysis(session_key: str, score: int, headline: str,
+                   asin_count: int, primary_issue: str, severity: str) -> None:
+    """Persist a completed analysis to the analyses table. Non-critical — swallows errors."""
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"INSERT INTO analyses "
+                f"(session_key, created_at, score, headline, asin_count, primary_issue, severity) "
+                f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
+                (session_key, time.time(), max(0, min(100, int(score))),
+                 headline[:200], max(1, int(asin_count)),
+                 primary_issue[:100], severity[:20])
+            )
+    except Exception as e:
+        log.debug("Failed to save analysis: %s", e)
+
+
 # ── Email drip sequence ────────────────────────────────────────────────────
 # Step 1: immediate  — welcome + free checklist
 # Step 2: 2 days     — education / case study
@@ -295,15 +350,23 @@ def _is_unsubscribed(email: str) -> bool:
 
 
 def _schedule_drip(email: str):
-    """Schedule all 3 drip emails for a new lead. Idempotent — skips if step already queued."""
-    now = time.time()
+    """Schedule all 3 drip emails for a new lead. Idempotent — skips any step already queued."""
+    now    = time.time()
+    email  = email.lower()
     try:
         with _db() as (cur, ph):
             for step, delay in _DRIP_DELAYS.items():
+                # Skip if this step is already queued for this email
+                cur.execute(
+                    f"SELECT 1 FROM email_drip_queue WHERE email = {ph} AND step = {ph} LIMIT 1",
+                    (email, step),
+                )
+                if cur.fetchone():
+                    continue
                 cur.execute(
                     f"INSERT INTO email_drip_queue (email, step, scheduled_at) "
                     f"VALUES ({ph}, {ph}, {ph})",
-                    (email.lower(), step, now + delay)
+                    (email, step, now + delay),
                 )
         log.info("Drip sequence scheduled for: %s", email)
     except Exception as e:
@@ -342,14 +405,18 @@ def _build_drip_email(email: str, step: int) -> dict | None:
             '<p style="font-size:15px;color:#334155;margin:0 0 20px;line-height:1.6;">'
             'Here is the 5-metric checklist we run on every diagnosis. '
             'Bookmark it and check these every Monday morning:</p>'
-            '<div style="background:#f1f5f9;border-radius:12px;padding:20px 24px;margin-bottom:20px;">'
-            '<div style="display:flex;flex-direction:column;gap:14px;">'
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">'
+            '<tr><td style="background:#f1f5f9;border-radius:12px;padding:20px 24px;">'
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0">'
             + "".join([
-                f'<div style="display:flex;gap:12px;align-items:flex-start;">'
-                f'<span style="background:#1f5fa8;color:#fff;font-size:11px;font-weight:800;'
-                f'min-width:22px;height:22px;border-radius:50%;display:inline-flex;'
-                f'align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;">{n}</span>'
-                f'<span style="font-size:14px;color:#334155;line-height:1.55;">{t}</span></div>'
+                f'<tr>'
+                f'<td width="28" valign="top" style="padding-bottom:12px;padding-right:12px;">'
+                f'<table width="22" cellpadding="0" cellspacing="0" border="0"><tr>'
+                f'<td style="background:#1f5fa8;color:#fff;font-size:11px;font-weight:800;'
+                f'width:22px;height:22px;border-radius:11px;text-align:center;vertical-align:middle;">{n}</td>'
+                f'</tr></table></td>'
+                f'<td valign="top" style="font-size:14px;color:#334155;line-height:1.55;padding-bottom:12px;">{t}</td>'
+                f'</tr>'
                 for n, t in [
                     (1, "<strong>CTR above 0.20%?</strong> Below this = your main image is losing to competitors. Fix image before anything else."),
                     (2, "<strong>CVR above 8%?</strong> Below 7% = listing fails at the decision moment (price, images, bullets, or reviews)."),
@@ -358,7 +425,7 @@ def _build_drip_email(email: str, step: int) -> dict | None:
                     (5, "<strong>Rating above 4.2?</strong> Below 4.0 kills conversion even with perfect ads. Address top negative review themes."),
                 ]
             ])
-            + '</div></div>'
+            + '</table></td></tr></table>'
             '<p style="font-size:14px;color:#617184;margin:0 0 24px;line-height:1.6;">'
             'Run this every Monday. It catches 80% of problems within the week they start.</p>'
             f'<a href="{site}/tool" style="display:block;text-align:center;background:#1f5fa8;'
@@ -404,13 +471,16 @@ def _build_drip_email(email: str, step: int) -> dict | None:
             'ASINInsight reads all 20 columns, cross-references your ad data, '
             'and tells you exactly which one needs your attention — with numbered '
             'steps to fix it. It takes 30 seconds.</p>'
-            '<div style="background:#f6f3ec;border-radius:14px;padding:20px 24px;margin-bottom:20px;">'
+            '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">'
+            '<tr><td style="background:#f6f3ec;border-radius:14px;padding:20px 24px;">'
             '<p style="font-size:13px;font-weight:700;color:#617184;text-transform:uppercase;'
             'letter-spacing:.06em;margin:0 0 12px;">What Pro gives you</p>'
             + "".join([
-                f'<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;">'
-                f'<span style="color:#1d6a42;font-size:16px;flex-shrink:0;">✓</span>'
-                f'<span style="font-size:14px;color:#334155;line-height:1.5;">{t}</span></div>'
+                f'<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:10px;">'
+                f'<tr>'
+                f'<td width="20" valign="top" style="color:#1d6a42;font-size:16px;padding-right:10px;">&#10003;</td>'
+                f'<td valign="top" style="font-size:14px;color:#334155;line-height:1.5;">{t}</td>'
+                f'</tr></table>'
                 for t in [
                     "Unlimited diagnoses — run it on every ASIN, every week",
                     "Priority issue detection across your full catalog",
@@ -419,7 +489,7 @@ def _build_drip_email(email: str, step: int) -> dict | None:
                     "Email report for sharing with your VA or team",
                 ]
             ])
-            + '</div>'
+            + '</td></tr></table>'
             f'<a href="{site}/pricing" style="display:block;text-align:center;'
             'background:#1f5fa8;color:#fff;text-decoration:none;padding:14px 24px;'
             'border-radius:10px;font-weight:700;font-size:15px;margin-bottom:12px;">'
@@ -985,12 +1055,21 @@ def capture_email():
 
     try:
         with _db() as (cur, ph):
+            # Check for duplicate — don't re-schedule drip if already captured
             cur.execute(
-                f"INSERT INTO email_leads (email, source, created_at) VALUES ({ph}, {ph}, {ph})",
-                (email, source, time.time())
+                f"SELECT 1 FROM email_leads WHERE email = {ph} LIMIT 1", (email,)
             )
-        log.info("Lead captured: %s (source=%s)", email, source)
-        _schedule_drip(email)
+            already_exists = cur.fetchone() is not None
+            if not already_exists:
+                cur.execute(
+                    f"INSERT INTO email_leads (email, source, created_at) VALUES ({ph}, {ph}, {ph})",
+                    (email, source, time.time())
+                )
+        if not already_exists:
+            log.info("Lead captured: %s (source=%s)", email, source)
+            _schedule_drip(email)
+        else:
+            log.info("Duplicate lead ignored: %s", email)
     except Exception as e:
         log.warning("Failed to save lead email: %s", e)
         # Don't surface DB errors to the user — just ack
@@ -1197,6 +1276,12 @@ def paddle_activate():
 
 @app.route("/api/send-report", methods=["POST"])
 def send_report():
+    if not _csrf_valid(request):
+        return jsonify({"ok": False, "error": "Invalid request"}), 403
+
+    if not session.get("plan"):
+        return jsonify({"ok": False, "error": "Authentication required"}), 401
+
     client_ip = _client_ip(request)
     if not _check_email_rate(client_ip):
         return jsonify({"ok": False, "error": "Too many requests. Please try again later."}), 429
@@ -1228,39 +1313,205 @@ def send_report():
         raw_blockers = []
     blockers = [html.escape(str(b)) for b in raw_blockers[:5] if b]
 
-    blockers_html = (
-        "".join(f"<li style='margin-bottom:6px;'>⚠️ {b}</li>" for b in blockers)
-        if blockers else "<li>No major blockers found.</li>"
+    # Score colour: green ≥70, amber 40–69, red <40
+    if score >= 70:
+        score_color = "#16a34a"
+        score_bg    = "#f0fdf4"
+        score_label = "Healthy"
+    elif score >= 40:
+        score_color = "#d97706"
+        score_bg    = "#fffbeb"
+        score_label = "Needs Work"
+    else:
+        score_color = "#dc2626"
+        score_bg    = "#fef2f2"
+        score_label = "Critical"
+
+    critical_color = "#dc2626" if critical > 0 else "#16a34a"
+
+    blockers_rows = (
+        "".join(
+            f"""<tr>
+              <td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">
+                <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td width="20" valign="top" style="font-size:14px;padding-top:1px;">&#9888;&#65039;</td>
+                    <td style="font-size:14px;color:#1e293b;line-height:1.5;padding-left:8px;">{b}</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>"""
+            for b in blockers
+        )
+        if blockers else
+        """<tr><td style="padding:12px 14px;font-size:14px;color:#64748b;">No major blockers found — portfolio looks healthy.</td></tr>"""
     )
 
-    html_body = f"""
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;background:#f8fafc;padding:32px 16px;">
-      <div style="background:#fff;border-radius:16px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-        <div style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:4px;">ASIN<span style="color:#2563eb;">Insight</span></div>
-        <p style="color:#64748b;font-size:14px;margin:0 0 24px;">Your diagnosis report is ready</p>
-        <div style="background:#eff6ff;border-radius:12px;padding:20px;margin-bottom:24px;">
-          <div style="font-size:13px;color:#1e40af;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px;">Portfolio Summary</div>
-          <div style="display:flex;gap:24px;flex-wrap:wrap;">
-            <div><div style="font-size:28px;font-weight:800;color:#0f172a;">{total}</div><div style="font-size:12px;color:#64748b;">ASINs analyzed</div></div>
-            <div><div style="font-size:28px;font-weight:800;color:#991b1b;">{critical}</div><div style="font-size:12px;color:#64748b;">Critical issues</div></div>
-            <div><div style="font-size:28px;font-weight:800;color:#0f172a;">{score}</div><div style="font-size:12px;color:#64748b;">Weakest score</div></div>
-          </div>
-        </div>
-        <div style="margin-bottom:24px;">
-          <div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:10px;">🔴 Top Issues — {weakest}</div>
-          <ul style="margin:0;padding-left:20px;color:#374151;font-size:14px;line-height:1.7;">
-            {blockers_html}
-          </ul>
-        </div>
-        <a href="https://asininsight.com/tool" style="display:block;text-align:center;background:#1d4ed8;color:#fff;text-decoration:none;padding:14px 24px;border-radius:8px;font-weight:600;font-size:15px;">
-          View Full Report →
-        </a>
-        <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
-          ASINInsight · <a href="https://asininsight.com/privacy" style="color:#94a3b8;">Privacy</a> · <a href="https://asininsight.com/terms" style="color:#94a3b8;">Terms</a>
-        </p>
-      </div>
-    </div>
-    """
+    html_body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Your ASINInsight Report</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+
+  <!-- Wrapper -->
+  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f1f5f9;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+
+        <!-- Card -->
+        <table cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+
+          <!-- ── HEADER ── -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:32px 36px 28px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <div style="font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">ASIN<span style="color:#93c5fd;">Insight</span></div>
+                    <div style="font-size:13px;color:#bfdbfe;margin-top:4px;">Amazon Seller Diagnosis</div>
+                  </td>
+                  <td align="right" valign="top">
+                    <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:12px;color:#dbeafe;font-weight:600;">REPORT READY</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── INTRO ── -->
+          <tr>
+            <td style="padding:28px 36px 0;">
+              <p style="margin:0;font-size:16px;color:#0f172a;font-weight:600;line-height:1.4;">
+                Your portfolio diagnosis is complete.
+              </p>
+              <p style="margin:8px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
+                Here's a summary of what we found. Upload your CSV again at any time to re-run the analysis.
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── STATS ROW ── -->
+          <tr>
+            <td style="padding:24px 36px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <!-- ASINs -->
+                  <td width="33%" align="center" style="padding:0 4px 0 0;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td align="center" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 8px;">
+                          <div style="font-size:32px;font-weight:800;color:#0f172a;line-height:1;">{total}</div>
+                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">ASINs Analyzed</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Critical -->
+                  <td width="33%" align="center" style="padding:0 2px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td align="center" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 8px;">
+                          <div style="font-size:32px;font-weight:800;color:{critical_color};line-height:1;">{critical}</div>
+                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">Critical Issues</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <!-- Weakest Score -->
+                  <td width="33%" align="center" style="padding:0 0 0 4px;">
+                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                      <tr>
+                        <td align="center" style="background:{score_bg};border:1px solid #e2e8f0;border-radius:12px;padding:18px 8px;">
+                          <div style="font-size:32px;font-weight:800;color:{score_color};line-height:1;">{score}</div>
+                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">Weakest Score</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── DIVIDER ── -->
+          <tr>
+            <td style="padding:0 36px;">
+              <div style="height:1px;background:#e2e8f0;"></div>
+            </td>
+          </tr>
+
+          <!-- ── TOP ISSUES ── -->
+          <tr>
+            <td style="padding:24px 36px 0;">
+              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.07em;">
+                &#128308; Top Issues — {weakest}
+              </p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff8f8;border:1px solid #fecaca;border-radius:10px;overflow:hidden;">
+                {blockers_rows}
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── SCORE BADGE ── -->
+          <tr>
+            <td style="padding:20px 36px;">
+              <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="background:{score_bg};border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;">
+                    <span style="font-size:13px;color:{score_color};font-weight:700;">&#9679; Portfolio Status: {score_label}</span>
+                    <span style="font-size:13px;color:#64748b;margin-left:8px;">— Weakest ASIN scored {score}/100</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── CTA BUTTON ── -->
+          <tr>
+            <td style="padding:4px 36px 32px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="background:#2563eb;border-radius:10px;">
+                    <a href="https://asininsight.com/tool" style="display:block;text-align:center;color:#ffffff;text-decoration:none;padding:15px 24px;font-weight:700;font-size:15px;letter-spacing:0.01em;">
+                      Run Another Analysis &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── FOOTER ── -->
+          <tr>
+            <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 36px;border-radius:0 0 16px 16px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="font-size:12px;color:#94a3b8;">
+                    &copy; 2025 ASINInsight &nbsp;&bull;&nbsp;
+                    <a href="https://asininsight.com/privacy" style="color:#94a3b8;text-decoration:underline;">Privacy</a>
+                    &nbsp;&bull;&nbsp;
+                    <a href="https://asininsight.com/terms" style="color:#94a3b8;text-decoration:underline;">Terms</a>
+                  </td>
+                  <td align="right" style="font-size:12px;color:#cbd5e1;">
+                    <a href="https://asininsight.com" style="color:#cbd5e1;text-decoration:none;">asininsight.com</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>"""
 
     try:
         sg_resp = requests.post(
@@ -1339,7 +1590,9 @@ _COL_MAP: dict[str, str] = {
     "(child) asin":                   "asin",
     "asin":                           "asin",
     "title":                          "title",
+    "product_title":                  "title",
     "category":                       "category",
+    "product_category":               "category",
     # Traffic
     "sessions":                       "sessions_30d",
     "sessions - total":               "sessions_30d",
@@ -1349,52 +1602,65 @@ _COL_MAP: dict[str, str] = {
     # CTR
     "click-through rate (ctr)":       "ctr",
     "click through rate":             "ctr",
+    "click_through_rate":             "ctr",
     "ctr":                            "ctr",
     # Conversion
     "unit session percentage":        "conversion_rate",
     "unit session percentage - total":"conversion_rate",
     "conversion rate":                "conversion_rate",
     "conversion_rate":                "conversion_rate",
+    "conversion":                     "conversion_rate",
     "cvr":                            "conversion_rate",
     "units ordered":                  "units_ordered_30d",
     "ordered units":                  "units_ordered_30d",
+    "units_ordered":                  "units_ordered_30d",
     "units_ordered_30d":              "units_ordered_30d",
     # Revenue / price
     "ordered product sales":          "revenue_30d",
     "ordered product sales - total":  "revenue_30d",
     "revenue_30d":                    "revenue_30d",
     "price":                          "price",
+    "current_price":                  "price",
     # Ads
     "ad spend":                       "ad_spend_30d",
     "advertising spend":              "ad_spend_30d",
+    "ad_spend":                       "ad_spend_30d",
     "ad_spend_30d":                   "ad_spend_30d",
     "ad sales":                       "ad_sales_30d",
     "advertising sales":              "ad_sales_30d",
+    "ad_sales":                       "ad_sales_30d",
     "ad_sales_30d":                   "ad_sales_30d",
     "acos":                           "acos",
+    "ad_acos":                        "acos",
     "advertising cost of sale":       "acos",
     # Inventory
     "days of cover":                  "days_of_cover",
     "days_of_cover":                  "days_of_cover",
+    "inventory_days_of_cover":        "days_of_cover",
     "afn fulfillable quantity":       "units_available",
     "units available":                "units_available",
     # Trust
     "average customer review":        "rating",
     "customer rating":                "rating",
+    "avg_rating":                     "rating",
     "rating":                         "rating",
     "customer reviews":               "review_count",
     "number of customer reviews":     "review_count",
+    "reviews":                        "review_count",
     "review_count":                   "review_count",
     # Listing quality
     "images count":                   "images_count",
     "number of images":               "images_count",
+    "image_count":                    "images_count",
     "images_count":                   "images_count",
     "bullet count":                   "bullet_count",
     "number of bullets":              "bullet_count",
+    "bullet_points":                  "bullet_count",
     "bullet_count":                   "bullet_count",
     "has a+":                         "has_a_plus",
     "has_a_plus":                     "has_a_plus",
     "a+ content":                     "has_a_plus",
+    "a_plus":                         "has_a_plus",
     # Buy Box
     "buy box percentage":             "buy_box_pct",
     "buy box %":                      "buy_box_pct",
@@ -1417,7 +1683,7 @@ def _normalize_value(key: str, raw) -> float | int | bool | None:
         return text or None
     if key == "has_a_plus":
         return str(raw).strip().lower() in ("1", "true", "yes", "y")
-    s = str(raw).strip().replace(",", "").replace("$", "")
+    s = str(raw).strip().replace(",", "").replace("$", "").replace("\ufeff", "")
     is_pct = s.endswith("%")
     try:
         n = float(s[:-1] if is_pct else s)
@@ -1453,7 +1719,17 @@ def parse_csv_text(text: str) -> list[dict]:
     """Convert a raw Amazon CSV into diagnose-ready ASIN payloads."""
     if not text or not text.strip():
         return []
-    reader = csv.DictReader(io.StringIO(text.lstrip("\ufeff")))
+    stripped = text.lstrip("\ufeff")
+    # Auto-detect delimiter: tab (Amazon native) → sniff for comma/semicolon/pipe
+    first_line = stripped.split("\n")[0] if "\n" in stripped else stripped
+    if "\t" in first_line:
+        delim = "\t"
+    else:
+        try:
+            delim = csv.Sniffer().sniff(first_line, delimiters=",;\t|").delimiter
+        except csv.Error:
+            delim = ","
+    reader = csv.DictReader(io.StringIO(stripped), delimiter=delim)
     items: list[dict] = []
     for index, row in enumerate(reader, start=1):
         if not isinstance(row, dict) or not any(str(v or "").strip() for v in row.values()):
@@ -1693,6 +1969,12 @@ def _soft_sev(
     """
     _EPS = 1e-9  # float tolerance: prevents IEEE 754 rounding from excluding exact boundaries
     for boundary, sev, milder in thresholds:
+        # Guard: boundary == 0 would cause ZeroDivisionError; skip the soft-zone
+        # check but still apply the severity if the threshold is crossed.
+        if boundary == 0:
+            if (direction == "below" and value < 0) or (direction == "above" and value > 0):
+                return sev
+            continue
         if direction == "below":
             if value < boundary:
                 # Relative distance from boundary. +EPS handles float imprecision at
@@ -1748,7 +2030,7 @@ def _validate_blocker(blocker: dict, m: dict) -> dict:
         downgrade = {"high": "medium", "medium": "low", "low": "low"}
         return {
             **blocker,
-            "confidence":         downgrade[conf],
+            "confidence":         downgrade.get(conf, "low"),
             "validation_warning": (
                 f"Diagnosis may not fully match the data — "
                 f"the key metric for '{area}' is absent or shows no problem."
@@ -2127,6 +2409,30 @@ def api_diagnose():
     if not _check_diagnose_rate(ip):
         return jsonify({"error": "Too many requests. Please wait a few minutes and try again."}), 429
 
+    # Free plan monthly cap — 3 diagnoses per calendar month
+    if session.get("plan") == "free":
+        import datetime
+        try:
+            now_dt     = datetime.datetime.utcnow()
+            month_start = datetime.datetime(now_dt.year, now_dt.month, 1).timestamp()
+            sk = _get_session_key()
+            with _db() as (cur, ph):
+                cur.execute(
+                    f"SELECT COUNT(*) FROM analyses WHERE session_key = {ph} AND created_at >= {ph}",
+                    (sk, month_start),
+                )
+                row = cur.fetchone()
+                monthly_count = int(row[0]) if row else 0
+            if monthly_count >= FREE_MONTHLY_LIMIT:
+                return jsonify({
+                    "error": (
+                        f"You've used all {FREE_MONTHLY_LIMIT} free diagnoses this month. "
+                        "Upgrade to Pro for unlimited diagnoses."
+                    )
+                }), 403
+        except Exception as e:
+            log.warning("Free plan monthly limit check failed (allowing through): %s", e)
+
     items, error = _extract_diagnose_items(request)
     if error:
         return jsonify({"error": error}), 400
@@ -2240,6 +2546,7 @@ def api_diagnose():
             )
         return fb
 
+    per_asin: list[dict] = []
     all_b, total = [], 0
     for item in items:
         # ── Auto-detection: if no pre-classified blockers, run detect() ──
@@ -2262,7 +2569,18 @@ def api_diagnose():
                 pen += PEN.get(sev, 2) + (8 if sev == "critical" else 0)
 
         rs = item.get("score")
-        total += int(_n(rs)) if rs not in (None, "") else max(100 - pen, 0)
+        item_score = int(_n(rs)) if rs not in (None, "") else max(100 - pen, 0)
+        total += item_score
+        top_b = bls[0] if bls else None
+        per_asin.append({
+            "asin":      str(item.get("asin", "") or "")[:20],
+            "title":     str(item.get("title", "") or "")[:80],
+            "score":     item_score,
+            "severity":  str(top_b.get("severity", "none")).lower() if top_b else "none",
+            "top_issue": str(top_b.get("type") or top_b.get("area") or "No issues")[:80]
+                         if top_b else "No issues",
+            "area":      str(top_b.get("area", "")) if top_b else "",
+        })
         cvr, ses, prc, acos, spend, ctr, cover, rating, reviews = _mx(item)
         for b in bls:
             if isinstance(b, dict):
@@ -2283,7 +2601,7 @@ def api_diagnose():
                     entry["validation_warning"] = str(b["validation_warning"])[:200]
                 all_b.append(entry)
 
-    score = round(total / len(items))
+    score = round(total / len(items)) if items else 0
     by_area: dict = {}
     for b in all_b:
         if b["area"] not in by_area or SEV_W.get(b["severity"], 9) < SEV_W.get(by_area[b["area"]]["severity"], 9):
@@ -2428,6 +2746,16 @@ def api_diagnose():
     # Increment the public "diagnoses run" counter (non-critical)
     _increment_stat("diagnoses_run")
 
+    # Save to user's analysis history (non-critical)
+    _save_analysis(
+        _get_session_key(),
+        score,
+        headline,
+        len(items),
+        top["area"] if top else "",
+        top["severity"] if top else "low",
+    )
+
     return jsonify({
         "overall_score":            score,
         "headline":                 headline,
@@ -2438,6 +2766,8 @@ def api_diagnose():
         "overall_confidence":       overall_confidence,
         "data_quality":             data_quality,
         "model_used":               "rule-based",
+        # Per-ASIN breakdown — only populated for multi-ASIN uploads (batch view)
+        "per_asin":                 per_asin if len(items) > 1 else [],
     })
 
 
@@ -2716,6 +3046,178 @@ tr:last-child td{{border-bottom:none;}}
 </body></html>"""
 
     return page, 200
+
+
+# ── User dashboard — analysis history ─────────────────────────────────────
+
+@app.route("/dashboard")
+def dashboard():
+    """User analysis history. Requires an active session. History is session-scoped."""
+    if not session.get("plan"):
+        return redirect("/")
+
+    session_key = _get_session_key()
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"SELECT created_at, score, headline, asin_count, primary_issue, severity "
+                f"FROM analyses WHERE session_key = {ph} "
+                f"ORDER BY created_at DESC LIMIT 30",
+                (session_key,)
+            )
+            rows = cur.fetchall()
+    except Exception as e:
+        log.warning("Dashboard DB error: %s", e)
+        rows = []
+
+    import datetime
+
+    def fmt_ts(ts):
+        try:
+            return datetime.datetime.utcfromtimestamp(float(ts)).strftime("%b %d %Y · %H:%M UTC")
+        except Exception:
+            return "—"
+
+    def sev_badge(s):
+        colors = {
+            "critical": ("#9e402e", "#f8e8e2"),
+            "high":     ("#92400e", "#fef3c7"),
+            "medium":   ("#166534", "#f0fdf4"),
+            "low":      ("#64748b", "#f8fafc"),
+        }
+        fg, bg = colors.get(str(s).lower(), ("#617184", "#f1f5f9"))
+        return (
+            f'<span style="display:inline-flex;align-items:center;padding:2px 10px;'
+            f'border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.06em;'
+            f'text-transform:uppercase;background:{bg};color:{fg};">'
+            f'{html.escape(str(s))}</span>'
+        )
+
+    def score_color(sc):
+        if sc < 50: return "#9e402e"
+        if sc < 70: return "#92400e"
+        return "#1d6a42"
+
+    rows_html = ""
+    for r in rows:
+        created, sc, hdl, asin_count, primary, severity = r
+        sc_int = int(sc or 0)
+        rows_html += (
+            f"<tr>"
+            f"<td style='color:#617184;font-size:12px;white-space:nowrap;'>{fmt_ts(created)}</td>"
+            f"<td><span style='font-size:20px;font-weight:800;font-family:Georgia,serif;"
+            f"color:{score_color(sc_int)};'>{sc_int}</span>"
+            f"<span style='font-size:11px;color:#9fb0c4;'>/100</span></td>"
+            f"<td style='font-size:13px;color:#15263d;'>{html.escape(str(hdl or ''))}</td>"
+            f"<td style='color:#617184;font-size:13px;text-align:center;'>{int(asin_count or 1)}</td>"
+            f"<td>{sev_badge(str(severity or 'low'))}</td>"
+            f"</tr>"
+        )
+    if not rows_html:
+        rows_html = (
+            "<tr><td colspan='5' style='text-align:center;color:#617184;padding:40px 16px;'>"
+            "No analyses yet. "
+            "<a href='/tool' style='color:#1f5fa8;font-weight:700;'>Run your first diagnosis →</a>"
+            "</td></tr>"
+        )
+
+    page = f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Diagnoses — ASINInsight</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<style>
+*,*::before,*::after{{box-sizing:border-box;}}
+body{{margin:0;font:16px/1.6 "Segoe UI",Arial,sans-serif;background:#f6f3ec;color:#15263d;-webkit-font-smoothing:antialiased;}}
+h1,h2,h3{{margin:0;font-family:Georgia,"Times New Roman",serif;letter-spacing:-.03em;}}p{{margin:0;}}
+a{{color:#1f5fa8;text-decoration:none;}}a:hover{{text-decoration:underline;}}
+nav{{position:sticky;top:0;z-index:50;background:rgba(246,243,236,.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(221,212,198,.8);}}
+.nav-inner{{width:min(860px,calc(100% - 32px));margin:0 auto;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;}}
+.logo{{font:700 22px Georgia,serif;color:#15263d;text-decoration:none;}}.logo span{{color:#1f5fa8;}}
+.nav-links{{display:flex;align-items:center;gap:16px;font-size:14px;color:#617184;}}
+.nav-links a{{color:#617184;}}.nav-links a:hover{{color:#1f5fa8;}}
+.btn{{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border-radius:10px;border:none;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;background:#1f5fa8;color:#fff;text-decoration:none;}}.btn:hover{{background:#184d87;text-decoration:none;}}
+.wrap{{width:min(860px,calc(100% - 32px));margin:0 auto;padding:40px 0 80px;}}
+.page-header{{margin-bottom:28px;}}
+.page-header h1{{font-size:clamp(24px,4vw,34px);margin-bottom:6px;}}
+.page-header p{{color:#617184;font-size:15px;}}
+.card{{background:#fffdfa;border:1px solid rgba(221,212,198,.9);border-radius:18px;overflow:hidden;}}
+table{{width:100%;border-collapse:collapse;font-size:14px;}}
+th{{text-align:left;padding:12px 16px;background:#f6f3ec;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#617184;border-bottom:1px solid rgba(221,212,198,.9);}}
+td{{padding:12px 16px;border-bottom:1px solid rgba(221,212,198,.4);vertical-align:middle;}}
+tr:last-child td{{border-bottom:none;}}
+tr:hover td{{background:#fdfaf4;}}
+.cta-bar{{margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}}
+.cta-bar .note{{font-size:13px;color:#617184;line-height:1.5;}}
+footer{{padding:24px 0 40px;border-top:1px solid rgba(221,212,198,.7);color:#617184;font-size:13px;margin-top:40px;}}
+.foot{{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}}
+.foot-links{{display:flex;gap:20px;}}.foot-links a{{color:#617184;}}.foot-links a:hover{{color:#1f5fa8;}}
+@media(max-width:640px){{
+  th:first-child,td:first-child{{display:none;}}
+  table{{font-size:13px;}}th,td{{padding:10px 12px;}}
+}}
+</style></head><body>
+<nav><div class="nav-inner">
+  <a href="/" class="logo">ASIN<span>Insight</span></a>
+  <div class="nav-links">
+    <a href="/tool">New diagnosis</a>
+    <a href="/pricing">Pricing</a>
+  </div>
+</div></nav>
+
+<div class="wrap">
+  <div class="page-header">
+    <h1>My Diagnoses</h1>
+    <p>Your recent analysis history from this browser session (last 30 runs).</p>
+  </div>
+
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Score</th>
+          <th>Headline</th>
+          <th style="text-align:center;">ASINs</th>
+          <th>Severity</th>
+        </tr>
+      </thead>
+      <tbody>{rows_html}</tbody>
+    </table>
+  </div>
+
+  <div class="cta-bar">
+    <a href="/tool" class="btn">Run new diagnosis →</a>
+    <span class="note">History is tied to your browser session and resets if you clear cookies or switch browsers.</span>
+  </div>
+</div>
+
+<footer><div class="wrap foot">
+  <a href="/" class="logo" style="font-size:16px;">ASIN<span>Insight</span></a>
+  <div class="foot-links">
+    <a href="/">Home</a><a href="/pricing">Pricing</a>
+    <a href="/compare">Compare</a><a href="/privacy">Privacy</a>
+  </div>
+  <div>&copy; 2026 ASINInsight. All rights reserved.</div>
+</div></footer>
+<script src="/static/analytics.js"></script>
+<script src="/static/cookie-consent.js"></script>
+</body></html>"""
+
+    return page, 200
+
+
+# ── Competitor comparison page ─────────────────────────────────────────────
+
+@app.route("/compare")
+def compare():
+    return send_from_directory(BASE_DIR, "compare.html")
+
+
+@app.route("/demo")
+def demo():
+    return send_from_directory(BASE_DIR, "demo.html")
 
 
 # ── Keep-alive ping (prevents cold starts on Railway free tier) ────────────
