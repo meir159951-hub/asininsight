@@ -98,30 +98,7 @@
 
   <footer>© 2026 ASINInsight. All rights reserved.</footer>
 
-  <!-- Cookie bar -->
-  <div id="cookieBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:#15263d;padding:14px 20px;align-items:center;justify-content:space-between;gap:16px;z-index:999;flex-wrap:wrap;" role="dialog" aria-live="polite" aria-label="Cookie consent">
-    <div style="max-width:680px;">
-      <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
-      <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy" style="color:rgba(255,255,255,.7);text-decoration:underline;">Privacy Policy</a></span>
-    </div>
-    <div style="display:flex;gap:10px;flex-shrink:0;">
-      <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
-      <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
-    </div>
-  </div>
-  <script>
-    (function() {
-      var consent = localStorage.getItem('cookieConsent');
-      if (!consent) { document.getElementById('cookieBar').style.display = 'flex'; }
-    })();
-    function dismissCookie() {
-      localStorage.setItem('cookieConsent', 'accepted');
-      document.getElementById('cookieBar').style.display = 'none';
-    }
-    function declineCookie() {
-      localStorage.setItem('cookieConsent', 'declined');
-      document.getElementById('cookieBar').style.display = 'none';
-    }
-  </script>
+<script src="/static/analytics.js"></script>
+<script src="/static/cookie-consent.js"></script>
 </body>
 </html>
