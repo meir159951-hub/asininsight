@@ -994,11 +994,10 @@ async function sendReport() {
   status.textContent = 'Sending…';
   status.className   = 'modal-status';
 
-  // Build a minimal report summary for the email
+  // Build the full report payload for the email
   const report = {};
   if (_lastReport) {
     const perAsin = Array.isArray(_lastReport.per_asin) ? _lastReport.per_asin : [];
-    // Find worst ASIN by score; fall back to first problem title
     const worstAsin = perAsin.length
       ? perAsin.reduce((a, b) => ((a.score ?? 100) <= (b.score ?? 100) ? a : b))
       : null;
@@ -1006,7 +1005,20 @@ async function sendReport() {
     report.critical_count = (_lastReport.problems || []).filter(x => x.severity === 'critical').length;
     report.weakest_score  = _lastReport.overall_score ?? 0;
     report.weakest_asin   = worstAsin?.asin || worstAsin?.title || 'Your ASIN';
-    report.top_blockers   = (_lastReport.problems || []).slice(0, 3).map(x => x.title);
+    report.headline       = _lastReport.headline || '';
+    report.revenue_impact = _lastReport.revenue_impact || _lastReport.estimated_revenue_impact || '';
+    // Full problems list (title + severity + explanation)
+    report.problems = (_lastReport.problems || []).slice(0, 5).map(p => ({
+      title:    p.title    || '',
+      severity: p.severity || 'medium',
+      detail:   p.detail   || p.explanation || '',
+    }));
+    // Full action plan (numbered steps)
+    report.recommendations = (_lastReport.recommendations || []).slice(0, 5).map(r => ({
+      step:   r.step   || 0,
+      action: r.action || '',
+      why:    r.why    || '',
+    }));
   }
 
   try {

@@ -1307,12 +1307,33 @@ def send_report():
     except (ValueError, TypeError):
         return jsonify({"ok": False, "error": "Invalid report data"}), 400
 
-    weakest = html.escape(str(report.get("weakest_asin") or "N/A")[:100])
+    weakest        = html.escape(str(report.get("weakest_asin") or "N/A")[:100])
+    headline_text  = html.escape(str(report.get("headline") or "")[:200])
+    revenue_impact = html.escape(str(report.get("revenue_impact") or "")[:200])
 
-    raw_blockers = report.get("top_blockers")
-    if not isinstance(raw_blockers, list):
-        raw_blockers = []
-    blockers = [html.escape(str(b)) for b in raw_blockers[:5] if b]
+    # Full problems list from client
+    raw_problems = report.get("problems")
+    problems = []
+    if isinstance(raw_problems, list):
+        for p in raw_problems[:5]:
+            if isinstance(p, dict) and p.get("title"):
+                problems.append({
+                    "title":    html.escape(str(p.get("title",    ""))[:150]),
+                    "severity": str(p.get("severity", "medium")).lower()[:20],
+                    "detail":   html.escape(str(p.get("detail",   ""))[:400]),
+                })
+
+    # Full action plan from client
+    raw_recs = report.get("recommendations")
+    recs = []
+    if isinstance(raw_recs, list):
+        for r in raw_recs[:5]:
+            if isinstance(r, dict) and r.get("action"):
+                recs.append({
+                    "step":   int(r.get("step", 0)),
+                    "action": html.escape(str(r.get("action", ""))[:300]),
+                    "why":    html.escape(str(r.get("why",    ""))[:300]),
+                })
 
     # Score colour: green ≥70, amber 40–69, red <40
     if score >= 70:
@@ -1330,34 +1351,94 @@ def send_report():
 
     critical_color = "#dc2626" if critical > 0 else "#16a34a"
 
-    blockers_rows = (
-        "".join(
-            f"""<tr>
-              <td style="padding:10px 14px;border-bottom:1px solid #f1f5f9;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td width="20" valign="top" style="font-size:14px;padding-top:1px;">&#9888;&#65039;</td>
-                    <td style="font-size:14px;color:#1e293b;line-height:1.5;padding-left:8px;">{b}</td>
-                  </tr>
-                </table>
-              </td>
-            </tr>"""
-            for b in blockers
-        )
-        if blockers else
-        """<tr><td style="padding:12px 14px;font-size:14px;color:#64748b;">No major blockers found — portfolio looks healthy.</td></tr>"""
-    )
+    # Severity colour mapping
+    SEV_STYLE = {
+        "critical": ("🔴", "#dc2626", "#fef2f2", "#fecaca"),
+        "high":     ("🟠", "#d97706", "#fffbeb", "#fed7aa"),
+        "medium":   ("🟡", "#ca8a04", "#fefce8", "#fde68a"),
+        "low":      ("🔵", "#2563eb", "#eff6ff", "#bfdbfe"),
+    }
+
+    # ── Build action plan rows ────────────────────────────────────────────
+    action_plan_rows = ""
+    for r in recs:
+        action_plan_rows += f"""
+              <tr>
+                <td style="padding:14px 16px;border-bottom:1px solid #e2e8f0;vertical-align:top;">
+                  <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                      <td width="32" valign="top" style="padding-right:12px;padding-top:1px;">
+                        <table width="28" cellpadding="0" cellspacing="0" border="0">
+                          <tr>
+                            <td style="background:#1e3a8a;color:#ffffff;font-size:13px;font-weight:800;
+                                       width:28px;height:28px;border-radius:14px;
+                                       text-align:center;vertical-align:middle;">{r['step']}</td>
+                          </tr>
+                        </table>
+                      </td>
+                      <td valign="top">
+                        <div style="font-size:14px;color:#0f172a;font-weight:600;line-height:1.4;margin-bottom:4px;">{r['action']}</div>
+                        <div style="font-size:13px;color:#64748b;line-height:1.5;">{r['why']}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>"""
+    if not action_plan_rows:
+        action_plan_rows = """<tr><td style="padding:14px 16px;font-size:14px;color:#64748b;">
+            No specific actions — all metrics are within healthy range.</td></tr>"""
+
+    # ── Build problems rows ───────────────────────────────────────────────
+    problems_rows = ""
+    for p in problems:
+        sev = p["severity"] if p["severity"] in SEV_STYLE else "medium"
+        icon, txt_color, bg_color, border_color = SEV_STYLE[sev]
+        problems_rows += f"""
+              <tr>
+                <td style="padding:14px 16px;border-bottom:1px solid #f1f5f9;background:{bg_color};vertical-align:top;">
+                  <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                    <tr>
+                      <td valign="top">
+                        <div style="font-size:13px;font-weight:700;color:{txt_color};margin-bottom:4px;">{icon} {p['title']}</div>
+                        <div style="font-size:13px;color:#334155;line-height:1.55;">{p['detail']}</div>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>"""
+    if not problems_rows:
+        problems_rows = """<tr><td style="padding:14px 16px;font-size:14px;color:#64748b;background:#f0fdf4;">
+            &#10003; No major issues detected — your listing metrics look healthy.</td></tr>"""
+
+    # ── Revenue impact line ───────────────────────────────────────────────
+    revenue_row = ""
+    if revenue_impact:
+        revenue_row = f"""
+          <tr>
+            <td style="padding:0 36px 20px;">
+              <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;">
+                    <span style="font-size:13px;color:#92400e;font-weight:700;">&#128176; Estimated revenue impact: </span>
+                    <span style="font-size:13px;color:#78350f;">{revenue_impact}</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>"""
 
     html_body = f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="en">
   <title>Your ASINInsight Report</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+<body translate="no" style="margin:0;padding:0;background-color:#f1f5f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
 
-  <!-- Wrapper -->
   <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f1f5f9;">
     <tr>
       <td align="center" style="padding:40px 16px;">
@@ -1365,69 +1446,21 @@ def send_report():
         <!-- Card -->
         <table cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
 
-          <!-- ── HEADER ── -->
+          <!-- HEADER -->
           <tr>
-            <td style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 100%);padding:32px 36px 28px;">
+            <td style="background:#1e3a8a;padding:28px 36px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td>
-                    <div style="font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">ASIN<span style="color:#93c5fd;">Insight</span></div>
-                    <div style="font-size:13px;color:#bfdbfe;margin-top:4px;">Amazon Seller Diagnosis</div>
+                  <td valign="middle">
+                    <div style="font-size:24px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">ASIN<span style="color:#93c5fd;">Insight</span></div>
+                    <div style="font-size:12px;color:#bfdbfe;margin-top:3px;font-weight:500;">Amazon Seller Diagnosis Report</div>
                   </td>
-                  <td align="right" valign="top">
-                    <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;display:inline-block;font-size:12px;color:#dbeafe;font-weight:600;">REPORT READY</div>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-          <!-- ── INTRO ── -->
-          <tr>
-            <td style="padding:28px 36px 0;">
-              <p style="margin:0;font-size:16px;color:#0f172a;font-weight:600;line-height:1.4;">
-                Your portfolio diagnosis is complete.
-              </p>
-              <p style="margin:8px 0 0;font-size:14px;color:#64748b;line-height:1.6;">
-                Here's a summary of what we found. Upload your CSV again at any time to re-run the analysis.
-              </p>
-            </td>
-          </tr>
-
-          <!-- ── STATS ROW ── -->
-          <tr>
-            <td style="padding:24px 36px;">
-              <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                <tr>
-                  <!-- ASINs -->
-                  <td width="33%" align="center" style="padding:0 4px 0 0;">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <td align="right" valign="middle">
+                    <table cellpadding="0" cellspacing="0" border="0">
                       <tr>
-                        <td align="center" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:18px 8px;">
-                          <div style="font-size:32px;font-weight:800;color:#0f172a;line-height:1;">{total}</div>
-                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">ASINs Analyzed</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <!-- Critical -->
-                  <td width="33%" align="center" style="padding:0 2px;">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                      <tr>
-                        <td align="center" style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:18px 8px;">
-                          <div style="font-size:32px;font-weight:800;color:{critical_color};line-height:1;">{critical}</div>
-                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">Critical Issues</div>
-                        </td>
-                      </tr>
-                    </table>
-                  </td>
-                  <!-- Weakest Score -->
-                  <td width="33%" align="center" style="padding:0 0 0 4px;">
-                    <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                      <tr>
-                        <td align="center" style="background:{score_bg};border:1px solid #e2e8f0;border-radius:12px;padding:18px 8px;">
-                          <div style="font-size:32px;font-weight:800;color:{score_color};line-height:1;">{score}</div>
-                          <div style="font-size:11px;color:#64748b;margin-top:6px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">Weakest Score</div>
+                        <td style="background:{score_bg};border-radius:10px;padding:10px 16px;text-align:center;">
+                          <div style="font-size:28px;font-weight:800;color:{score_color};line-height:1;">{score}</div>
+                          <div style="font-size:10px;color:{score_color};font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:2px;">{score_label}</div>
                         </td>
                       </tr>
                     </table>
@@ -1437,47 +1470,60 @@ def send_report():
             </td>
           </tr>
 
-          <!-- ── DIVIDER ── -->
+          <!-- INTRO -->
           <tr>
-            <td style="padding:0 36px;">
-              <div style="height:1px;background:#e2e8f0;"></div>
-            </td>
-          </tr>
-
-          <!-- ── TOP ISSUES ── -->
-          <tr>
-            <td style="padding:24px 36px 0;">
-              <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.07em;">
-                &#128308; Top Issues — {weakest}
+            <td style="padding:24px 36px 20px;">
+              <p style="margin:0 0 6px;font-size:16px;color:#0f172a;font-weight:700;line-height:1.4;">
+                {headline_text if headline_text else "Your listing diagnosis is complete."}
               </p>
-              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#fff8f8;border:1px solid #fecaca;border-radius:10px;overflow:hidden;">
-                {blockers_rows}
+              <p style="margin:0;font-size:14px;color:#64748b;line-height:1.6;">
+                Analyzed <strong>{total}</strong> ASIN{"s" if total != 1 else ""} &bull; <strong style="color:{critical_color};">{critical} critical issue{"s" if critical != 1 else ""}</strong> found &bull; Overall score: <strong style="color:{score_color};">{score}/100</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- DIVIDER -->
+          <tr><td style="padding:0 36px;"><div style="height:1px;background:#e2e8f0;"></div></td></tr>
+
+          <!-- ACTION PLAN -->
+          <tr>
+            <td style="padding:24px 36px 16px;">
+              <p style="margin:0 0 14px;font-size:12px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.08em;">
+                &#9997; Your Action Plan
+              </p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+                {action_plan_rows}
               </table>
             </td>
           </tr>
 
-          <!-- ── SCORE BADGE ── -->
+          <!-- DIVIDER -->
+          <tr><td style="padding:0 36px;"><div style="height:1px;background:#e2e8f0;"></div></td></tr>
+
+          <!-- PROBLEMS -->
           <tr>
-            <td style="padding:20px 36px;">
-              <table cellpadding="0" cellspacing="0" border="0">
-                <tr>
-                  <td style="background:{score_bg};border:1px solid #e2e8f0;border-radius:8px;padding:10px 16px;">
-                    <span style="font-size:13px;color:{score_color};font-weight:700;">&#9679; Portfolio Status: {score_label}</span>
-                    <span style="font-size:13px;color:#64748b;margin-left:8px;">— Weakest ASIN scored {score}/100</span>
-                  </td>
-                </tr>
+            <td style="padding:24px 36px 16px;">
+              <p style="margin:0 0 14px;font-size:12px;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.08em;">
+                &#128270; Issues Identified
+              </p>
+              <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+                {problems_rows}
               </table>
             </td>
           </tr>
 
-          <!-- ── CTA BUTTON ── -->
+          {revenue_row}
+
+          <!-- CTA -->
           <tr>
-            <td style="padding:4px 36px 32px;">
+            <td style="padding:8px 36px 32px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
-                  <td align="center" style="background:#2563eb;border-radius:10px;">
-                    <a href="https://asininsight.com/tool" style="display:block;text-align:center;color:#ffffff;text-decoration:none;padding:15px 24px;font-weight:700;font-size:15px;letter-spacing:0.01em;">
-                      Run Another Analysis &rarr;
+                  <td align="center" style="background:#1e3a8a;border-radius:10px;">
+                    <a href="https://asininsight.com/tool"
+                       style="display:block;text-align:center;color:#ffffff;text-decoration:none;
+                              padding:15px 24px;font-weight:700;font-size:15px;">
+                      Run Another Analysis &#8594;
                     </a>
                   </td>
                 </tr>
@@ -1485,9 +1531,9 @@ def send_report():
             </td>
           </tr>
 
-          <!-- ── FOOTER ── -->
+          <!-- FOOTER -->
           <tr>
-            <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 36px;border-radius:0 0 16px 16px;">
+            <td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 36px;">
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="font-size:12px;color:#94a3b8;">
@@ -1496,8 +1542,8 @@ def send_report():
                     &nbsp;&bull;&nbsp;
                     <a href="https://asininsight.com/terms" style="color:#94a3b8;text-decoration:underline;">Terms</a>
                   </td>
-                  <td align="right" style="font-size:12px;color:#cbd5e1;">
-                    <a href="https://asininsight.com" style="color:#cbd5e1;text-decoration:none;">asininsight.com</a>
+                  <td align="right" style="font-size:12px;">
+                    <a href="https://asininsight.com" style="color:#94a3b8;text-decoration:none;">asininsight.com</a>
                   </td>
                 </tr>
               </table>
@@ -1505,8 +1551,6 @@ def send_report():
           </tr>
 
         </table>
-        <!-- /Card -->
-
       </td>
     </tr>
   </table>
@@ -1524,7 +1568,7 @@ def send_report():
             json={
                 "personalizations": [{"to": [{"email": email}]}],
                 "from": {"email": EMAIL_FROM_ADDRESS, "name": EMAIL_FROM_NAME},
-                "subject": f"Your ASINInsight Report — {total} ASINs, {critical} Critical Issues",
+                "subject": f"ASINInsight Report — Score {score}/100, {critical} Critical Issue{'s' if critical != 1 else ''}",
                 "content": [{"type": "text/html", "value": html_body}],
             },
             timeout=10,
