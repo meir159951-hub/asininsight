@@ -7,5 +7,6 @@ Disallow: /checkout/
 Disallow: /tool
 Disallow: /success
 Disallow: /cancel
+Disallow: /dashboard
 
 Sitemap: https://asininsight.com/sitemap.xml

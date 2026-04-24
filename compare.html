@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASINInsight vs Helium 10, Jungle Scout, SellerApp — Tool Comparison</title>
+  <meta name="description" content="Compare ASINInsight to Helium 10, Jungle Scout, and SellerApp. See which Amazon seller tool gives you the fastest listing diagnosis without API connections or monthly subscriptions.">
+  <link rel="canonical" href="https://asininsight.com/compare">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://asininsight.com/compare">
+  <meta property="og:title" content="ASINInsight vs Helium 10, Jungle Scout — Tool Comparison">
+  <meta property="og:description" content="Compare the fastest way to diagnose Amazon listing problems. No API connection required.">
+  <meta property="og:image" content="https://asininsight.com/static/og-card.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ASINInsight vs Helium 10, Jungle Scout — Amazon Tool Comparison">
+  <meta name="twitter:description" content="Compare the fastest way to diagnose Amazon listing problems.">
+  <meta name="twitter:image" content="https://asininsight.com/static/og-card.svg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.6 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: #1f5fa8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :root { --muted: #617184; --line: #ddd4c6; --paper: #fffdfa; --blue: #1f5fa8; --blue-dark: #184d87; --blue-soft: #e8f0fa; --green: #1d6a42; --green-soft: #e7f3eb; --red: #9e402e; --red-soft: #f8e8e2; }
+
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(960px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; color: #15263d; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 16px; font-size: 14px; color: var(--muted); }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--blue); }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 22px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; background: var(--blue); color: #fff; text-decoration: none; transition: background .15s; }
+    .btn:hover { background: var(--blue-dark); text-decoration: none; }
+    .btn-lg { min-height: 52px; padding: 0 32px; font-size: 16px; border-radius: 14px; }
+    .btn-ghost { background: transparent; border: 1.5px solid var(--line); color: var(--blue); }
+    .btn-ghost:hover { background: #fff; }
+
+    .wrap { width: min(960px, calc(100% - 32px)); margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero { padding: 72px 0 48px; }
+    .hero-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: var(--blue-soft); padding: 5px 14px; border-radius: 999px; margin-bottom: 18px; }
+    .hero h1 { font-size: clamp(32px, 5vw, 52px); line-height: 1.08; max-width: 700px; margin-bottom: 18px; }
+    .hero h1 em { color: var(--blue); font-style: normal; }
+    .hero p { font-size: 18px; color: var(--muted); max-width: 560px; line-height: 1.65; margin-bottom: 28px; }
+    .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .hero-note { font-size: 13px; color: var(--muted); }
+
+    /* ── The key difference ── */
+    .diff-section { padding: 48px 0 32px; }
+    .diff-section h2 { font-size: clamp(22px, 3.5vw, 32px); margin-bottom: 10px; }
+    .diff-section p { font-size: 16px; color: var(--muted); max-width: 620px; line-height: 1.7; margin-bottom: 28px; }
+    .diff-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .diff-card { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 18px; padding: 24px; }
+    .diff-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .diff-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .diff-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Comparison table ── */
+    .compare-section { padding: 40px 0 60px; }
+    .compare-section h2 { font-size: clamp(22px, 3.5vw, 32px); margin-bottom: 8px; }
+    .compare-section > p { font-size: 16px; color: var(--muted); margin-bottom: 28px; }
+    .table-wrap { overflow-x: auto; border-radius: 18px; border: 1px solid rgba(221,212,198,.9); background: var(--paper); }
+    .cmp-table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
+
+    /* Header row */
+    .cmp-table thead tr { border-bottom: 2px solid rgba(221,212,198,.9); }
+    .cmp-table th { padding: 16px 20px; text-align: center; font-size: 13px; font-weight: 700; }
+    .cmp-table th:first-child { text-align: left; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; font-weight: 800; }
+    .col-us { background: #f0f6ff; }
+    .col-us .prod-name { font-size: 16px; font-weight: 800; color: var(--blue); font-family: Georgia, serif; }
+    .col-us .prod-sub { font-size: 12px; color: var(--muted); }
+    .col-other .prod-name { font-size: 14px; font-weight: 700; color: #334155; }
+    .col-other .prod-sub { font-size: 12px; color: var(--muted); }
+
+    /* Body rows */
+    .cmp-table tbody tr { border-bottom: 1px solid rgba(221,212,198,.5); transition: background .1s; }
+    .cmp-table tbody tr:last-child { border-bottom: none; }
+    .cmp-table tbody tr:hover { background: #fdfaf4; }
+    .cmp-table td { padding: 13px 20px; vertical-align: middle; }
+    .cmp-table td:first-child { font-size: 13px; color: #334155; font-weight: 600; }
+    .cmp-table td:not(:first-child) { text-align: center; }
+    .cmp-table td.col-us { background: rgba(31,95,168,.03); }
+
+    /* Cell values */
+    .yes  { color: #1d6a42; font-size: 18px; }
+    .no   { color: #9e402e; font-size: 18px; }
+    .part { color: #92400e; font-size: 14px; font-weight: 700; }
+    .val  { font-size: 13px; color: #334155; }
+    .val-muted { font-size: 13px; color: var(--muted); }
+
+    /* Section sub-headers in table */
+    .cat-row td { background: #f6f3ec; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 8px 20px; }
+    .cat-row td:not(:first-child) { background: #f6f3ec; }
+
+    /* ── Pricing callout ── */
+    .price-section { padding: 32px 0 60px; }
+    .price-section h2 { font-size: clamp(22px, 3.5vw, 32px); margin-bottom: 8px; }
+    .price-section > p { font-size: 16px; color: var(--muted); margin-bottom: 28px; }
+    .price-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .price-card { background: var(--paper); border: 1px solid rgba(221,212,198,.9); border-radius: 18px; padding: 24px; }
+    .price-card.featured { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(31,95,168,.08); }
+    .price-card .tool-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 8px; }
+    .price-card .tool-name.blue { color: var(--blue); }
+    .price-card .price { font-size: 32px; font-weight: 800; font-family: Georgia, serif; color: #15263d; }
+    .price-card .price sub { font-size: 14px; font-weight: 600; color: var(--muted); vertical-align: baseline; }
+    .price-card .price-note { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .price-card ul { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
+    .price-card li { font-size: 13px; color: #334155; display: flex; gap: 8px; align-items: flex-start; }
+    .price-card li::before { content: "✓"; color: var(--green); font-weight: 800; flex-shrink: 0; }
+
+    /* ── Bottom CTA ── */
+    .cta-section { text-align: center; padding: 48px 0 80px; }
+    .cta-section h2 { font-size: clamp(24px, 4vw, 40px); margin-bottom: 12px; }
+    .cta-section p { font-size: 17px; color: var(--muted); margin-bottom: 28px; }
+
+    /* ── Footer ── */
+    footer { padding: 28px 0 44px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
+    .foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; }
+    .foot-links { display: flex; gap: 20px; }
+    .foot-links a { color: var(--muted); }
+    .foot-links a:hover { color: var(--blue); }
+
+    @media (max-width: 760px) {
+      .diff-cards { grid-template-columns: 1fr; }
+      .hero p { font-size: 16px; }
+    }
+    @media (max-width: 520px) {
+      .hero { padding: 48px 0 32px; }
+      .hero h1 { font-size: 28px; }
+      .hero-cta { flex-direction: column; align-items: flex-start; }
+      .btn-lg { width: 100%; justify-content: center; }
+      .price-cards { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">ASIN<span>Insight</span></a>
+    <div class="nav-links">
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <form action="/checkout/free" method="post" style="display:inline;">
+        <button type="submit" class="btn" style="min-height:36px;font-size:13px;padding:0 14px;">Start free</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-label">Tool Comparison</div>
+    <h1>The Amazon tools that give you dashboards.<br>ASINInsight gives you a <em>verdict</em>.</h1>
+    <p>Helium 10, Jungle Scout, and SellerApp are powerful research platforms. ASINInsight does one thing: tells you the single metric costing you the most money right now and exactly how to fix it.</p>
+    <div class="hero-cta">
+      <form action="/checkout/free" method="post">
+        <button type="submit" class="btn btn-lg">Try free — no account needed →</button>
+      </form>
+      <span class="hero-note">5 diagnoses/month free. No credit card.</span>
+    </div>
+  </div>
+</section>
+
+<!-- The key difference -->
+<section class="diff-section">
+  <div class="wrap">
+    <h2>Different tool, different job</h2>
+    <p>Most Amazon tools help you research keywords and track competitors. ASINInsight diagnoses why your existing listing isn't converting and gives you numbered steps to fix it — in 30 seconds.</p>
+    <div class="diff-cards">
+      <div class="diff-card">
+        <div class="icon">📂</div>
+        <h3>No account connection required</h3>
+        <p>Upload the CSV you already pull from Seller Central every week. No Amazon SP-API OAuth. No permissions. No risk.</p>
+      </div>
+      <div class="diff-card">
+        <div class="icon">🎯</div>
+        <h3>Verdict, not dashboard</h3>
+        <p>Instead of showing you 20 metrics and leaving you to figure it out, ASINInsight identifies the single highest-priority fix and how much it's costing you.</p>
+      </div>
+      <div class="diff-card">
+        <div class="icon">⚡</div>
+        <h3>30 seconds, not 30 minutes</h3>
+        <p>Skip the feature overload. Upload, get the diagnosis, start fixing. No onboarding, no learning curve, no monthly commitment to do analysis you already understand.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Comparison table -->
+<section class="compare-section">
+  <div class="wrap">
+    <h2>Feature comparison</h2>
+    <p>How ASINInsight compares to the major Amazon seller tools on the things that matter for listing diagnosis.</p>
+
+    <div class="table-wrap">
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="col-us"><div class="prod-name">ASINInsight</div><div class="prod-sub">Listing diagnosis</div></th>
+            <th class="col-other"><div class="prod-name">Helium 10</div><div class="prod-sub">Full suite</div></th>
+            <th class="col-other"><div class="prod-name">Jungle Scout</div><div class="prod-sub">Full suite</div></th>
+            <th class="col-other"><div class="prod-name">SellerApp</div><div class="prod-sub">Analytics</div></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- Setup -->
+          <tr class="cat-row"><td colspan="5">Getting started</td></tr>
+          <tr>
+            <td>No Amazon account connection needed</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Start diagnosing in under 60 seconds</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span><div class="val-muted">Days to onboard</div></td>
+            <td><span class="no">✗</span><div class="val-muted">Days to onboard</div></td>
+            <td><span class="no">✗</span><div class="val-muted">Hours to onboard</div></td>
+          </tr>
+          <tr>
+            <td>Free plan available</td>
+            <td class="col-us"><span class="yes">✓</span><div class="val">5 diagnoses/month</div></td>
+            <td><span class="part">Limited</span><div class="val-muted">Very restricted</div></td>
+            <td><span class="part">Trial only</span></td>
+            <td><span class="part">Trial only</span></td>
+          </tr>
+
+          <!-- Diagnosis capability -->
+          <tr class="cat-row"><td colspan="5">Listing diagnosis</td></tr>
+          <tr>
+            <td>Instant listing health score (0–100)</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="part">Via Listing Analyzer</span></td>
+            <td><span class="part">Via Listing Grader</span></td>
+            <td><span class="part">Limited</span></td>
+          </tr>
+          <tr>
+            <td>Dollar impact per issue</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+          </tr>
+          <tr>
+            <td>Prioritized action plan (numbered steps)</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span><div class="val-muted">Metrics, no actions</div></td>
+            <td><span class="no">✗</span><div class="val-muted">Metrics, no actions</div></td>
+            <td><span class="no">✗</span><div class="val-muted">Metrics, no actions</div></td>
+          </tr>
+          <tr>
+            <td>CTR, CVR, ACOS, Buy Box all in one run</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="part">Separate tools</span></td>
+            <td><span class="part">Separate tools</span></td>
+            <td><span class="part">Separate tools</span></td>
+          </tr>
+          <tr>
+            <td>Multi-ASIN batch diagnosis</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Email the diagnosis report</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="part">Export only</span></td>
+            <td><span class="part">Export only</span></td>
+            <td><span class="part">Export only</span></td>
+          </tr>
+
+          <!-- Data & privacy -->
+          <tr class="cat-row"><td colspan="5">Data &amp; privacy</td></tr>
+          <tr>
+            <td>File deleted immediately after analysis</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+            <td><span class="no">✗</span></td>
+          </tr>
+          <tr>
+            <td>GDPR + CCPA compliant</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="part">Partial</span></td>
+          </tr>
+          <tr>
+            <td>Works with all Amazon marketplaces</td>
+            <td class="col-us"><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+
+          <!-- Research features (where big tools win) -->
+          <tr class="cat-row"><td colspan="5">Research features (where big suites excel)</td></tr>
+          <tr>
+            <td>Keyword research</td>
+            <td class="col-us"><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Product launch &amp; research tools</td>
+            <td class="col-us"><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>Competitor tracking &amp; market data</td>
+            <td class="col-us"><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+          <tr>
+            <td>PPC automation</td>
+            <td class="col-us"><span class="no">✗</span></td>
+            <td><span class="yes">✓</span></td>
+            <td><span class="part">Limited</span></td>
+            <td><span class="yes">✓</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing comparison -->
+<section class="price-section">
+  <div class="wrap">
+    <h2>Pricing at a glance</h2>
+    <p>ASINInsight is purpose-built for listing diagnosis. You don't pay for keyword research, market tracking, or tools you won't use.</p>
+    <div class="price-cards">
+      <div class="price-card featured">
+        <div class="tool-name blue">ASINInsight</div>
+        <div class="price">Free<sub> to start</sub></div>
+        <div class="price-note">Pro: $49/mo · Agency: $199/mo</div>
+        <ul>
+          <li>5 free diagnoses/month, forever</li>
+          <li>No Amazon account required</li>
+          <li>Instant diagnosis from CSV</li>
+          <li>Dollar impact per issue</li>
+          <li>Numbered action plan</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="tool-name">Helium 10</div>
+        <div class="price">$29<sub>/mo</sub></div>
+        <div class="price-note">Starter · Full suite from $79/mo</div>
+        <ul>
+          <li>Full keyword research suite</li>
+          <li>Listing Analyzer included</li>
+          <li>Requires Amazon connection</li>
+          <li>Large feature set, steep learning curve</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="tool-name">Jungle Scout</div>
+        <div class="price">$49<sub>/mo</sub></div>
+        <div class="price-note">Basic · Suite from $69/mo</div>
+        <ul>
+          <li>Best-in-class product research</li>
+          <li>Listing Grader available</li>
+          <li>Requires Amazon connection</li>
+          <li>Strong for new product launches</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="tool-name">SellerApp</div>
+        <div class="price">$49<sub>/mo</sub></div>
+        <div class="price-note">Pro Lite · Full from $99/mo</div>
+        <ul>
+          <li>PPC automation + analytics</li>
+          <li>Ad performance focus</li>
+          <li>Requires Amazon connection</li>
+          <li>Strong for ad-heavy sellers</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Bottom CTA -->
+<section class="cta-section">
+  <div class="wrap">
+    <h2>Try ASINInsight free — takes 30 seconds</h2>
+    <p>Upload your Business Report CSV and get the one metric costing you the most money right now. No account, no credit card, no API connection.</p>
+    <form action="/checkout/free" method="post">
+      <button type="submit" class="btn btn-lg">Start free →</button>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="logo" style="font-size:16px;">ASIN<span style="color:var(--blue);">Insight</span></div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/dashboard">My diagnoses</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+    </div>
+    <div>&copy; 2026 ASINInsight. All rights reserved.</div>
+  </div>
+</footer>
+<script>
+(function(){
+  function _t(){var m=document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);return m?decodeURIComponent(m[1]):'';}
+  var _f=window.fetch;
+  window.fetch=function(u,o){o=o||{};if(typeof u==='string'&&/^\//.test(u)){o.headers=Object.assign({'X-CSRF-Token':_t()},o.headers||{});}return _f.call(this,u,o);};
+  document.addEventListener('submit',function(e){
+    var f=e.target;if(!f||f.method.toLowerCase()!=='post')return;
+    try{if(new URL(f.action,location.href).origin===location.origin){if(!f.querySelector('[name="_csrf"]')){var i=document.createElement('input');i.type='hidden';i.name='_csrf';i.value=_t();f.appendChild(i);}}}catch(ex){}
+  },true);
+})();
+</script>
+<script src="/static/analytics.js"></script>
+<script src="/static/cookie-consent.js"></script>
+</body>
+</html>

@@ -182,8 +182,9 @@
         <div class="price">$0 <small>/ mo</small></div>
         <ul>
           <li>3 diagnoses per month</li>
-          <li>Primary issue + severity</li>
-          <li>First action step</li>
+          <li>Full action plan + severity</li>
+          <li>Revenue impact estimate</li>
+          <li>Email report delivery</li>
         </ul>
         <form action="/checkout/free" method="post">
           <button type="submit" class="btn btn-secondary">Start free</button>
@@ -301,9 +302,9 @@
         <tbody>
           <tr><td>Diagnoses per month</td><td style="text-align:center;">3</td><td style="text-align:center;" class="highlight">Unlimited</td><td style="text-align:center;">Unlimited</td></tr>
           <tr><td>Primary issue + severity level</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
-          <tr><td>Full numbered action plan</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
-          <tr><td>Revenue impact estimate</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
-          <tr><td>Email report delivery</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
+          <tr><td>Full numbered action plan</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
+          <tr><td>Revenue impact estimate</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
+          <tr><td>Email report delivery</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td><td class="check" style="text-align:center;">✓</td></tr>
           <tr><td>Multiple ASINs / accounts</td><td class="cross" style="text-align:center;">—</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td></tr>
           <tr><td>Bulk CSV upload</td><td class="cross" style="text-align:center;">—</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td></tr>
           <tr><td>Priority support</td><td class="cross" style="text-align:center;">—</td><td class="cross" style="text-align:center;">—</td><td class="check" style="text-align:center;">✓</td></tr>
@@ -347,7 +348,7 @@
       <div class="pfaq-item">
         <div class="pfaq-q" onclick="togglePfaq(this)">Does the free plan include the full action plan?
           <svg class="pfaq-chevron" width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg></div>
-        <div class="pfaq-a">The free plan shows you the primary issue, severity level, and the first action step so you can see exactly what type of output you'll get. Pro unlocks the full numbered action plan, all supporting steps, the revenue impact estimate, and email delivery.</div>
+        <div class="pfaq-a">The free plan gives you the primary issue, severity level, the full action plan, and email report delivery — everything you need to identify and fix your #1 problem. Pro adds unlimited diagnoses (vs. 3/month on free), multi-ASIN batch analysis, and revenue impact estimates. <a href="/pricing" style="color:var(--blue);font-weight:600;">See full comparison →</a></div>
       </div>
       <div class="pfaq-item">
         <div class="pfaq-q" onclick="togglePfaq(this)">Is there an annual billing option?
@@ -474,34 +475,6 @@
   );
 
 })();
-</script>
-
-<!-- Cookie bar -->
-<div id="cookieBar" style="display:none;" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <div style="max-width:680px;">
-    <strong style="color:#fff;font-size:14px;">We use essential cookies only.</strong>
-    <span style="color:rgba(255,255,255,.75);font-size:13px;"> A single session cookie keeps you signed in. No tracking. No advertising. No third-party analytics. <a href="/privacy">Privacy Policy</a></span>
-  </div>
-  <div style="display:flex;gap:10px;flex-shrink:0;">
-    <button id="cookieDecline" onclick="declineCookie()" style="background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.75);font:inherit;font-size:13px;font-weight:600;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Decline</button>
-    <button id="cookieDismiss" onclick="dismissCookie()" style="background:rgba(255,255,255,.15);border:none;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:6px 16px;border-radius:8px;cursor:pointer;white-space:nowrap;">Accept</button>
-  </div>
-</div>
-<script>
-  (function() {
-    var consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
-      document.getElementById('cookieBar').style.display = 'flex';
-    }
-  })();
-  function dismissCookie() {
-    localStorage.setItem('cookieConsent', 'accepted');
-    document.getElementById('cookieBar').style.display = 'none';
-  }
-  function declineCookie() {
-    localStorage.setItem('cookieConsent', 'declined');
-    document.getElementById('cookieBar').style.display = 'none';
-  }
 </script>
 
 <!-- CSRF double-submit: read _csrf cookie → inject into all same-origin

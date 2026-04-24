@@ -189,6 +189,17 @@
   </div>
 </footer>
 
+<script>
+(function(){
+  function _t(){var m=document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);return m?decodeURIComponent(m[1]):'';}
+  var _f=window.fetch;
+  window.fetch=function(u,o){o=o||{};if(typeof u==='string'&&/^\//.test(u)){o.headers=Object.assign({'X-CSRF-Token':_t()},o.headers||{});}return _f.call(this,u,o);};
+  document.addEventListener('submit',function(e){
+    var f=e.target;if(!f||f.method.toLowerCase()!=='post')return;
+    try{if(new URL(f.action,location.href).origin===location.origin){if(!f.querySelector('[name="_csrf"]')){var i=document.createElement('input');i.type='hidden';i.name='_csrf';i.value=_t();f.appendChild(i);}}}catch(ex){}
+  },true);
+})();
+</script>
 <script src="/static/analytics.js"></script>
 <script src="/static/cookie-consent.js"></script>
 </body>
