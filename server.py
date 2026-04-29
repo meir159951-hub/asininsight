@@ -88,6 +88,12 @@ SENDGRID_API_KEY   = os.getenv("SENDGRID_API_KEY", "")
 EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "reports@asininsight.com")
 EMAIL_FROM_NAME    = os.getenv("EMAIL_FROM_NAME", "ASINInsight")
 
+# Anthropic Claude — used for Pro-tier LLM-enhanced insights on top of rule-based audit.
+# When unset, /api/diagnose silently degrades to rule-based only. Free tier never calls the LLM.
+ANTHROPIC_API_KEY  = os.getenv("ANTHROPIC_API_KEY", "")
+LLM_MODEL          = os.getenv("LLM_MODEL", "claude-opus-4-7")
+LLM_TIMEOUT_S      = float(os.getenv("LLM_TIMEOUT_S", "8"))
+
 # Railway gives postgres:// but psycopg2 requires postgresql://
 DATABASE_URL = os.getenv("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
 
@@ -666,6 +672,219 @@ def _client_ip(req) -> str:
     return req.headers.get("X-Forwarded-For", req.remote_addr).split(",")[0].strip()
 
 
+# ── LLM-powered Pro insights ────────────────────────────────────────────────
+#
+# After the rule-based engine produces problems + recommendations, we ask
+# Claude to add 2-3 deeper insights for Pro-tier customers. The system prompt
+# is cached (stable across audits) so per-audit cost stays under ~$0.02.
+#
+# On any failure (API down, timeout, malformed JSON) we return [] — the rest
+# of the audit is unaffected. LLM insights are pure enrichment.
+
+_LLM_SYSTEM_PROMPT = """You are a senior Amazon FBA strategist reviewing a seller's diagnostic data.
+
+A rule-based engine has already analyzed their Detail Page Sales and Traffic Business Report \
+and surfaced metric-level issues (CTR low, ACOS high, etc.). Your job is to add 2-3 deeper \
+insights that the rule engine cannot see — patterns across metrics, category context, and \
+algorithmic implications.
+
+DIAGNOSTIC FRAMEWORK
+====================
+
+The 2025-2026 Amazon ranking landscape has three layers:
+
+1. **A10** (legacy) — mechanical: sales velocity, CTR, conversion rate, lexical title match.
+   Title remains the single highest-impact field for organic discovery.
+
+2. **COSMO** (semantic AI, 2024-2025) — reads structured backend attributes for buyer intent.
+   Keyword stuffing is now actively penalized; coherent backend taxonomy is rewarded.
+
+3. **Rufus** (generative shopping assistant, 2025) — surfaces 5 products per query, not 50.
+   Being one of those 5 requires clear use-case signals in title, bullets, and A+ content.
+
+WHAT TO LOOK FOR
+================
+
+Cross-metric patterns the rule engine misses:
+- High CTR + low conversion → image-listing mismatch (people click expecting X, get Y)
+- High sessions + low Buy Box → you're losing the box mid-day to a competitor
+- ACOS spike + organic rank drop → ad-driven sales were propping up rank; fix listing first
+- Low CTR + high price → not a price problem, it's a hero image problem
+- High CTR + good conversion + low rank → review velocity gap; you need Vine or external traffic
+
+Category context:
+- A 0.3% CTR is bottom-quartile in most consumer categories, but normal in B2B/industrial
+- A 2.5% conversion rate is strong for a $80+ price point, weak for sub-$25
+- ACOS above 50% is bleeding for mature listings, acceptable for launch phase (<60 days live)
+
+Algorithmic implications (call these out by name when relevant):
+- A10/COSMO/Rufus changes that map to the symptoms in the data
+- The 2025 algorithm shift that crashed visibility for many sellers (mobile + buyer intent + backend re-weighting)
+
+OUTPUT RULES
+============
+
+- Be blunt, specific, and numeric. Cite the seller's actual numbers from the data shown.
+- Each insight is one paragraph, 2-3 sentences max.
+- No hedging. No "might/could/consider". Use "fix this", "your listing has X", "stop spending on Y".
+- Reference A10/COSMO/Rufus by name when the insight depends on them.
+- Avoid restating the rule-based findings — go DEEPER, not broader.
+
+You output JSON in this exact shape:
+{
+  "insights": [
+    {"title": "<5-10 word headline>", "detail": "<1 paragraph, 2-3 sentences>", "priority": "high|medium|low"},
+    ...
+  ]
+}
+"""
+
+
+def _llm_enhance_pro(score: int, headline: str, problems: list, recommendations: list,
+                    items: list) -> list:
+    """
+    Returns a list of LLM-generated Pro insights, or [] on any failure.
+    Cost target: <$0.02/audit. Latency target: <5s.
+    """
+    if not ANTHROPIC_API_KEY:
+        return []
+
+    try:
+        import anthropic
+    except ImportError:
+        log.warning("anthropic SDK not installed; skipping LLM enrichment")
+        return []
+
+    # Build per-audit user message — keep it tight to control cost
+    top_problems = []
+    for p in (problems or [])[:3]:
+        if isinstance(p, dict):
+            top_problems.append({
+                "title":    str(p.get("title", ""))[:120],
+                "severity": str(p.get("severity", "medium"))[:12],
+                "detail":   str(p.get("detail", ""))[:200],
+            })
+    top_recs = []
+    for r in (recommendations or [])[:3]:
+        if isinstance(r, dict):
+            top_recs.append({
+                "step":   int(r.get("step", 0)),
+                "action": str(r.get("action", ""))[:200],
+                "why":    str(r.get("why", ""))[:200],
+            })
+    sample_items = []
+    for it in (items or [])[:5]:
+        if not isinstance(it, dict):
+            continue
+        m = it.get("metrics") if isinstance(it.get("metrics"), dict) else {}
+        sample_items.append({
+            "asin":     str(it.get("asin", ""))[:20],
+            "title":    str(it.get("title", ""))[:100],
+            "ctr":      m.get("ctr") if m else it.get("ctr"),
+            "cvr":      m.get("conversion_rate") if m else it.get("conversion_rate"),
+            "acos":     m.get("acos") if m else it.get("acos"),
+            "sessions": m.get("sessions_30d") if m else it.get("sessions_30d"),
+            "buy_box":  m.get("buy_box_pct") if m else it.get("buy_box_pct"),
+            "price":    m.get("price") if m else it.get("price"),
+            "rating":   m.get("rating") if m else it.get("rating"),
+            "reviews":  m.get("review_count") if m else it.get("review_count"),
+        })
+
+    user_payload = {
+        "overall_score":   score,
+        "headline":        str(headline)[:300],
+        "top_problems":    top_problems,
+        "top_actions":     top_recs,
+        "asin_sample":     sample_items,
+    }
+
+    try:
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY, timeout=LLM_TIMEOUT_S)
+        # cache_control on the system prompt — stable across all audits, so subsequent
+        # requests pay ~10% of the input price for the system prefix.
+        resp = client.messages.create(
+            model=LLM_MODEL,
+            max_tokens=1024,
+            thinking={"type": "adaptive"},
+            system=[{
+                "type": "text",
+                "text": _LLM_SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral", "ttl": "1h"},
+            }],
+            output_config={"format": {
+                "type": "json_schema",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "insights": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 3,
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "title":    {"type": "string"},
+                                    "detail":   {"type": "string"},
+                                    "priority": {"type": "string", "enum": ["high", "medium", "low"]},
+                                },
+                                "required": ["title", "detail", "priority"],
+                                "additionalProperties": False,
+                            },
+                        },
+                    },
+                    "required": ["insights"],
+                    "additionalProperties": False,
+                },
+            }},
+            messages=[{
+                "role": "user",
+                "content": "Diagnostic data for this audit:\n\n" + json.dumps(user_payload),
+            }],
+        )
+
+        # Parse the JSON response
+        text_blocks = [b.text for b in resp.content if getattr(b, "type", None) == "text"]
+        if not text_blocks:
+            return []
+        parsed = json.loads(text_blocks[0])
+        raw_insights = parsed.get("insights", [])
+        if not isinstance(raw_insights, list):
+            return []
+
+        # Sanitize before returning to client (will be HTML-escaped on render)
+        cleaned = []
+        for ins in raw_insights[:3]:
+            if not isinstance(ins, dict):
+                continue
+            title    = str(ins.get("title",    ""))[:200].strip()
+            detail   = str(ins.get("detail",   ""))[:800].strip()
+            priority = str(ins.get("priority", "medium")).lower().strip()
+            if priority not in ("high", "medium", "low"):
+                priority = "medium"
+            if title and detail:
+                cleaned.append({"title": title, "detail": detail, "priority": priority})
+
+        # Log cost telemetry (cache hits show how well the cache is working)
+        try:
+            usage = resp.usage
+            log.info(
+                "LLM enrich: %d insights, in=%d cache_read=%d cache_write=%d out=%d",
+                len(cleaned),
+                getattr(usage, "input_tokens", 0),
+                getattr(usage, "cache_read_input_tokens", 0),
+                getattr(usage, "cache_creation_input_tokens", 0),
+                getattr(usage, "output_tokens", 0),
+            )
+        except Exception:
+            pass
+
+        return cleaned
+
+    except Exception as e:
+        log.warning("LLM enrichment failed: %s — falling back to rule-based only", e)
+        return []
+
+
 def _is_same_origin(req) -> bool:
     """
     Soft same-origin guard for API endpoints.
@@ -887,8 +1106,11 @@ def index():
 
 @app.route("/tool")
 def tool():
-    if not session.get("plan"):
-        return redirect("/")
+    """
+    Anti-funnel: anyone can reach /tool. The first audit is free; the Free-plan
+    monthly cap (3/month) and the Pro upgrade prompt are enforced inside
+    /api/diagnose. No signup required to see what the product does.
+    """
     return send_from_directory(BASE_DIR, "app.html")
 
 
@@ -1009,10 +1231,9 @@ def site_config():
 
 @app.route("/api/stats")
 def api_stats():
-    """Public site stats — used for social proof counter on landing page."""
-    SEED = 2847  # base offset representing diagnoses before tracking began
+    """Public site stats. Returns the real DB count only — no synthetic seed."""
     return jsonify({
-        "diagnoses_run": SEED + _get_stat("diagnoses_run"),
+        "diagnoses_run": _get_stat("diagnoses_run"),
     })
 
 
@@ -1335,6 +1556,18 @@ def send_report():
                     "why":    html.escape(str(r.get("why",    ""))[:300]),
                 })
 
+    # AI deep-dive insights (Pro tier only — empty for Free)
+    raw_llm = report.get("llm_insights")
+    llm_insights = []
+    if isinstance(raw_llm, list):
+        for ins in raw_llm[:3]:
+            if isinstance(ins, dict) and ins.get("title") and ins.get("detail"):
+                llm_insights.append({
+                    "title":    html.escape(str(ins.get("title",    ""))[:200]),
+                    "detail":   html.escape(str(ins.get("detail",   ""))[:800]),
+                    "priority": str(ins.get("priority", "medium")).lower()[:10],
+                })
+
     # Score colour: green ≥70, amber 40–69, red <40
     if score >= 70:
         score_color = "#16a34a"
@@ -1409,6 +1642,46 @@ def send_report():
     if not problems_rows:
         problems_rows = """<tr><td style="padding:14px 16px;font-size:14px;color:#64748b;background:#f0fdf4;">
             &#10003; No major issues detected — your listing metrics look healthy.</td></tr>"""
+
+    # ── Build AI deep-dive insights block (Pro only) ──────────────────────
+    insights_block = ""
+    if llm_insights:
+        insight_rows = ""
+        for ins in llm_insights:
+            pri = ins["priority"]
+            dot_color = "#c8542d" if pri == "high" else ("#7a8a9a" if pri == "low" else "#b48a3c")
+            insight_rows += f"""
+              <tr>
+                <td style="padding:0 36px 12px;">
+                  <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#ffffff;border:1px solid #ead8b8;border-radius:10px;">
+                    <tr>
+                      <td style="padding:14px 16px;vertical-align:top;">
+                        <table cellpadding="0" cellspacing="0" border="0" width="100%">
+                          <tr>
+                            <td width="14" valign="top" style="padding-top:6px;padding-right:10px;">
+                              <div style="width:8px;height:8px;border-radius:50%;background:{dot_color};"></div>
+                            </td>
+                            <td valign="top">
+                              <div style="font-size:14px;font-weight:700;color:#15263d;margin-bottom:4px;line-height:1.35;">{ins['title']}</div>
+                              <div style="font-size:13px;color:#475569;line-height:1.55;">{ins['detail']}</div>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>"""
+        insights_block = f"""
+          <tr>
+            <td style="padding:0 36px 8px;">
+              <div style="font-size:11px;font-weight:700;color:#7a5b1f;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;">
+                &#10024; AI deep-dive (Pro) &middot; <span style="color:#a08555;font-weight:600;">Generated by Claude</span>
+              </div>
+            </td>
+          </tr>{insight_rows}
+          <tr><td style="padding:0 36px 20px;"><div style="height:1px;background:#e2e8f0;"></div></td></tr>
+        """
 
     # ── Revenue impact line ───────────────────────────────────────────────
     revenue_row = ""
@@ -1499,6 +1772,9 @@ def send_report():
 
           <!-- DIVIDER -->
           <tr><td style="padding:0 36px;"><div style="height:1px;background:#e2e8f0;"></div></td></tr>
+
+          <!-- AI DEEP-DIVE (Pro only — empty for Free) -->
+          {insights_block}
 
           <!-- PROBLEMS -->
           <tr>
@@ -2438,16 +2714,18 @@ def detect(metrics: dict) -> list[dict]:
 
 @app.route("/api/diagnose", methods=["POST"])
 def api_diagnose():
-    # Authentication — must have an active session (free or paid plan).
-    # This stops anonymous API scraping and brute-force data extraction.
-    if not session.get("plan"):
-        return jsonify({"error": "Authentication required."}), 401
-
-    # Same-origin guard — block cross-site AJAX calls from other domains
+    # Same-origin guard — block cross-site AJAX calls from other domains.
+    # This is the primary anti-abuse gate now that anonymous audits are allowed.
     if not _is_same_origin(request):
         log.warning("Rejected cross-origin /api/diagnose request (IP: %s, Origin: %s)",
                     _client_ip(request), request.headers.get("Origin", "none"))
         return jsonify({"error": "Request origin not permitted."}), 403
+
+    # Anti-funnel: auto-create a free session for first-time anonymous visitors.
+    # The Free monthly cap (3/mo) is enforced below; Pro upgrade prompt fires at the cap.
+    if not session.get("plan"):
+        session["plan"] = "free"
+        session.permanent = True
 
     # Rate limit — 30 requests / hour / IP
     ip = _client_ip(request)
@@ -2801,6 +3079,13 @@ def api_diagnose():
         top["severity"] if top else "low",
     )
 
+    # ── Pro/Agency tier: LLM-enhanced insights on top of rule-based output ──
+    # Free tier never calls the LLM. Failures degrade silently to [].
+    plan = session.get("plan", "free")
+    llm_insights = []
+    if plan in ("pro", "agency") and ANTHROPIC_API_KEY:
+        llm_insights = _llm_enhance_pro(score, headline, problems, recs[:5], items)
+
     return jsonify({
         "overall_score":            score,
         "headline":                 headline,
@@ -2810,9 +3095,11 @@ def api_diagnose():
         "estimated_revenue_impact": rev,
         "overall_confidence":       overall_confidence,
         "data_quality":             data_quality,
-        "model_used":               "rule-based",
+        "model_used":               "rule-based+claude" if llm_insights else "rule-based",
         # Per-ASIN breakdown — only populated for multi-ASIN uploads (batch view)
         "per_asin":                 per_asin if len(items) > 1 else [],
+        # LLM-enhanced insights for Pro+ tiers (empty array on Free or LLM failure)
+        "llm_insights":             llm_insights,
     })
 
 
