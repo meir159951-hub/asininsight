@@ -87,6 +87,11 @@ AMAZON_REDIRECT_URI  = os.getenv("AMAZON_REDIRECT_URI", "")
 SENDGRID_API_KEY   = os.getenv("SENDGRID_API_KEY", "")
 EMAIL_FROM_ADDRESS = os.getenv("EMAIL_FROM_ADDRESS", "reports@asininsight.com")
 EMAIL_FROM_NAME    = os.getenv("EMAIL_FROM_NAME", "ASINInsight")
+# CAN-SPAM §5 requires every commercial email to include a valid physical postal
+# address of the sender. Set BUSINESS_POSTAL_ADDRESS in Railway to a real PO Box
+# or virtual-mailbox street address before re-enabling marketing emails. Fallback
+# below is identification-only and is acceptable for transactional receipts.
+BUSINESS_POSTAL_ADDRESS = os.getenv("BUSINESS_POSTAL_ADDRESS", "ASINInsight · Los Angeles, CA, United States")
 
 # Anthropic Claude — used for Pro-tier LLM-enhanced insights on top of rule-based audit.
 # When unset, /api/diagnose silently degrades to rule-based only. Free tier never calls the LLM.
@@ -385,11 +390,14 @@ def _build_drip_email(email: str, step: int) -> dict | None:
     site = SITE_URL or "https://asininsight.com"
     unsub_url = f"{site}/unsubscribe?e={requests.utils.quote(email)}&t={unsub_token}"
 
+    # CAN-SPAM §5(a)(5): every commercial email must include the sender's
+    # valid physical postal address. BUSINESS_POSTAL_ADDRESS is set via env.
     footer_html = (
         f'<p style="margin:28px 0 0;font-size:11px;color:#94a3b8;text-align:center;line-height:1.6;">'
         f'ASINInsight &middot; '
         f'<a href="{site}/privacy" style="color:#94a3b8;">Privacy</a> &middot; '
         f'<a href="{unsub_url}" style="color:#94a3b8;">Unsubscribe</a>'
+        f'<br>{html.escape(BUSINESS_POSTAL_ADDRESS)}'
         f'</p>'
     )
 
@@ -1287,11 +1295,15 @@ def capture_email():
                     f"INSERT INTO email_leads (email, source, created_at) VALUES ({ph}, {ph}, {ph})",
                     (email, source, time.time())
                 )
+        # Marketing drip disabled (2026-04 launch hardening): the previous flow
+        # auto-enrolled every captured lead into a 3-email sequence without
+        # explicit opt-in, which violated CAN-SPAM (no postal address) and GDPR
+        # (no freely-given specific consent). Re-enable behind an opt-in
+        # checkbox + postal address before reactivating _schedule_drip.
         if not already_exists:
-            log.info("Lead captured: %s (source=%s)", email, source)
-            _schedule_drip(email)
+            log.info("Lead captured (source=%s)", source)
         else:
-            log.info("Duplicate lead ignored: %s", email)
+            log.info("Duplicate lead ignored")
     except Exception as e:
         log.warning("Failed to save lead email: %s", e)
         # Don't surface DB errors to the user — just ack
@@ -1813,13 +1825,19 @@ def send_report():
               <table cellpadding="0" cellspacing="0" border="0" width="100%">
                 <tr>
                   <td style="font-size:12px;color:#94a3b8;">
-                    &copy; 2025 ASINInsight &nbsp;&bull;&nbsp;
+                    &copy; 2026 ASINInsight &nbsp;&bull;&nbsp;
                     <a href="https://asininsight.com/privacy" style="color:#94a3b8;text-decoration:underline;">Privacy</a>
                     &nbsp;&bull;&nbsp;
                     <a href="https://asininsight.com/terms" style="color:#94a3b8;text-decoration:underline;">Terms</a>
                   </td>
                   <td align="right" style="font-size:12px;">
                     <a href="https://asininsight.com" style="color:#94a3b8;text-decoration:none;">asininsight.com</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="font-size:11px;color:#94a3b8;padding-top:8px;line-height:1.5;">
+                    You received this because you requested an audit copy at asininsight.com. We don't add you to any list or send follow-ups.<br>
+                    {html.escape(BUSINESS_POSTAL_ADDRESS)}
                   </td>
                 </tr>
               </table>
@@ -2939,25 +2957,52 @@ def api_diagnose():
                     entry["validation_warning"] = str(b["validation_warning"])[:200]
                 all_b.append(entry)
 
-    score = round(total / len(items)) if items else 0
+    # ── Score aggregation (Fix #3) ────────────────────────────────────────
+    # Naive average hides a single critical ASIN behind 4 healthy ones (a
+    # 5-ASIN portfolio with one losing money on ads can score 98 = "looks
+    # great"). Cap the overall score by the worst per-ASIN severity so the
+    # number a buyer sees first matches the headline.
+    SEV_CAP = {
+        "critical": 60,   # any critical ASIN → can't claim store is healthy
+        "high":     80,
+        "medium":   90,
+        "low":      95,
+        "none":    100,
+    }
+    worst_sev = "none"
+    for r in per_asin:
+        s = str(r.get("severity") or "none").lower()
+        if SEV_W.get(s, 99) < SEV_W.get(worst_sev, 99):
+            worst_sev = s
+    naive_avg = (total / len(items)) if items else 0
+    score = round(min(naive_avg, SEV_CAP.get(worst_sev, 100)))
+
     by_area: dict = {}
     for b in all_b:
         if b["area"] not in by_area or SEV_W.get(b["severity"], 9) < SEV_W.get(by_area[b["area"]]["severity"], 9):
             by_area[b["area"]] = b
     ranked = sorted(by_area.values(), key=lambda x: SEV_W.get(x["severity"], 9))
     top    = ranked[0] if ranked else None
-    urgent = sum(1 for b in all_b if b["severity"] in ("critical", "high"))
-    iw     = "issue" if urgent == 1 else "issues"
+
+    # ── Headline counter (Fix #4) ─────────────────────────────────────────
+    # Count critical and high SEPARATELY. The previous version called the
+    # combined critical+high count "{n} critical issues" — overstating
+    # severity by ~7× on dirty real-world CSVs.
+    n_critical = sum(1 for b in all_b if b["severity"] == "critical")
+    n_high     = sum(1 for b in all_b if b["severity"] == "high")
+    n_urgent   = n_critical + n_high
+    iw_crit    = "issue" if n_critical == 1 else "issues"
+    iw_urg     = "issue" if n_urgent   == 1 else "issues"
 
     if not ranked:
         headline = "This ASIN looks healthy — no significant blockers detected."
-    elif urgent >= 3 and top["severity"] == "critical":
-        headline = f"{urgent} critical {iw} compounding each other — start with {top['area']}, fix in order."
+    elif n_critical >= 3:
+        headline = f"{n_critical} critical {iw_crit} compounding each other — start with {top['area']}, fix in order."
     elif top["severity"] == "critical":
         headline = f"Critical {top['area']} problem — fix this before scaling anything."
-    elif urgent >= 3:
-        headline = f"{urgent} urgent {iw} compounding each other — fix them in order, not all at once."
-    elif urgent == 1:
+    elif n_urgent >= 3:
+        headline = f"{n_urgent} urgent {iw_urg} compounding each other — fix them in order, not all at once."
+    elif n_urgent == 1:
         headline = f"One fix needed in {top['area']} — address it and results improve within 14 days."
     else:
         headline = f"Main opportunity is in {top['area']} — one focused change can move the needle."
@@ -2991,6 +3036,19 @@ def api_diagnose():
         min_conf = {"high": "medium", "medium": "low"}.get(min_conf, min_conf)
     if len(all_contradictions) >= 2 and conf_order.get(min_conf, 2) > 1:
         min_conf = {"high": "medium", "medium": "low"}.get(min_conf, min_conf)
+
+    # Fix #7 — Confidence calibration on heavily-incomplete CSVs.
+    # If 4+ of the 6 core fields are missing across ALL ASINs, we genuinely
+    # don't have enough signal to be confident — force "low" and cap the
+    # overall score so a CSV with only a title + bullet count can't return
+    # "score 96, healthy listing".
+    severe_gap = len(all_missing) >= 4
+    if severe_gap:
+        min_conf = "low"
+        # When confidence is structurally low, no listing can claim "healthy".
+        # Cap the displayed overall score at 75 so the user understands the
+        # number is provisional, not a green light.
+        score = min(score, 75)
     overall_confidence = min_conf
 
     # ── Problems list — include confidence + warnings ────────────────────
