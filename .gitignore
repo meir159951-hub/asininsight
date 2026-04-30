@@ -40,3 +40,22 @@ Thumbs.db
 # ── Beta test responses (may contain real user feedback) ──────────────────
 beta_testing/responses/*.json
 !beta_testing/responses/RESP-XXX-*.json
+
+# ── Local dev artefacts — may contain live session cookies / API responses ─
+# These are produced by curl --cookie-jar / smoke-test scripts during local
+# development and may capture real session IDs, CSRF tokens, or diagnose
+# response payloads. Never commit them.
+cookies*.txt
+live_cookies.txt
+live*.txt
+server_out.txt
+diag_result.json
+diag_*.json
+test_data.csv
+output/
+validation_output/
+
+# Tooling state ───────────────────────────────────────────────────────────
+.claude/
+.cursor/
+.aider*

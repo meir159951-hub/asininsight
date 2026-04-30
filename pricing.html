@@ -122,9 +122,14 @@
       .hero p { font-size: 15px; }
       .wrap { padding: 0 16px; }
     }
+    /* Skip-to-content link — visible only when keyboard-focused (ADA / WCAG 2.1 SC 2.4.1). */
+    .skip-link { position: absolute; left: 0; top: 0; padding: 10px 18px; background: var(--blue); color: #fff; font-weight: 700; font-size: 14px; z-index: 1000; text-decoration: underline; transform: translateY(-110%); transition: transform .15s; }
+    .skip-link:focus { transform: translateY(0); outline: 3px solid #fff; outline-offset: -3px; }
   </style>
 </head>
 <body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <!-- Nav — all links use server routes, not file paths -->
 <nav>
@@ -143,6 +148,8 @@
 <div class="notice-bar" id="cancelledBar" style="display:none;">
   No charge was made. You can start for free below or return to checkout any time.
 </div>
+
+<main id="main">
 
 <section class="hero">
   <div class="wrap">
@@ -362,6 +369,8 @@
     </div>
   </div>
 </section>
+
+</main>
 
 <footer>
   <div class="wrap foot">

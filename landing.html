@@ -237,8 +237,15 @@
       .stat-num { font-size: 20px; }
     }
   </style>
+  <style>
+    /* Skip-to-content link — visible only when keyboard-focused (ADA / WCAG 2.1 SC 2.4.1). */
+    .skip-link { position: absolute; left: 0; top: 0; padding: 10px 18px; background: #1f5fa8; color: #fff; font-weight: 700; font-size: 14px; z-index: 1000; text-decoration: underline; transform: translateY(-110%); transition: transform .15s; }
+    .skip-link:focus { transform: translateY(0); outline: 3px solid #fff; outline-offset: -3px; }
+  </style>
 </head>
 <body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
 
 <!-- Announcement bar -->
 <div class="announce-bar" id="announceBar">
@@ -261,6 +268,8 @@
 
 <!-- Page notice (shown for OAuth error redirects) -->
 <div id="pageNotice" hidden></div>
+
+<main id="main">
 
 <!-- Hero -->
 <section class="hero">
@@ -761,6 +770,8 @@ function resetDemo() {
   </div>
 </section>
 
+</main>
+
 <!-- Footer -->
 <footer>
   <div class="wrap foot">
@@ -872,7 +883,7 @@ function toggleFaq(el) {
     <h3 id="exitTitle" style="font:700 22px Georgia,serif;color:#15263d;margin:0 0 10px;line-height:1.2;">Before you go — see what's hurting your listing</h3>
     <p style="color:#617184;font-size:15px;line-height:1.6;margin:0 0 24px;">Most Amazon sellers lose $200+ per month to one fixable issue. Upload your Business Report — it takes about a minute and it's completely free.</p>
     <a href="/tool" class="btn btn-primary" style="width:100%;min-height:50px;font-size:16px;display:flex;align-items:center;justify-content:center;text-decoration:none;margin-bottom:12px;">Show me what's wrong — free →</a>
-    <button onclick="closeExit()" style="background:none;border:none;color:#94a3b8;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;">I'll figure it out myself</button>
+    <button onclick="closeExit()" style="background:none;border:none;color:#64748b;font-size:13px;cursor:pointer;font-family:inherit;padding:4px;">I'll figure it out myself</button>
   </div>
 </div>
 

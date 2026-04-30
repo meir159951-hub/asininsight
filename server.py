@@ -1003,8 +1003,10 @@ def add_security_headers(response):
 
     # ── Universal hardening headers ───────────────────────────────────────
     response.headers["X-Content-Type-Options"]             = "nosniff"
-    response.headers["X-Frame-Options"]                    = "SAMEORIGIN"
-    response.headers["X-XSS-Protection"]                   = "1; mode=block"
+    # DENY (not SAMEORIGIN) matches the CSP frame-ancestors 'none' directive
+    # for legacy browsers that don't honor CSP-3 frame-ancestors.
+    response.headers["X-Frame-Options"]                    = "DENY"
+    response.headers["X-XSS-Protection"]                   = "0"  # explicitly disabled — deprecated header, can introduce its own XSS vectors; CSP supersedes
     response.headers["Referrer-Policy"]                    = "strict-origin-when-cross-origin"
     response.headers["Strict-Transport-Security"]          = "max-age=63072000; includeSubDomains; preload"
     response.headers["X-Permitted-Cross-Domain-Policies"]  = "none"
@@ -1025,9 +1027,16 @@ def add_security_headers(response):
 
     # Content-Security-Policy.
     # 'unsafe-inline' for script-src and style-src is required because all
-    # JS and CSS is currently inline in the HTML files (no bundler step).
-    # TODO: extract inline scripts to separate .js files and replace
-    # 'unsafe-inline' with per-file hashes or a nonce-based approach.
+    # JS and CSS is currently inline in the HTML files (served as static
+    # files via send_from_directory, no Jinja templating). Migrating to
+    # nonce/hash-based CSP requires either externalising every inline block
+    # or moving to render_template — tracked for post-launch hardening.
+    #
+    # frame-ancestors 'none'        — clickjacking defence (broader than X-Frame-Options).
+    # upgrade-insecure-requests     — forces any sub-resource accidentally requested over
+    #                                  http:// to upgrade to https:// (defence in depth on
+    #                                  top of HSTS).
+    # block-all-mixed-content       — pre-CSP3 belt-and-suspenders for the same.
     response.headers["Content-Security-Policy"] = (
         "default-src 'self'; "
         "script-src 'self' 'unsafe-inline' https://cdn.paddle.com https://www.googletagmanager.com https://www.google-analytics.com; "
@@ -1036,9 +1045,12 @@ def add_security_headers(response):
         "font-src 'self' data:; "
         "connect-src 'self' https://sandbox-api.paddle.com https://api.paddle.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; "
         "frame-src https://sandbox-buy.paddle.com https://buy.paddle.com; "
+        "frame-ancestors 'none'; "
         "object-src 'none'; "
         "base-uri 'self'; "
-        "form-action 'self';"
+        "form-action 'self'; "
+        "upgrade-insecure-requests; "
+        "block-all-mixed-content;"
     )
 
     # ── Cache control — no-store only where it matters ────────────────────
