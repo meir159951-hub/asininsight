@@ -249,10 +249,41 @@
     .impact-card .result-card-body { background: var(--green-soft); }
     .impact-card .result-card-body p { color: var(--green); font-weight: 600; font-size: 15px; }
 
-    .action-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
-    .action-item { display: flex; gap: 10px; align-items: flex-start; }
-    .action-num { width: 24px; height: 24px; border-radius: 50%; background: var(--blue); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-    .action-text { font-size: 14px; line-height: 1.55; color: #2d3f55; }
+    .action-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; position: relative; }
+    .action-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 10px 12px 10px 10px;
+      border-radius: 10px;
+      background: #fafbfc;
+      border: 1px solid #eef1f5;
+      border-left: 3px solid var(--blue);
+      transition: background .12s, border-color .12s, transform .08s;
+      position: relative;
+    }
+    .action-item:hover { background: #f4f7fb; border-color: #e2e8f0; }
+    .action-item.sev-critical { border-left-color: var(--red);   background: #fff7f5; }
+    .action-item.sev-critical:hover { background: #ffeeea; }
+    .action-item.sev-high     { border-left-color: var(--amber); background: #fffaf0; }
+    .action-item.sev-high:hover { background: #fff3df; }
+    .action-item.sev-medium   { border-left-color: #166534;      background: #f3fbf4; }
+    .action-item.sev-medium:hover { background: #ecf8ed; }
+    .action-item.sev-low      { border-left-color: #94a3b8;      background: #f8fafc; }
+    .action-item.sev-low:hover { background: #eef2f7; }
+    .action-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      font-size: 12px; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+      font-variant-numeric: tabular-nums;
+      box-shadow: 0 1px 2px rgba(15,23,42,.08);
+    }
+    .action-item.sev-critical .action-num { background: var(--red); }
+    .action-item.sev-high     .action-num { background: var(--amber); }
+    .action-item.sev-medium   .action-num { background: #166534; }
+    .action-item.sev-low      .action-num { background: #64748b; }
+    .action-text { font-size: 14px; line-height: 1.6; color: #2d3f55; flex: 1; }
+    .action-text strong { color: var(--ink); font-weight: 700; }
     .follow-up-note { margin-top: 12px; padding: 10px 12px; background: var(--blue-soft); border-radius: 10px; font-size: 13px; color: var(--blue); }
 
     .conf-note { margin-top: 10px; padding: 10px 14px; background: #f8fafc; border-radius: 10px; font-size: 13px; color: var(--muted); }
@@ -334,7 +365,32 @@
     }
     .batch-table td { padding: 9px 14px; border-bottom: 1px solid rgba(221,212,198,.4); vertical-align: middle; }
     .batch-table tr:last-child td { border-bottom: none; }
-    .batch-table tr:hover td { background: #fdfaf4; }
+    .batch-row { cursor: pointer; transition: background .12s; }
+    .batch-row:hover td { background: #fdfaf4; }
+    .batch-row.open td { background: #fbf6e8; }
+    .batch-row td:last-child { position: relative; padding-right: 30px; }
+    .batch-chev {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; color: #94a3b8; transition: transform .15s;
+      width: 14px; height: 14px; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .batch-row.open .batch-chev { transform: translateY(-50%) rotate(90deg); color: var(--blue); }
+    .batch-detail-row td { padding: 0; background: #fcf9f3; border-bottom: 1px solid rgba(221,212,198,.4); }
+    .batch-detail {
+      padding: 16px 18px;
+      display: grid; gap: 10px;
+      animation: detail-fade .18s ease;
+    }
+    @keyframes detail-fade {
+      from { opacity: 0; transform: translateY(-2px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .batch-detail-title { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; margin-bottom: 2px; }
+    .batch-detail-meta { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--muted); }
+    .batch-detail-meta span { background: #fff; border: 1px solid #e7dfd1; padding: 2px 8px; border-radius: 999px; }
+    .batch-detail h5 { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .batch-detail p { font-size: 13px; color: #2d3f55; line-height: 1.55; margin: 0; }
+    .batch-detail .bd-action { background: #fff; border: 1px solid #e7dfd1; border-radius: 8px; padding: 10px 12px; }
     .batch-sc { font-size: 15px; font-weight: 800; font-family: Georgia, serif; }
     .batch-sc.crit { color: var(--red); }
     .batch-sc.high { color: var(--amber); }
@@ -350,15 +406,31 @@
       .progress-bar { padding: 12px 8px; gap: 0; }
       .prog-step { padding: 0 6px; font-size: 11px; }
       .prog-sep { width: 20px; }
+      .nav-history { gap: 10px; font-size: 12px; }
+      .batch-table th, .batch-table td { padding: 8px 10px; font-size: 12px; }
+      .batch-detail { padding: 12px 14px; }
+      .batch-detail-title { font-size: 12px; }
+      .batch-detail p { font-size: 12px; }
+      .batch-row td:last-child { padding-right: 26px; }
+      .action-item { padding: 9px 10px 9px 9px; gap: 10px; }
+      .action-num { width: 22px; height: 22px; font-size: 11px; }
+      .action-text { font-size: 13px; line-height: 1.55; }
+      .result-card-head { padding: 9px 14px; flex-wrap: wrap; }
+      .result-card-body { padding: 12px 14px; }
     }
     @media (max-width: 520px) {
       .score-header { flex-direction: column; align-items: flex-start; gap: 10px; }
       .score-circle { width: 60px; height: 60px; }
       .score-circle .sn { font-size: 22px; }
       .score-text h2 { font-size: 16px; }
+      .score-meta-row { gap: 6px; }
       .modal-box { padding: 24px 20px; }
       .modal-box h3 { font-size: 18px; }
       .topnav { padding: 0 14px; }
+      .nav-history a:nth-child(1) { display: none; } /* hide "My diagnoses" — keep "← Home" */
+      .batch-table .batch-issue { display: none; }    /* free up width — issue shown in drill-down */
+      .batch-table thead th:nth-child(3) { display: none; }
+      .bench-pill { font-size: 11px; padding: 2px 8px; }
     }
   </style>
 </head>
@@ -986,9 +1058,11 @@ function renderResults(data) {
   document.getElementById('revenueText').textContent = revenue;
   document.getElementById('impactCard').hidden = !revenue;
 
-  // Action steps — parse numbered list from recommendation action string
+  // Action steps — parse numbered list from recommendation action string.
+  // Severity is taken from the primary issue so the steps inherit the right colour.
   const actionText = rec?.action || '';
-  renderActionSteps(actionText);
+  const actionSev  = (problem?.severity || rec?.severity || 'medium').toLowerCase();
+  renderActionSteps(actionText, actionSev);
 
   // AI deep-dive insights (Pro only — empty for Free or LLM failure)
   renderAIInsights(Array.isArray(data.llm_insights) ? data.llm_insights : []);
@@ -1013,14 +1087,16 @@ function renderResults(data) {
     cnEl.hidden = true;
   }
 
-  // Batch ASIN table (only when per_asin has >1 entries)
+  // Batch ASIN table (only when per_asin has >1 entries).
+  // Each row is clickable: click expands a detail panel showing the top-blocker
+  // explanation + tailored action for that specific ASIN. Click again to collapse.
   const perAsin = Array.isArray(data.per_asin) ? data.per_asin : [];
   const batchSec = document.getElementById('batchSection');
   if (perAsin.length > 1) {
     document.getElementById('batchCount').textContent = perAsin.length;
     const tbody = document.getElementById('batchTableBody');
     tbody.innerHTML = '';
-    perAsin.forEach(function(row) {
+    perAsin.forEach(function(row, idx) {
       const sc = row.score ?? 0;
       const scoreCls = sc < 50 ? 'crit' : (sc < 70 ? 'high' : 'ok');
       const sev = (row.severity || 'none').toLowerCase();
@@ -1030,13 +1106,46 @@ function renderResults(data) {
       const titleHtml = row.title
         ? `<div class="batch-title">${escHtml((row.title || '').substring(0, 55))}${(row.title || '').length > 55 ? '…' : ''}</div>`
         : '';
+
+      const hasDetail = !!(row.top_why || row.top_action || row.title);
       const tr = document.createElement('tr');
+      tr.className = hasDetail ? 'batch-row' : '';
+      tr.dataset.idx = String(idx);
       tr.innerHTML =
         `<td><div class="batch-asin">${escHtml(row.asin || '')}</div>${titleHtml}</td>` +
         `<td><span class="batch-sc ${scoreCls}">${sc}</span><span style="font-size:10px;color:var(--muted);margin-left:1px;">/100</span></td>` +
         `<td class="batch-issue">${escHtml(row.top_issue || '—')}</td>` +
-        `<td><span class="sev-badge ${sevCls}">${escHtml(sevLabel)}</span></td>`;
+        `<td><span class="sev-badge ${sevCls}">${escHtml(sevLabel)}</span>` +
+          (hasDetail ? `<span class="batch-chev" aria-hidden="true">▶</span>` : '') +
+        `</td>`;
       tbody.appendChild(tr);
+
+      if (hasDetail) {
+        const detailTr = document.createElement('tr');
+        detailTr.className = 'batch-detail-row';
+        detailTr.hidden = true;
+        const fullTitle = row.title ? escHtml(row.title) : '';
+        const why = row.top_why ? `<div><h5>Why this matters</h5><p>${escHtml(row.top_why)}</p></div>` : '';
+        const action = row.top_action ? `<div class="bd-action"><h5>What to do</h5><p>${escHtml(row.top_action)}</p></div>` : '';
+        const metaParts = [];
+        if (row.area)     metaParts.push(`<span>${escHtml(row.area)}</span>`);
+        if (row.severity && row.severity !== 'none') metaParts.push(`<span>${escHtml(row.severity)} severity</span>`);
+        metaParts.push(`<span>score ${sc}/100</span>`);
+        const meta = `<div class="batch-detail-meta">${metaParts.join('')}</div>`;
+        detailTr.innerHTML =
+          `<td colspan="4">` +
+            `<div class="batch-detail">` +
+              (fullTitle ? `<div class="batch-detail-title">${fullTitle}</div>` : '') +
+              meta + why + action +
+            `</div>` +
+          `</td>`;
+        tbody.appendChild(detailTr);
+
+        tr.addEventListener('click', function() {
+          const isOpen = tr.classList.toggle('open');
+          detailTr.hidden = !isOpen;
+        });
+      }
     });
     batchSec.hidden = false;
   } else {
@@ -1047,10 +1156,25 @@ function renderResults(data) {
   showLeadCapture();
 }
 
-function renderActionSteps(text) {
+function renderActionSteps(text, severity) {
   const list = document.getElementById('actionList');
   list.innerHTML = '';
   if (!text) return;
+
+  const sevMap = { critical: 'sev-critical', high: 'sev-high', medium: 'sev-medium', low: 'sev-low' };
+  const sevCls = sevMap[(severity || 'medium').toLowerCase()] || 'sev-medium';
+
+  // Bold the leading verb phrase ("Add A+ content using…", "Rewrite Bullet 1…")
+  // so the user can scan the list at a glance without reading every word.
+  function emphasize(stepText) {
+    const safe = escHtml(stepText);
+    // Match the first ~3-7 words ending at a comma/em-dash/period — i.e. the imperative clause
+    const m = safe.match(/^([A-Z][^.,—:;]{2,80}?)(\s|[.,—:;]|$)/);
+    if (!m) return safe;
+    const head = m[1];
+    const rest = safe.slice(head.length);
+    return `<strong>${head}</strong>${rest}`;
+  }
 
   // Split on "1.", "2.", "3." etc — keep the content after each number
   const parts = text.split(/(?=\b\d+\.\s)/g).filter(s => s.trim());
@@ -1058,8 +1182,8 @@ function renderActionSteps(text) {
   if (parts.length <= 1) {
     // Not a numbered list — show as single item
     const li = document.createElement('li');
-    li.className = 'action-item';
-    li.innerHTML = `<span class="action-num">!</span><span class="action-text">${escHtml(text)}</span>`;
+    li.className = 'action-item ' + sevCls;
+    li.innerHTML = `<span class="action-num">!</span><span class="action-text">${emphasize(text)}</span>`;
     list.appendChild(li);
     return;
   }
@@ -1068,8 +1192,8 @@ function renderActionSteps(text) {
     const cleaned = part.replace(/^\d+\.\s*/, '').trim();
     if (!cleaned) return;
     const li = document.createElement('li');
-    li.className = 'action-item';
-    li.innerHTML = `<span class="action-num">${i+1}</span><span class="action-text">${escHtml(cleaned)}</span>`;
+    li.className = 'action-item ' + sevCls;
+    li.innerHTML = `<span class="action-num">${i+1}</span><span class="action-text">${emphasize(cleaned)}</span>`;
     list.appendChild(li);
   });
 }

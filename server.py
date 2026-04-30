@@ -2895,16 +2895,31 @@ def api_diagnose():
         item_score = int(_n(rs)) if rs not in (None, "") else max(100 - pen, 0)
         total += item_score
         top_b = bls[0] if bls else None
-        per_asin.append({
-            "asin":      str(item.get("asin", "") or "")[:20],
-            "title":     str(item.get("title", "") or "")[:80],
-            "score":     item_score,
-            "severity":  str(top_b.get("severity", "none")).lower() if top_b else "none",
-            "top_issue": str(top_b.get("type") or top_b.get("area") or "No issues")[:80]
-                         if top_b else "No issues",
-            "area":      str(top_b.get("area", "")) if top_b else "",
-        })
         cvr, ses, prc, acos, spend, ctr, cover, rating, reviews = _mx(item)
+
+        # Per-ASIN drill-down payload: include the top blocker's *why* + tailored
+        # *action* so the frontend can render a meaningful expand panel without
+        # forcing users to scroll back to the global recommendation card.
+        if top_b:
+            top_area_   = str(top_b.get("area") or top_b.get("type") or "general").lower()[:40]
+            top_why_    = str(top_b.get("why", ""))[:400]
+            top_action_ = _action(top_area_, cvr, ses, prc, acos, spend, ctr, cover, rating, reviews,
+                                  str(top_b.get("action", ""))[:400])
+        else:
+            top_why_    = ""
+            top_action_ = ""
+
+        per_asin.append({
+            "asin":       str(item.get("asin", "") or "")[:20],
+            "title":      str(item.get("title", "") or "")[:80],
+            "score":      item_score,
+            "severity":   str(top_b.get("severity", "none")).lower() if top_b else "none",
+            "top_issue":  str(top_b.get("type") or top_b.get("area") or "No issues")[:80]
+                          if top_b else "No issues",
+            "area":       str(top_b.get("area", "")) if top_b else "",
+            "top_why":    top_why_,
+            "top_action": top_action_,
+        })
         for b in bls:
             if isinstance(b, dict):
                 area = str(b.get("area") or b.get("type") or "general").lower()[:40]
