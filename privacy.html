@@ -74,13 +74,32 @@
     <h2>4. Payment Processing</h2>
     <p>Payments are processed by Paddle.com Market Limited. We do not store your credit card information. Paddle's privacy policy is available at <a href="https://www.paddle.com/legal/privacy" target="_blank">paddle.com/legal/privacy</a>.</p>
 
-    <h2>5. Cookies</h2>
-    <p>We use one essential session cookie to keep you signed in and remember your subscription status. We do not use advertising cookies, analytics cookies, or any third-party tracking. When you first visit ASINInsight, we ask for your explicit consent before setting any cookies. You may accept or decline at any time. Declining does not affect your ability to use the core diagnostic tool.</p>
+    <h2>5. Sub-processors and Third-Country Transfers</h2>
+    <p>To deliver the Service, we share specific data with the following sub-processors, each acting under a written data-processing agreement and only for the purpose listed:</p>
+    <ul>
+      <li><strong>Paddle.com Market Limited</strong> (United Kingdom) &mdash; payment processing and merchant of record. Receives your email and billing details when you subscribe.</li>
+      <li><strong>Twilio SendGrid</strong> (United States) &mdash; transactional email delivery. Receives only the recipient email address and the email body when you request a report copy.</li>
+      <li><strong>Anthropic PBC</strong> (United States) &mdash; LLM-powered insights for the Pro tier <em>only when explicitly used</em>. Receives the audit summary metadata for that single request; CSV row content is never sent. Free tier never invokes Anthropic.</li>
+      <li><strong>Railway Corp.</strong> (United States) &mdash; application hosting and PostgreSQL database. Receives whatever the application stores (account email, audit summaries, session cookies).</li>
+    </ul>
+    <p>For EU/EEA and UK data subjects, transfers to the United States rely on the European Commission's adequacy decision for the EU&ndash;US Data Privacy Framework where applicable, and on Standard Contractual Clauses (Module 2) supplemented by sub-processor security commitments where it is not. You may request a copy of the relevant safeguards by emailing <strong>support@asininsight.com</strong>.</p>
 
-    <h2>6. Data Retention</h2>
-    <p>We retain your account information for as long as your subscription is active or as required by law. You may request deletion of your data at any time by contacting us.</p>
+    <h2>6. Cookies</h2>
+    <p>We use one strictly necessary session cookie (<code>sid</code>) to keep you signed in and remember your subscription status, and one CSRF-protection cookie (<code>_csrf</code>) to prevent cross-site request forgery on form submissions. These two cookies are exempt from consent requirements under the EU ePrivacy Directive Article 5(3) because they are essential to deliver a service you have explicitly requested. We do not use advertising cookies. We do not use third-party tracking.</p>
+    <p>If you accept analytics on the cookie banner, we additionally load Google Analytics 4 with IP anonymization enabled. Decline at any time and analytics will not load.</p>
 
-    <h2>7. Your Rights Under GDPR (EU and EEA Residents Only)</h2>
+    <h2>7. Data Retention</h2>
+    <p>We retain personal data only as long as needed for the purpose collected:</p>
+    <ul>
+      <li><strong>Account email and subscription status:</strong> for the duration of your active subscription, plus 12 months after cancellation for tax/audit purposes, or until you request deletion.</li>
+      <li><strong>Audit summaries</strong> (score, headline, severity, ASIN count, primary area): 12 months from creation, then automatically purged. You may delete individual audits from the dashboard at any time.</li>
+      <li><strong>Lead emails</strong> (entered to receive a report copy): until you unsubscribe or 24 months, whichever is sooner.</li>
+      <li><strong>Server access logs</strong> (IP address, user agent, request path): 30 days, used for rate-limiting and abuse investigation only.</li>
+      <li><strong>Email-suppression records</strong> (unsubscribes): retained indefinitely as required to honor your suppression preference.</li>
+    </ul>
+    <p>You may request deletion of your data at any time by emailing <strong>support@asininsight.com</strong>. We respond within 30 days.</p>
+
+    <h2>8. Your Rights Under GDPR (EU and EEA Residents Only)</h2>
     <p><strong>Note:</strong> The General Data Protection Regulation (GDPR) applies to residents of the European Union (EU) and European Economic Area (EEA) only. If you are located in the EU or EEA, you have the following rights:</p>
     <ul>
       <li><strong>Right of access (Art. 15):</strong> You have the right to request a copy of the personal data we hold about you.</li>
@@ -94,7 +113,7 @@
     <p>Our legal basis for processing your data is: (a) contract performance (to provide the Service you subscribed to), (b) legitimate interests (security, fraud prevention, and service improvement), and (c) your consent for non-essential cookies.</p>
     <p>To exercise any of these rights, contact us at <strong>support@asininsight.com</strong>. We will respond within 30 days. You also have the right to lodge a complaint with your local data protection authority.</p>
 
-    <h2>8. Your Rights Under CCPA (California Residents Only)</h2>
+    <h2>9. Your Rights Under CCPA (California Residents Only)</h2>
     <p><strong>Note:</strong> The California Consumer Privacy Act (CCPA) applies only to residents of the state of California, USA. It does not apply to residents of other US states or other countries. If you are a California resident, you have the following rights:</p>
     <ul>
       <li><strong>Right to know:</strong> You may request disclosure of the categories and specific pieces of personal information we collect, use, and disclose.</li>
@@ -104,20 +123,22 @@
     </ul>
     <p>To exercise your CCPA rights, contact us at <strong>support@asininsight.com</strong> with the subject line "CCPA Request."</p>
 
-    <h2 id="do-not-sell">9. Do Not Sell or Share My Personal Information</h2>
+    <h2 id="do-not-sell">10. Do Not Sell or Share My Personal Information</h2>
     <p><strong>We do not sell or share your personal information with any third party for monetary or other consideration.</strong> ASINInsight has no advertising partners and does not exchange user data with data brokers, analytics providers, or any other party for cross-context behavioral advertising.</p>
     <p>The only third parties we share data with are essential service providers that operate strictly under our instructions: Paddle (payment processing), SendGrid (transactional email), Anthropic (LLM-powered insights for Pro tier — only when explicitly used), and our hosting provider. None of these constitute a &ldquo;sale&rdquo; or &ldquo;share&rdquo; under CCPA/CPRA.</p>
     <p>California residents may submit a verifiable request to exercise rights under the CCPA/CPRA by emailing <strong>support@asininsight.com</strong> with the subject line &ldquo;California Privacy Request.&rdquo; We will respond within 45 days.</p>
 
-    <h2>10. Children's Privacy</h2>
+    <h2>11. Children's Privacy</h2>
     <p>Our Service is not directed to children under 13. We do not knowingly collect personal information from children under 13. The Service is intended for business use by adults aged 18 or older.</p>
 
-    <h2>11. Changes to This Policy</h2>
+    <h2>12. Changes to This Policy</h2>
     <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page with an updated date.</p>
 
-    <h2>12. Contact Us and Data Controller</h2>
-    <p>ASINInsight is the data controller for personal data collected through this Service.</p>
-    <p>If you have questions about this Privacy Policy, please contact us at: <strong>support@asininsight.com</strong></p>
+    <h2>13. Contact Us, Data Controller, and EU Representative</h2>
+    <p><strong>Data Controller:</strong> ASINInsight is the data controller for personal data collected through this Service. Operating contact: <strong>support@asininsight.com</strong>.</p>
+    <p><strong>For EU/EEA residents (Article 27 representative):</strong> If you reside in the European Union or European Economic Area and prefer to direct GDPR enquiries through a designated representative, email <strong>support@asininsight.com</strong> with the subject line "Article 27 enquiry" and we will route your request through our designated representative. We will appoint a formally listed Article 27 representative once total EU data subjects exceed the threshold that requires one.</p>
+    <p><strong>For UK residents:</strong> Same as above, with subject line "UK GDPR Article 27 enquiry."</p>
+    <p><strong>Supervisory authority:</strong> EU/EEA residents may lodge a complaint with their local data protection authority. UK residents may complain to the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk/make-a-complaint/" target="_blank" rel="noopener">ico.org.uk/make-a-complaint</a>.</p>
   </div>
 
   <footer>© 2026 ASINInsight. <a href="/" style="color:#94a3b8;">Home</a> · <a href="/terms" style="color:#94a3b8;">Terms</a> · <a href="/refund" style="color:#94a3b8;">Refund</a> · <a href="/privacy#do-not-sell" style="color:#94a3b8;">Do Not Sell or Share My Info</a></footer>
