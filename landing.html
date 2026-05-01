@@ -91,6 +91,15 @@
     .hero { padding: 80px 0 40px; }
     .hero-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); background: #e8f0fa; padding: 5px 12px; border-radius: 999px; margin-bottom: 20px; }
     .hero h1 { max-width: 740px; font-size: clamp(36px, 5.5vw, 58px); line-height: 1.04; }
+
+    /* Price-compare block under the hero (Feature 5) */
+    .price-compare { margin-top: 26px; max-width: 460px; border: 1px solid rgba(221,212,198,.9); border-radius: 14px; background: var(--paper); overflow: hidden; }
+    .pc-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px; font-size: 14px; color: var(--muted); border-bottom: 1px solid rgba(221,212,198,.5); }
+    .pc-row:last-child { border-bottom: none; }
+    .pc-them .pc-name::before { content: '✗ '; color: #94a3b8; }
+    .pc-us { background: var(--green-soft); color: var(--green); padding-top: 11px; padding-bottom: 11px; }
+    .pc-us .pc-name::before { content: '✓ '; color: var(--green); font-weight: 800; }
+    .pc-price { font-family: Georgia, serif; font-weight: 700; font-variant-numeric: tabular-nums; }
     .hero-sub { margin-top: 18px; max-width: 560px; font-size: 18px; line-height: 1.6; color: var(--muted); }
     .hero .btn-row { margin-top: 28px; }
     .hero-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
@@ -274,7 +283,7 @@
 <!-- Hero -->
 <section class="hero">
   <div class="wrap">
-    <div class="hero-label">Amazon Listing Diagnostics</div>
+    <div class="hero-label" style="background:#fef3c7;color:#92400e;">Built for sellers who unsubscribed from Helium 10</div>
     <h1>Your Business Report already has the answer. We just tell you which line.</h1>
     <p class="hero-sub">Upload your Business Report. Get the one metric costing you the most right now. Get a numbered action plan to fix it. Under a minute.</p>
     <p style="margin-top:14px;font-size:15px;font-weight:700;color:var(--blue);">Not another suite. Not another score. One diagnosis. One fix.</p>
@@ -316,6 +325,27 @@
       <div class="trust-item">
         <svg aria-hidden="true" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" style="color:#617184"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         One-click cancel. No retention calls.
+      </div>
+    </div>
+
+    <!-- Price-comparison block (Feature 5) — anchors $49 against the suites
+         most sellers are already over-paying for. -->
+    <div class="price-compare" aria-label="Price comparison">
+      <div class="pc-row pc-them">
+        <span class="pc-name">Helium 10</span>
+        <span class="pc-price">$129/mo</span>
+      </div>
+      <div class="pc-row pc-them">
+        <span class="pc-name">Jungle Scout</span>
+        <span class="pc-price">$129/mo</span>
+      </div>
+      <div class="pc-row pc-them">
+        <span class="pc-name">DataDive</span>
+        <span class="pc-price">$79/mo</span>
+      </div>
+      <div class="pc-row pc-us">
+        <span class="pc-name"><strong>ASINInsight</strong> · one job, done well</span>
+        <span class="pc-price"><strong>$49/mo</strong></span>
       </div>
     </div>
   </div>

@@ -267,6 +267,34 @@ def _init_db():
                     severity      TEXT NOT NULL DEFAULT 'medium'
                 )
             """)
+            # Feature 2: 30-day re-audit reminders
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reaudit_reminders (
+                    id            SERIAL PRIMARY KEY,
+                    email         TEXT NOT NULL,
+                    asin          TEXT NOT NULL DEFAULT '',
+                    score         INTEGER NOT NULL DEFAULT 0,
+                    headline      TEXT NOT NULL DEFAULT '',
+                    primary_issue TEXT NOT NULL DEFAULT '',
+                    severity      TEXT NOT NULL DEFAULT 'medium',
+                    requested_at  REAL NOT NULL,
+                    due_at        REAL NOT NULL,
+                    sent_at       REAL
+                )
+            """ if DATABASE_URL else """
+                CREATE TABLE IF NOT EXISTS reaudit_reminders (
+                    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email         TEXT NOT NULL,
+                    asin          TEXT NOT NULL DEFAULT '',
+                    score         INTEGER NOT NULL DEFAULT 0,
+                    headline      TEXT NOT NULL DEFAULT '',
+                    primary_issue TEXT NOT NULL DEFAULT '',
+                    severity      TEXT NOT NULL DEFAULT 'medium',
+                    requested_at  REAL NOT NULL,
+                    due_at        REAL NOT NULL,
+                    sent_at       REAL
+                )
+            """)
         log.info("Database initialised")
     except Exception as e:
         log.warning("DB init failed (will retry on first request): %s", e)
@@ -590,14 +618,117 @@ def _process_drip_queue():
                 log.warning("Failed to mark drip %d as sent: %s", row_id, e)
 
 
+def _build_reaudit_email(email: str, prev: dict) -> dict:
+    """Feature 2 — 30-day re-audit reminder email."""
+    site = SITE_URL or "https://asininsight.com"
+    unsub_url = f"{site}/unsubscribe?e={requests.utils.quote(email)}&t={_unsub_token(email)}"
+    score    = int(prev.get("score") or 0)
+    headline = html.escape(str(prev.get("headline") or ""))[:200]
+    primary  = html.escape(str(prev.get("primary_issue") or "")).title()[:80]
+    asin     = html.escape(str(prev.get("asin") or "")) or "your ASIN"
+    score_color = "#16a34a" if score >= 70 else ("#d97706" if score >= 40 else "#dc2626")
+
+    body = (
+        f'<div style="font:15px/1.6 -apple-system,BlinkMacSystemFont,\'Segoe UI\',Arial,sans-serif;'
+        f'max-width:560px;margin:0 auto;background:#f6f3ec;padding:32px 16px;color:#15263d;">'
+        f'<div style="background:#fffdfa;border-radius:16px;padding:36px 32px;'
+        f'box-shadow:0 1px 4px rgba(0,0,0,.06);">'
+        f'<div style="font-size:22px;font-weight:800;margin-bottom:20px;">'
+        f'ASIN<span style="color:#1f5fa8;">Insight</span></div>'
+        f'<h1 style="font:700 22px Georgia,serif;color:#15263d;margin:0 0 14px;line-height:1.3;">'
+        f'30 days later — did the fix work?</h1>'
+        f'<p style="margin:0 0 18px;color:#475569;">'
+        f'You ran an audit on <strong>{asin}</strong> 30 days ago. Time to see if the fixes moved the needle.</p>'
+        f'<div style="border:1px solid #e2e8f0;border-radius:12px;padding:16px;background:#f8fafc;margin:0 0 22px;">'
+          f'<div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#64748b;margin-bottom:8px;">'
+          f'Your previous audit</div>'
+          f'<div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px;">'
+            f'<span style="font:800 32px Georgia,serif;color:{score_color};">{score}</span>'
+            f'<span style="font-size:13px;color:#94a3b8;">/100</span>'
+          f'</div>'
+          f'<div style="font-size:14px;color:#0f172a;font-weight:600;line-height:1.45;">{headline}</div>'
+          + (f'<div style="font-size:13px;color:#475569;margin-top:6px;">Primary issue: {primary}</div>' if primary else '')
+        + f'</div>'
+        f'<div style="text-align:center;margin:24px 0;">'
+        f'<a href="{site}/tool" style="display:inline-block;background:#1f5fa8;color:#fff;'
+        f'text-decoration:none;font-weight:700;padding:14px 28px;border-radius:10px;font-size:15px;">'
+        f'Run a fresh audit →</a></div>'
+        f'<p style="margin:18px 0 0;color:#64748b;font-size:13px;line-height:1.55;">'
+        f"Upload the same Business Report you pulled today. We'll show you what changed since {time.strftime('%B %d', time.localtime(prev.get('requested_at', time.time())))} — and whether your #1 fix actually moved the metric."
+        f'</p>'
+        f'<p style="margin:28px 0 0;font-size:11px;color:#64748b;text-align:center;line-height:1.6;">'
+        f'ASINInsight &middot; '
+        f'<a href="{site}/privacy" style="color:#64748b;">Privacy</a> &middot; '
+        f'<a href="{unsub_url}" style="color:#64748b;">Unsubscribe</a>'
+        f'<br>{html.escape(BUSINESS_POSTAL_ADDRESS)}'
+        f'</p>'
+        f'</div></div>'
+    )
+    return {
+        "subject": f"30 days later — did the fix work? (Your previous score: {score}/100)",
+        "html_body": body,
+    }
+
+
+def _process_reaudit_reminders():
+    """Feature 2 worker — send re-audit reminders that came due in the last day."""
+    if not SENDGRID_API_KEY:
+        return
+    now = time.time()
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"SELECT id, email, asin, score, headline, primary_issue, severity, requested_at "
+                f"FROM reaudit_reminders "
+                f"WHERE due_at <= {ph} AND sent_at IS NULL "
+                f"ORDER BY due_at LIMIT 50",
+                (now,)
+            )
+            due = cur.fetchall()
+    except Exception as e:
+        log.warning("Re-audit reminder read error: %s", e)
+        return
+
+    for row in due:
+        row_id, email, asin, score, headline, primary, severity, requested_at = row
+        if _is_unsubscribed(email):
+            try:
+                with _db() as (cur, ph):
+                    cur.execute(
+                        f"UPDATE reaudit_reminders SET sent_at = {ph} WHERE id = {ph}",
+                        (now, row_id)
+                    )
+            except Exception:
+                pass
+            continue
+        content = _build_reaudit_email(email, {
+            "asin": asin, "score": score, "headline": headline,
+            "primary_issue": primary, "severity": severity,
+            "requested_at": requested_at,
+        })
+        if _send_drip_email(email, content["subject"], content["html_body"]):
+            try:
+                with _db() as (cur, ph):
+                    cur.execute(
+                        f"UPDATE reaudit_reminders SET sent_at = {ph} WHERE id = {ph}",
+                        (now, row_id)
+                    )
+            except Exception as e:
+                log.warning("Failed to mark reminder %d as sent: %s", row_id, e)
+
+
 def _drip_worker_loop():
-    """Background thread: process drip queue every 20 minutes."""
+    """Background thread: process drip queue + re-audit reminders every 20 minutes."""
     time.sleep(60)  # wait for server to fully boot
     while True:
         try:
             _process_drip_queue()
         except Exception as e:
             log.warning("Drip worker error: %s", e)
+        try:
+            _process_reaudit_reminders()
+        except Exception as e:
+            log.warning("Re-audit reminder worker error: %s", e)
         time.sleep(20 * 60)  # 20 minutes
 
 
@@ -1319,6 +1450,59 @@ def capture_email():
     except Exception as e:
         log.warning("Failed to save lead email: %s", e)
         # Don't surface DB errors to the user — just ack
+    return jsonify({"ok": True})
+
+
+# ── Feature 2: 30-day re-audit scheduling ────────────────────────────────
+@app.route("/api/schedule-reaudit", methods=["POST"])
+def schedule_reaudit():
+    """Save an opt-in for a 30-day re-audit reminder. Idempotent per email+asin."""
+    if not _csrf_valid(request):
+        return jsonify({"ok": False, "error": "Invalid request"}), 403
+
+    ip = _client_ip(request)
+    if not _check_lead_rate(ip):
+        return jsonify({"ok": False, "error": "Too many requests. Please wait."}), 429
+
+    data = request.get_json(silent=True) or {}
+    email   = str(data.get("email", "")).strip().lower()[:254]
+    asin    = str(data.get("asin", "")).strip()[:20]
+    score   = int(data.get("score") or 0)
+    headline= str(data.get("headline") or "")[:200]
+    primary = str(data.get("primary_issue") or "")[:100]
+    severity= str(data.get("severity") or "medium")[:20]
+
+    if not email or "@" not in email or "." not in email.split("@")[-1]:
+        return jsonify({"ok": False, "error": "Please enter a valid email address."}), 400
+    if _is_unsubscribed(email):
+        return jsonify({"ok": False, "error": "This email is unsubscribed."}), 400
+
+    now    = time.time()
+    due_at = now + (30 * 24 * 3600)  # 30 days from now
+
+    try:
+        with _db() as (cur, ph):
+            # Idempotent: don't double-schedule for the same email+asin within 7 days
+            cur.execute(
+                f"SELECT 1 FROM reaudit_reminders "
+                f"WHERE email = {ph} AND asin = {ph} AND requested_at > {ph} "
+                f"AND sent_at IS NULL LIMIT 1",
+                (email, asin, now - 7 * 24 * 3600)
+            )
+            if cur.fetchone():
+                return jsonify({"ok": True, "duplicate": True})
+
+            cur.execute(
+                f"INSERT INTO reaudit_reminders "
+                f"(email, asin, score, headline, primary_issue, severity, requested_at, due_at) "
+                f"VALUES ({ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph}, {ph})",
+                (email, asin, max(0, min(100, score)), headline, primary, severity, now, due_at)
+            )
+        log.info("Re-audit reminder scheduled (asin=%s, score=%d, due in 30d)", asin or "n/a", score)
+    except Exception as e:
+        log.warning("Failed to save re-audit reminder: %s", e)
+        return jsonify({"ok": False, "error": "Could not schedule reminder. Please try again."}), 500
+
     return jsonify({"ok": True})
 
 
@@ -2313,6 +2497,37 @@ def _priority_score(sev: str, gap: float) -> float:
 
 _SOFT_ZONE = 0.10  # MVP heuristic: 10% band around each threshold
 
+# Feature 4 — Category-aware ACOS thresholds.
+# Multipliers applied to the default 70% / 50% / 35% ACOS boundaries.
+# Source: Sellerite + Parah Group 2026 category-CVR benchmarks combined with
+# typical AOV in each category (lower AOV + thinner margin → stricter ACOS).
+CATEGORY_ACOS_MULTIPLIER: dict[str, float] = {
+    "beauty":      0.70,   # 70% × 0.70 = 49% critical (tight margins)
+    "grocery":     0.70,   # very thin margins
+    "fashion":     0.85,   # high return rates eat margin
+    "health":      0.90,   # midway
+    "sports":      0.95,
+    "pets":        1.00,
+    "home":        1.00,
+    "toys":        1.00,
+    "books":       1.15,   # low cost, predictable
+    "electronics": 1.20,   # high AOV, more headroom
+    "other":       1.00,
+}
+CATEGORY_LABELS: dict[str, str] = {
+    "beauty":      "Beauty & Personal Care",
+    "grocery":     "Grocery & Gourmet",
+    "fashion":     "Clothing, Shoes & Jewelry",
+    "health":      "Health & Household",
+    "sports":      "Sports & Outdoors",
+    "pets":        "Pet Supplies",
+    "home":        "Home & Kitchen",
+    "toys":        "Toys & Games",
+    "books":       "Books",
+    "electronics": "Electronics",
+    "other":       "Other / Mixed",
+}
+
 
 def _soft_sev(
     value: float,
@@ -2536,14 +2751,21 @@ def _build_rules(m: dict) -> list[dict]:
                 "weight": None})
 
     # ── Ads / ACOS ───────────────────────────────────────────────────────
-    # Thresholds: >70% = critical, >50% = high, >35% = medium (MVP heuristics)
+    # Thresholds: >70% = critical, >50% = high, >35% = medium (default).
+    # Feature 4: multiplied by the category-specific factor so Beauty's
+    # critical line (49%) is stricter than Electronics' (84%). The seller
+    # picks a category at upload time; if they don't, defaults apply.
     if acos > 0 and spend > 0:
+        _cat_mult = CATEGORY_ACOS_MULTIPLIER.get(str(m.get("_category") or "other"), 1.0)
+        _crit_at  = 0.70 * _cat_mult
+        _high_at  = 0.50 * _cat_mult
+        _med_at   = 0.35 * _cat_mult
         sev = _soft_sev(acos,
-            [(0.70, "critical", "high"), (0.50, "high", "medium"), (0.35, "medium", "low")],
+            [(_crit_at, "critical", "high"), (_high_at, "high", "medium"), (_med_at, "medium", "low")],
             direction="above")
         if sev in ("critical", "high", "medium"):
             waste = int(spend * (1.0 - 0.30 / max(acos, 0.01))) if acos > 0.30 else 0
-            is_crit = acos > 0.70 * (1 + _SOFT_ZONE)
+            is_crit = acos > _crit_at * (1 + _SOFT_ZONE)
             rules.append({"area": "ads", "severity": sev,
                 "type": ("ACOS critically high" if is_crit else
                          "ACOS above target"    if sev == "high" else "ACOS elevated"),
@@ -2807,6 +3029,38 @@ def api_diagnose():
     if len(items) > _MAX_ASINS_PER_REQUEST:
         items = items[:_MAX_ASINS_PER_REQUEST]
         log.info("Truncated request to %d ASINs (IP: %s)", _MAX_ASINS_PER_REQUEST, ip)
+
+    # ── Feature 1: Break-even ACOS ────────────────────────────────────────
+    # Optional product_cost (dollars per unit) lets us compute the seller's
+    # actual break-even ACOS — the line above which ad spend turns every
+    # ad-driven sale into a loss. This is the single number sellers in
+    # forums beg for ("Am I burning money on ads?"). We use a flat 15%
+    # Amazon referral fee assumption for MVP — covers most categories.
+    def _safe_float_form(key: str) -> float:
+        v = request.form.get(key, "")
+        try:
+            return float(str(v).strip().replace(",", "").replace("$", "")) if v not in ("", None) else 0.0
+        except (ValueError, TypeError):
+            return 0.0
+
+    product_cost_input  = _safe_float_form("product_cost")
+    selling_price_input = _safe_float_form("selling_price")
+
+    # ── Feature 4: Category-aware benchmarks ──────────────────────────────
+    # The same ACOS that's "fine" in Electronics ($75 AOV) is a disaster in
+    # Beauty (~$22 AOV, thinner margins). When the seller picks a category
+    # we tighten or loosen the thresholds before the rules engine runs.
+    # Multipliers are applied to the ACOS critical/high boundaries.
+    category = str(request.form.get("category") or "").strip().lower()[:32]
+    if category not in CATEGORY_ACOS_MULTIPLIER:
+        category = ""  # unknown / not provided → use defaults
+    # Inject into each item so _build_rules can read it
+    if category:
+        for it in items:
+            m = it.get("metrics") if isinstance(it.get("metrics"), dict) else None
+            if m is None:
+                it["metrics"] = m = {}
+            m["_category"] = category
 
     SEV_W = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     PEN   = {"critical": 26, "high": 9, "medium": 4, "low": 2}
@@ -3188,6 +3442,40 @@ def api_diagnose():
     if plan in ("pro", "agency") and ANTHROPIC_API_KEY:
         llm_insights = _llm_enhance_pro(score, headline, problems, recs[:5], items)
 
+    # ── Feature 1 cont. — compute break-even given the optional product_cost ──
+    break_even = None
+    if product_cost_input > 0:
+        # Auto-detect average selling price from CSV when user didn't enter one.
+        prices = []
+        acoses = []
+        for it in items:
+            _, _, prc_v, acos_v, *_ = _mx(it)
+            if prc_v and prc_v > 0:
+                prices.append(float(prc_v))
+            if acos_v and acos_v > 0:
+                acoses.append(float(acos_v))
+        avg_price = (selling_price_input if selling_price_input > 0
+                     else (sum(prices) / len(prices) if prices else 0.0))
+        if avg_price > 0 and avg_price > product_cost_input:
+            AMAZON_FEE_PCT = 0.15  # default referral fee — MVP assumption
+            net_per_unit   = avg_price - product_cost_input - (avg_price * AMAZON_FEE_PCT)
+            break_even_acos_pct = max(0.0, net_per_unit / avg_price)
+            current_acos_pct    = (sum(acoses) / len(acoses)) if acoses else 0.0
+            is_losing = current_acos_pct > 0 and current_acos_pct > break_even_acos_pct
+            loss_per_ad_sale = max(0.0, (current_acos_pct - break_even_acos_pct) * avg_price) if is_losing else 0.0
+            margin_per_ad_sale_at_be = max(0.0, (break_even_acos_pct - current_acos_pct) * avg_price) if not is_losing else 0.0
+            break_even = {
+                "product_cost":          round(product_cost_input, 2),
+                "selling_price":         round(avg_price, 2),
+                "amazon_fee_pct":        15,
+                "break_even_acos_pct":   round(break_even_acos_pct * 100, 1),
+                "current_acos_pct":      round(current_acos_pct * 100, 1) if current_acos_pct else None,
+                "is_losing_money":       bool(is_losing),
+                "loss_per_ad_sale":      round(loss_per_ad_sale, 2),
+                "margin_per_ad_sale":    round(margin_per_ad_sale_at_be, 2),
+                "selling_price_source":  "user" if selling_price_input > 0 else "csv_average",
+            }
+
     return jsonify({
         "overall_score":            score,
         "headline":                 headline,
@@ -3202,6 +3490,8 @@ def api_diagnose():
         "per_asin":                 per_asin if len(items) > 1 else [],
         # LLM-enhanced insights for Pro+ tiers (empty array on Free or LLM failure)
         "llm_insights":             llm_insights,
+        # Break-even ACOS — only present when seller provided product_cost
+        "break_even":               break_even,
     })
 
 

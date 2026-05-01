@@ -134,6 +134,86 @@
     .csv-guide-body ol { padding-left: 18px; margin: 0 0 10px; }
     .csv-guide-body li { font-size: 13px; color: #2d3f55; line-height: 1.65; margin-bottom: 4px; }
     .csv-guide-body li strong { color: var(--ink); }
+
+    /* ── Category picker (Feature 4) ── */
+    .cat-block { margin: 12px 0 14px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; }
+    .cat-label { display: flex; flex-direction: column; gap: 3px; cursor: pointer; }
+    .cat-label-text { font-size: 13px; font-weight: 700; color: #15263d; }
+    .cat-label-sub  { font-size: 12px; color: var(--muted); line-height: 1.45; }
+    .cat-select {
+      margin-top: 8px; width: 100%; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--line);
+      font: inherit; font-size: 14px; background: #fff; color: var(--ink); cursor: pointer; outline: none;
+      transition: border-color .12s;
+    }
+    .cat-select:focus { border-color: var(--blue); }
+
+    /* ── Break-even ACOS inputs (Feature 1) ── */
+    .be-block { margin: 12px 0 14px; border-radius: 12px; border: 1px solid #c8e1d1; background: #f3fbf4; overflow: hidden; }
+    .be-block[open] { background: #fff; }
+    .be-block summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: center; gap: 10px; user-select: none; }
+    .be-block summary::-webkit-details-marker { display: none; }
+    .be-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #1d6a42; color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0; font-family: Georgia, serif; }
+    .be-summary-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .be-summary-title { font-size: 13px; font-weight: 700; color: #15263d; }
+    .be-summary-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .be-chev { color: #94a3b8; font-size: 14px; transition: transform .15s; flex-shrink: 0; }
+    .be-block[open] .be-chev { transform: rotate(180deg); }
+    .be-body { padding: 4px 14px 14px; border-top: 1px solid #e7f3eb; }
+    .be-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    @media (max-width: 520px) { .be-grid { grid-template-columns: 1fr; } }
+    .be-field { display: flex; flex-direction: column; gap: 5px; }
+    .be-label { font-size: 12px; font-weight: 700; color: #2d3f55; letter-spacing: .02em; }
+    .be-optional { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+    .be-input-wrap { position: relative; display: flex; align-items: center; }
+    .be-prefix { position: absolute; left: 12px; font-size: 14px; color: var(--muted); font-weight: 700; pointer-events: none; }
+    .be-input-wrap input { width: 100%; padding: 10px 12px 10px 26px; border-radius: 9px; border: 1px solid var(--line); font: inherit; font-size: 14px; outline: none; background: #fff; transition: border-color .12s; -moz-appearance: textfield; appearance: textfield; }
+    .be-input-wrap input::-webkit-outer-spin-button, .be-input-wrap input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .be-input-wrap input:focus { border-color: var(--blue); }
+    .be-fineprint { margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ── Break-even result panel (rendered in results state) ── */
+    .be-result { margin-bottom: 12px; border-radius: 14px; overflow: hidden; border: 1px solid; }
+    .be-result.losing  { background: #fff7f5; border-color: #fecaca; }
+    .be-result.winning { background: #f3fbf4; border-color: #bbf7d0; }
+    .be-result.unknown { background: #f8fafc; border-color: #e2e8f0; }
+    .be-result-head { padding: 11px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+    .be-result.losing  .be-result-head { background: var(--red-soft); color: var(--red); }
+    .be-result.winning .be-result-head { background: var(--green-soft); color: var(--green); }
+    .be-result.unknown .be-result-head { background: #eef2f7; color: #475569; }
+    .be-result-body { padding: 14px 16px; }
+    .be-numbers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    @media (max-width: 520px) { .be-numbers { grid-template-columns: 1fr; gap: 8px; } }
+    .be-num { display: flex; flex-direction: column; gap: 2px; }
+    .be-num-label { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+    .be-num-value { font-family: Georgia, serif; font-size: 24px; font-weight: 800; line-height: 1; color: var(--ink); }
+    .be-num.bad  .be-num-value { color: var(--red); }
+    .be-num.good .be-num-value { color: var(--green); }
+    .be-verdict { font-size: 14px; font-weight: 600; line-height: 1.55; color: #2d3f55; }
+    .be-verdict strong { color: var(--ink); }
+    .be-verdict-meta { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+
+    /* ── Re-audit reminder (Feature 2) ── */
+    .reaudit-card .result-card-head { background: var(--blue-soft); }
+    .reaudit-pill { font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--green-soft); color: var(--green); }
+    .reaudit-blurb { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.55; }
+    .reaudit-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+    @media (max-width: 520px) { .reaudit-form { grid-template-columns: 1fr; } }
+    .reaudit-input { padding: 11px 14px; border-radius: 10px; border: 1px solid var(--line); font: inherit; font-size: 14px; outline: none; background: #fff; }
+    .reaudit-input:focus { border-color: var(--blue); }
+    .reaudit-status { font-size: 13px; margin-top: 10px; min-height: 18px; font-weight: 700; }
+    .reaudit-status.ok  { color: var(--green); }
+    .reaudit-status.err { color: var(--red); }
+
+    /* ── VA hand-off card (Feature 3) ── */
+    .va-card .result-card-head { background: #fbf6e8; }
+    .va-pill { font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
+    .va-blurb { font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.55; }
+    .va-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    @media (max-width: 640px) { .va-actions { grid-template-columns: 1fr; } }
+    .btn-va { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: #15263d; font: 700 13px/1.2 inherit; cursor: pointer; transition: background .12s, border-color .12s, transform .08s; text-align: center; }
+    .btn-va:hover { background: #f8fafc; border-color: var(--blue); }
+    .btn-va:active { transform: scale(.98); }
+    .va-status { font-size: 12px; color: var(--green); margin-top: 10px; min-height: 18px; font-weight: 700; }
     .csv-path { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; background: var(--blue-soft); color: var(--blue); padding: 3px 10px; border-radius: 6px; margin: 2px 0; }
     .csv-guide-tip { font-size: 12px; color: var(--muted); background: #f8fafc; border-radius: 8px; padding: 8px 12px; margin-top: 6px; }
 
@@ -520,6 +600,63 @@
       </div>
     </details>
 
+    <!-- Category picker (Feature 4) — sharpens ACOS thresholds to your niche.
+         Optional: leave blank for generic thresholds. -->
+    <div class="cat-block">
+      <label for="categorySelect" class="cat-label">
+        <span class="cat-label-text">Your category</span>
+        <span class="cat-label-sub">(tunes ACOS thresholds — Beauty is stricter, Electronics more lenient)</span>
+      </label>
+      <select id="categorySelect" class="cat-select">
+        <option value="">— Generic thresholds (all categories) —</option>
+        <option value="beauty">Beauty &amp; Personal Care</option>
+        <option value="electronics">Electronics</option>
+        <option value="home">Home &amp; Kitchen</option>
+        <option value="fashion">Clothing, Shoes &amp; Jewelry</option>
+        <option value="sports">Sports &amp; Outdoors</option>
+        <option value="toys">Toys &amp; Games</option>
+        <option value="books">Books</option>
+        <option value="grocery">Grocery &amp; Gourmet</option>
+        <option value="pets">Pet Supplies</option>
+        <option value="health">Health &amp; Household</option>
+        <option value="other">Other / Mixed catalog</option>
+      </select>
+    </div>
+
+    <!-- Optional Break-even ACOS inputs — feature 1.
+         When seller adds their cost, we tell them their break-even ACOS and
+         exactly how much money each ad-driven sale loses (or makes). No other
+         tool computes this from a single CSV upload. -->
+    <details class="be-block" id="beBlock">
+      <summary>
+        <span class="be-icon">$</span>
+        <span class="be-summary-text">
+          <span class="be-summary-title">Optional: Get your break-even ACOS</span>
+          <span class="be-summary-sub">Add your cost — we'll show exactly how much each ad sale costs you.</span>
+        </span>
+        <span class="be-chev">▾</span>
+      </summary>
+      <div class="be-body">
+        <div class="be-grid">
+          <label class="be-field">
+            <span class="be-label">Product cost per unit</span>
+            <span class="be-input-wrap">
+              <span class="be-prefix">$</span>
+              <input type="number" id="productCost" step="0.01" min="0" placeholder="8.50" inputmode="decimal" autocomplete="off">
+            </span>
+          </label>
+          <label class="be-field">
+            <span class="be-label">Selling price <span class="be-optional">(optional — auto-detect from CSV)</span></span>
+            <span class="be-input-wrap">
+              <span class="be-prefix">$</span>
+              <input type="number" id="sellingPrice" step="0.01" min="0" placeholder="24.99" inputmode="decimal" autocomplete="off">
+            </span>
+          </label>
+        </div>
+        <p class="be-fineprint">We assume a 15% Amazon referral fee. Most categories. Adjust below if yours is different.</p>
+      </div>
+    </details>
+
     <div class="upload-actions">
       <button id="analyzeBtn" class="btn btn-primary btn-full" disabled onclick="startAnalysis()">
         Diagnose my listing →
@@ -659,6 +796,11 @@
       </div>
     </div>
 
+    <!-- Break-even ACOS result panel — only rendered when seller provided cost.
+         Feature 1: tells the seller in plain dollars whether each ad sale is
+         making or losing money. -->
+    <div id="breakEvenPanel" hidden></div>
+
     <!-- Revenue impact -->
     <div class="result-card impact-card" id="impactCard">
       <div class="result-card-head">
@@ -696,6 +838,46 @@
 
     <!-- Confidence note (only shown when degraded) -->
     <p class="conf-note" id="confNote" hidden></p>
+
+    <!-- 30-day re-audit reminder (Feature 2) — the single feature that
+         keeps the seller subscribed. We email them 30 days from today
+         with their previous score + headline and a CTA to re-audit. -->
+    <div class="result-card reaudit-card" id="reauditCard">
+      <div class="result-card-head">
+        <span class="label">Did the fix work? Get a 30-day check-in</span>
+        <span class="reaudit-pill">free</span>
+      </div>
+      <div class="result-card-body">
+        <p class="reaudit-blurb" id="reauditBlurb">
+          On day 30, we'll email you with your previous score and a one-click link to re-audit.
+          See exactly which fixes moved the metric — and which didn't. No marketing follow-ups.
+        </p>
+        <form class="reaudit-form" id="reauditForm" onsubmit="event.preventDefault(); scheduleReaudit();">
+          <input type="email" id="reauditEmail" class="reaudit-input" placeholder="your@email.com" autocomplete="email" required>
+          <button type="submit" class="btn btn-primary" id="reauditBtn">Remind me in 30 days →</button>
+        </form>
+        <p class="reaudit-status" id="reauditStatus" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <!-- VA / Agency hand-off (Feature 3) — turn the audit into a ready-to-send
+         message. Sellers complain VAs can't be briefed clearly; this gives
+         them a numbered task list with deadline + ASIN, in 1 click. -->
+    <div class="result-card va-card" id="vaCard">
+      <div class="result-card-head">
+        <span class="label">Hand off to your VA or agency</span>
+        <span class="va-pill">1 click</span>
+      </div>
+      <div class="result-card-body">
+        <p class="va-blurb">Pre-formatted with the fix list, your numbers, and a deadline. No re-typing. No Loom video.</p>
+        <div class="va-actions">
+          <button class="btn-va" onclick="vaCopy('slack')"  type="button">📋 Copy as Slack/Notion message</button>
+          <button class="btn-va" onclick="vaCopy('markdown')" type="button">📝 Copy as Markdown</button>
+          <button class="btn-va" onclick="vaEmail()"        type="button">📧 Open email to VA</button>
+        </div>
+        <p class="va-status" id="vaStatus" aria-live="polite"></p>
+      </div>
+    </div>
 
     <!-- Buttons -->
     <div class="result-actions">
@@ -944,6 +1126,18 @@ async function startAnalysis() {
   const formData = new FormData();
   formData.append('file', file);
 
+  // Feature 1: pass optional product_cost / selling_price so the server can
+  // compute break-even ACOS and tell the seller exactly how much each ad sale
+  // is costing them. Empty strings are ignored server-side.
+  const _pc = (document.getElementById('productCost') || {}).value || '';
+  const _sp = (document.getElementById('sellingPrice') || {}).value || '';
+  if (_pc) formData.append('product_cost',  _pc);
+  if (_sp) formData.append('selling_price', _sp);
+
+  // Feature 4: optional category — tightens or loosens ACOS thresholds.
+  const _cat = (document.getElementById('categorySelect') || {}).value || '';
+  if (_cat) formData.append('category', _cat);
+
   try {
     const resp = await fetch('/api/diagnose', { method: 'POST', body: formData });
     const data = await resp.json().catch(() => ({}));
@@ -1061,6 +1255,9 @@ function renderResults(data) {
       problem.detail || problem.explanation || '';
   }
 
+  // Break-even ACOS panel (Feature 1) — rendered above revenue impact when present
+  renderBreakEven(data.break_even);
+
   // Revenue impact
   document.getElementById('revenueText').textContent = revenue;
   document.getElementById('impactCard').hidden = !revenue;
@@ -1165,6 +1362,235 @@ function renderResults(data) {
   // with a physical postal address. The transactional "email me this report"
   // modal (showEmailModal) remains active because it is honest 1:1 send.
   // showLeadCapture();
+}
+
+// Feature 2 — schedule a 30-day re-audit reminder.
+async function scheduleReaudit() {
+  const email = (document.getElementById('reauditEmail') || {}).value.trim();
+  const btn   = document.getElementById('reauditBtn');
+  const status= document.getElementById('reauditStatus');
+  if (!email || !email.includes('@')) {
+    status.textContent = 'Please enter a valid email.';
+    status.className   = 'reaudit-status err';
+    return;
+  }
+  if (!_lastReport) {
+    status.textContent = 'Run a diagnosis first.';
+    status.className   = 'reaudit-status err';
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Scheduling…';
+  status.textContent = '';
+  status.className = 'reaudit-status';
+
+  // Build payload from the most recent audit
+  const r = _lastReport;
+  const perAsin = Array.isArray(r.per_asin) ? r.per_asin : [];
+  const worstAsin = perAsin.length
+    ? perAsin.reduce((a, b) => ((a.score ?? 100) <= (b.score ?? 100) ? a : b))
+    : null;
+  const problem = (r.problems || [])[0] || {};
+  const payload = {
+    email:         email,
+    asin:          (worstAsin && (worstAsin.asin || worstAsin.title)) || 'your ASIN',
+    score:         r.overall_score ?? 0,
+    headline:      r.headline || '',
+    primary_issue: problem.title || '',
+    severity:      problem.severity || 'medium',
+  };
+
+  try {
+    const resp = await fetch('/api/schedule-reaudit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (data.ok) {
+      status.textContent = data.duplicate
+        ? '✓ Already scheduled — check back in 30 days.'
+        : '✓ Set! We\'ll email you in 30 days. No spam between now and then.';
+      status.className = 'reaudit-status ok';
+      btn.textContent  = 'Reminder set ✓';
+      // Disable form to prevent double-submit
+      document.getElementById('reauditEmail').disabled = true;
+    } else {
+      status.textContent = data.error || 'Could not schedule. Try again.';
+      status.className   = 'reaudit-status err';
+      btn.disabled       = false;
+      btn.textContent    = 'Remind me in 30 days →';
+    }
+  } catch (e) {
+    status.textContent = 'Connection error. Please try again.';
+    status.className   = 'reaudit-status err';
+    btn.disabled       = false;
+    btn.textContent    = 'Remind me in 30 days →';
+  }
+}
+
+// Feature 3 — VA / Agency hand-off. Build a single self-contained message
+// from the audit and copy / email it.
+function _vaBuild(format) {
+  if (!_lastReport) return '';
+  const r = _lastReport;
+  const score    = r.overall_score ?? '—';
+  const headline = r.headline || '';
+  const problem  = (r.problems  || [])[0] || {};
+  const rec      = (r.recommendations || [])[0] || {};
+  const revenue  = r.revenue_impact || r.estimated_revenue_impact || '';
+  const be       = r.break_even || null;
+  const perAsin  = Array.isArray(r.per_asin) ? r.per_asin : [];
+  const targetAsin = perAsin.length
+    ? (perAsin.reduce((a,b) => ((a.score ?? 100) <= (b.score ?? 100) ? a : b)).asin || 'your ASIN')
+    : 'your ASIN';
+
+  // Deadline = next Friday, formatted ISO-ish in the user's tz
+  const today = new Date();
+  const friday = new Date(today.getTime() + ((5 - today.getDay() + 7) % 7 || 7) * 86400000);
+  const deadline = friday.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  // Parse numbered steps from the recommendation action string
+  const actionText = String(rec.action || '');
+  const rawSteps = actionText.split(/(?=\b\d+\.\s)/g).map(s => s.replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
+  const steps = rawSteps.length ? rawSteps : (actionText ? [actionText] : []);
+
+  if (format === 'markdown') {
+    let md = `# ASINInsight Audit — ${targetAsin}\n\n`;
+    md += `**Deadline:** ${deadline}\n`;
+    md += `**Overall score:** ${score}/100\n`;
+    md += `**Diagnosis:** ${headline}\n\n`;
+    if (problem.title)  md += `## Primary issue: ${problem.title}\n\n${problem.detail || problem.explanation || ''}\n\n`;
+    if (revenue)        md += `**Revenue impact:** ${revenue}\n\n`;
+    if (be) {
+      md += `## Break-even ACOS\n\n`;
+      md += `- Break-even ACOS: ${be.break_even_acos_pct}%\n`;
+      if (be.current_acos_pct != null) md += `- Current ACOS: ${be.current_acos_pct}%\n`;
+      if (be.is_losing_money) md += `- **Losing $${be.loss_per_ad_sale} per ad-driven sale.**\n\n`;
+      else if (be.current_acos_pct != null) md += `- Margin per ad sale: $${be.margin_per_ad_sale}\n\n`;
+    }
+    if (steps.length) {
+      md += `## Action plan\n\n`;
+      steps.forEach((s, i) => { md += `${i+1}. ${s}\n`; });
+      md += `\n`;
+    }
+    md += `\n— Auto-generated from ASINInsight diagnosis (asininsight.com)\n`;
+    return md;
+  }
+
+  // Default: plain-text Slack/Notion friendly
+  let out = `Hi — ASINInsight audit results for ${targetAsin}.\n`;
+  out += `Please complete by ${deadline}.\n\n`;
+  out += `Score: ${score}/100 — ${headline}\n\n`;
+  if (problem.title) {
+    out += `🎯 Primary issue: ${problem.title}\n`;
+    if (problem.detail || problem.explanation) out += `   ${problem.detail || problem.explanation}\n`;
+    out += `\n`;
+  }
+  if (revenue) out += `💰 Revenue impact: ${revenue}\n\n`;
+  if (be) {
+    out += `📊 Break-even ACOS: ${be.break_even_acos_pct}%`;
+    if (be.current_acos_pct != null) out += ` · Current ACOS: ${be.current_acos_pct}%`;
+    out += `\n`;
+    if (be.is_losing_money) out += `   ⚠️ Losing $${be.loss_per_ad_sale} on every ad-driven sale.\n\n`;
+    else if (be.current_acos_pct != null) out += `   ✓ Earning $${be.margin_per_ad_sale} per ad sale.\n\n`;
+    else out += `\n`;
+  }
+  if (steps.length) {
+    out += `Action plan:\n`;
+    steps.forEach((s, i) => { out += `${i+1}. ${s}\n`; });
+    out += `\n`;
+  }
+  out += `— Generated from ASINInsight (https://asininsight.com)`;
+  return out;
+}
+
+function vaCopy(format) {
+  const txt = _vaBuild(format);
+  if (!txt) return;
+  const status = document.getElementById('vaStatus');
+  const finish = (ok) => {
+    status.textContent = ok
+      ? (format === 'markdown' ? '✓ Markdown copied — paste into Notion / GitHub / docs'
+                                : '✓ Copied — paste into Slack, email, or anywhere')
+      : '✕ Copy failed — try the email button instead';
+    setTimeout(() => { status.textContent = ''; }, 4000);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => finish(true)).catch(() => finish(false));
+  } else {
+    // Legacy fallback
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { finish(document.execCommand('copy')); }
+    catch (e) { finish(false); }
+    document.body.removeChild(ta);
+  }
+}
+
+function vaEmail() {
+  const txt = _vaBuild('plain');
+  if (!txt) return;
+  const subject = 'ASINInsight audit — please action by Friday';
+  // mailto length cap is ~2000 chars in most clients; trim if needed.
+  const body = txt.length > 1900 ? txt.substring(0, 1850) + '\n\n[…full report at asininsight.com/dashboard]' : txt;
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+}
+
+// Feature 1 — render the break-even ACOS panel.
+// Only shows when the seller provided product_cost on the upload form.
+// Three states: losing money (red), winning at break-even (green), unknown (no current ACOS).
+function renderBreakEven(be) {
+  const panel = document.getElementById('breakEvenPanel');
+  if (!panel) return;
+  if (!be || typeof be !== 'object') { panel.hidden = true; panel.innerHTML = ''; return; }
+
+  const beAcos   = Number(be.break_even_acos_pct ?? 0);
+  const curAcos  = be.current_acos_pct == null ? null : Number(be.current_acos_pct);
+  const sellPrc  = Number(be.selling_price ?? 0);
+  const cost     = Number(be.product_cost ?? 0);
+  const losing   = !!be.is_losing_money;
+  const lossEa   = Number(be.loss_per_ad_sale ?? 0);
+  const marginEa = Number(be.margin_per_ad_sale ?? 0);
+  const priceSrc = be.selling_price_source === 'csv_average' ? ' (avg from your CSV)' : '';
+
+  // Build the verdict sentence — the most important number on this entire page.
+  let state = 'unknown', headLabel = '', verdict = '', meta = '';
+  if (curAcos == null) {
+    state = 'unknown';
+    headLabel = '$ Break-even ACOS';
+    verdict = `Your break-even ACOS is <strong>${beAcos.toFixed(1)}%</strong>. Above that, every ad sale loses money. We can't see your current ACOS in the CSV — try uploading a report that includes ad spend.`;
+  } else if (losing) {
+    state = 'losing';
+    headLabel = '$ You are losing money on ads';
+    verdict = `Your break-even ACOS is <strong>${beAcos.toFixed(1)}%</strong>. You're running at <strong>${curAcos.toFixed(1)}%</strong>. Every ad-driven sale loses you <strong>$${lossEa.toFixed(2)}</strong>.`;
+    meta = `Based on $${cost.toFixed(2)} cost, $${sellPrc.toFixed(2)} selling price${priceSrc}, 15% Amazon referral fee.`;
+  } else {
+    state = 'winning';
+    headLabel = '$ Your ad spend is profitable';
+    verdict = `Your break-even ACOS is <strong>${beAcos.toFixed(1)}%</strong>. You're running at <strong>${curAcos.toFixed(1)}%</strong>. Every ad sale nets you <strong>$${marginEa.toFixed(2)}</strong>.`;
+    meta = `Based on $${cost.toFixed(2)} cost, $${sellPrc.toFixed(2)} selling price${priceSrc}, 15% Amazon referral fee.`;
+  }
+
+  const cur = curAcos == null
+    ? `<div class="be-num"><span class="be-num-label">Current ACOS</span><span class="be-num-value" style="color:#94a3b8;">—</span></div>`
+    : `<div class="be-num ${losing ? 'bad' : 'good'}"><span class="be-num-label">Current ACOS</span><span class="be-num-value">${curAcos.toFixed(1)}%</span></div>`;
+
+  panel.innerHTML =
+    `<div class="be-result ${state}">` +
+      `<div class="be-result-head"><span>${headLabel}</span><span style="font-weight:700;letter-spacing:.04em;text-transform:none;font-size:11px;">Pro signal</span></div>` +
+      `<div class="be-result-body">` +
+        `<div class="be-numbers">` +
+          `<div class="be-num good"><span class="be-num-label">Break-even ACOS</span><span class="be-num-value">${beAcos.toFixed(1)}%</span></div>` +
+          cur +
+          `<div class="be-num ${losing ? 'bad' : (curAcos != null ? 'good' : '')}"><span class="be-num-label">Per ad sale</span><span class="be-num-value">${losing ? '−$' + lossEa.toFixed(2) : (curAcos != null ? '+$' + marginEa.toFixed(2) : '—')}</span></div>` +
+        `</div>` +
+        `<div class="be-verdict">${verdict}</div>` +
+        (meta ? `<div class="be-verdict-meta">${escHtml(meta)}</div>` : '') +
+      `</div>` +
+    `</div>`;
+  panel.hidden = false;
 }
 
 function renderActionSteps(text, severity) {
