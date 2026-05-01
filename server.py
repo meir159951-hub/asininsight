@@ -2996,12 +2996,16 @@ def api_diagnose():
     ranked = sorted(by_area.values(), key=lambda x: SEV_W.get(x["severity"], 9))
     top    = ranked[0] if ranked else None
 
-    # ── Headline counter (Fix #4) ─────────────────────────────────────────
-    # Count critical and high SEPARATELY. The previous version called the
-    # combined critical+high count "{n} critical issues" — overstating
-    # severity by ~7× on dirty real-world CSVs.
-    n_critical = sum(1 for b in all_b if b["severity"] == "critical")
-    n_high     = sum(1 for b in all_b if b["severity"] == "high")
+    # ── Headline counter (Fix #4 + email-consistency hotfix) ──────────────
+    # Count critical and high SEPARATELY, AND count from by_area (deduped
+    # by issue area) so the headline matches what the user can act on AND
+    # matches the count the email subject reports. Counting raw all_b
+    # entries inflated the number whenever multiple ASINs shared the same
+    # underlying issue (e.g. five ASINs with high ACOS were six "critical
+    # issues" in the headline but one "Critical Issue" in the subject —
+    # the same email contradicted itself).
+    n_critical = sum(1 for b in by_area.values() if b["severity"] == "critical")
+    n_high     = sum(1 for b in by_area.values() if b["severity"] == "high")
     n_urgent   = n_critical + n_high
     iw_crit    = "issue" if n_critical == 1 else "issues"
     iw_urg     = "issue" if n_urgent   == 1 else "issues"
