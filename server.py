@@ -3512,19 +3512,29 @@ def dashboard():
         except Exception:
             return "—"
 
-    def sev_badge(s):
-        colors = {
-            "critical": ("#9e402e", "#f8e8e2"),
-            "high":     ("#92400e", "#fef3c7"),
-            "medium":   ("#166534", "#f0fdf4"),
-            "low":      ("#64748b", "#f8fafc"),
-        }
-        fg, bg = colors.get(str(s).lower(), ("#617184", "#f1f5f9"))
+    def sev_badge(s, sc=None):
+        # Healthy listings (no detected blocker → severity stored as "none" or
+        # "low" with score >= 90) should show as "✓ Healthy" not "LOW" — a "LOW"
+        # badge for a 100/100 score reads as "there's a small problem" when
+        # actually nothing is wrong.
+        sev_lower = str(s).lower()
+        if sev_lower in ("none", "") or (sev_lower == "low" and (sc or 0) >= 90):
+            label = "✓ Healthy"
+            fg, bg = "#1d6a42", "#e7f3eb"
+        else:
+            colors = {
+                "critical": ("#9e402e", "#f8e8e2"),
+                "high":     ("#92400e", "#fef3c7"),
+                "medium":   ("#166534", "#f0fdf4"),
+                "low":      ("#64748b", "#f8fafc"),
+            }
+            fg, bg = colors.get(sev_lower, ("#617184", "#f1f5f9"))
+            label = str(s)
         return (
             f'<span style="display:inline-flex;align-items:center;padding:2px 10px;'
             f'border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.06em;'
             f'text-transform:uppercase;background:{bg};color:{fg};">'
-            f'{html.escape(str(s))}</span>'
+            f'{html.escape(label)}</span>'
         )
 
     def score_color(sc):
@@ -3544,7 +3554,7 @@ def dashboard():
             f"<span style='font-size:11px;color:#9fb0c4;'>/100</span></td>"
             f"<td style='font-size:13px;color:#15263d;'>{html.escape(str(hdl or ''))}</td>"
             f"<td style='color:#617184;font-size:13px;text-align:center;'>{int(asin_count or 1)}</td>"
-            f"<td>{sev_badge(str(severity or 'low'))}</td>"
+            f"<td>{sev_badge(str(severity or 'none'), sc_int)}</td>"
             f"</tr>"
         )
     if not rows_html:

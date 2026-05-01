@@ -45,8 +45,10 @@
     .post-meta { font-size: 12px; color: #9fb0c4; }
     .post-cta { font-size: 14px; font-weight: 700; color: var(--blue); }
     .post-cta:hover { text-decoration: underline; }
-    .coming-soon { opacity: 0.55; cursor: default; }
-    .coming-soon .post-cta { color: var(--muted); }
+    /* "Coming soon" cards are hidden at launch so the blog doesn't look
+       half-empty. Re-enable by removing the display:none rule when each
+       post ships. */
+    .coming-soon { display: none; }
     footer { padding: 28px 0 44px; border-top: 1px solid rgba(221,212,198,.8); color: var(--muted); }
     .foot { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; font-size: 13px; }
     .foot-links { display: flex; gap: 20px; }

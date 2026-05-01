@@ -437,18 +437,14 @@
       }
     }
     if (!paddleReady || !priceId) {
-      // Paddle not configured — start free plan instead (with CSRF token)
-      var form = document.querySelector('form[action="/checkout/free"]');
-      if (form) {
-        var m = document.cookie.match(/(?:^|;\s*)_csrf=([^;]+)/);
-        var token = m ? decodeURIComponent(m[1]) : '';
-        if (token && !form.querySelector('[name="_csrf"]')) {
-          var inp = document.createElement('input');
-          inp.type = 'hidden'; inp.name = '_csrf'; inp.value = token;
-          form.appendChild(inp);
-        }
-        form.submit();
-      }
+      // Paddle not configured yet — DO NOT silently submit the free form.
+      // The previous fallback caused users who clicked "Get Pro $49/mo" to
+      // be activated as Free with no visible feedback — looked broken or
+      // bait-and-switch. Show a clear "coming soon" message instead.
+      btn.disabled = false;
+      errEl.textContent = 'Paid checkout is not yet enabled. Try the free plan first — it gives you the full diagnosis. We’ll email you when paid plans go live.';
+      errEl.style.display = 'block';
+      errEl.style.color   = '#92400e';  // amber, not red — "not yet" not "broken"
       return;
     }
 
