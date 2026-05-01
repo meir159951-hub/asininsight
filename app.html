@@ -1371,6 +1371,7 @@ async function sendReport() {
       : null;
     report.total_asins    = perAsin.length || 1;
     report.critical_count = (_lastReport.problems || []).filter(x => x.severity === 'critical').length;
+    report.high_count     = (_lastReport.problems || []).filter(x => x.severity === 'high').length;
     report.weakest_score  = _lastReport.overall_score ?? 0;
     report.weakest_asin   = worstAsin?.asin || worstAsin?.title || 'Your ASIN';
     report.headline       = _lastReport.headline || '';

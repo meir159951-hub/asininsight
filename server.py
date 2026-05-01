@@ -1548,9 +1548,22 @@ def send_report():
     try:
         total    = int(report.get("total_asins") or 0)
         critical = int(report.get("critical_count") or 0)
+        high     = int(report.get("high_count")     or 0)
         score    = int(report.get("weakest_score") or 0)
     except (ValueError, TypeError):
         return jsonify({"ok": False, "error": "Invalid report data"}), 400
+
+    # Subject line — pick the most informative phrasing for the inbox preview.
+    # Showing "0 Critical Issues" looks broken; instead degrade gracefully:
+    # critical > 0   → "N Critical Issue(s)"
+    # high > 0       → "N Issue(s) to fix"
+    # otherwise      → just "Healthy listing"
+    if critical > 0:
+        subject_tail = f"{critical} Critical Issue" + ("s" if critical != 1 else "")
+    elif high > 0:
+        subject_tail = f"{high} Issue" + ("s" if high != 1 else "") + " to fix"
+    else:
+        subject_tail = "Healthy listing"
 
     weakest        = html.escape(str(report.get("weakest_asin") or "N/A")[:100])
     headline_text  = html.escape(str(report.get("headline") or "")[:200])
@@ -1874,7 +1887,7 @@ def send_report():
             json={
                 "personalizations": [{"to": [{"email": email}]}],
                 "from": {"email": EMAIL_FROM_ADDRESS, "name": EMAIL_FROM_NAME},
-                "subject": f"ASINInsight Report — Score {score}/100, {critical} Critical Issue{'s' if critical != 1 else ''}",
+                "subject": f"ASINInsight Report — Score {score}/100, {subject_tail}",
                 "content": [{"type": "text/html", "value": html_body}],
             },
             timeout=10,
