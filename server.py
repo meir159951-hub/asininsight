@@ -1652,7 +1652,12 @@ def paddle_webhook():
                     log.error("DB error saving customer %s: %s", customer_id, e)
                     return jsonify({"error": "db error"}), 500
 
-    elif event_type in ("subscription.cancelled", "subscription.paused"):
+    # Paddle Billing v2 sends "subscription.canceled" (US, single L). Earlier
+    # versions of this code listened for "subscription.cancelled" (UK, double L)
+    # which Paddle never sends — so cancellations silently no-op'd and the
+    # customer kept Pro access after they stopped paying. Listen for both
+    # spellings so neither side of the Atlantic breaks us.
+    elif event_type in ("subscription.canceled", "subscription.cancelled", "subscription.paused"):
         data        = event.get("data", {})
         customer_id = data.get("customer_id", "")
         if customer_id:
