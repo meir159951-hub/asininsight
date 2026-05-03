@@ -3,6 +3,7 @@ ASINInsight - Flask server with Paddle payments + Amazon SP-API
 """
 
 import os
+import re
 import csv
 import io
 import hmac
@@ -519,7 +520,7 @@ def _build_drip_email(email: str, step: int) -> dict | None:
             '<p style="font-size:15px;color:#334155;margin:0 0 20px;line-height:1.6;">'
             'ASINInsight reads all 20 columns, cross-references your ad data, '
             'and tells you exactly which one needs your attention — with numbered '
-            'steps to fix it. It takes 30 seconds.</p>'
+            'steps to fix it. Takes under a minute.</p>'
             '<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:20px;">'
             '<tr><td style="background:#f6f3ec;border-radius:14px;padding:20px 24px;">'
             '<p style="font-size:13px;font-weight:700;color:#617184;text-transform:uppercase;'
@@ -2348,14 +2349,25 @@ def parse_csv_text(text: str) -> list[dict]:
             delim = ","
     reader = csv.DictReader(io.StringIO(stripped), delimiter=delim)
     items: list[dict] = []
+    skipped_invalid_asins = 0
+    # Amazon ASINs are exactly 10 alphanumeric chars (B0XXXXXXXX or older 10-char).
+    # Stream-4 fix T28: reject rows where ASIN contains spaces or special chars
+    # such as `B 016 #!@` so the engine doesn't treat junk as a real product.
+    _asin_re = re.compile(r"^[A-Z0-9]{10}$")
     for index, row in enumerate(reader, start=1):
         if not isinstance(row, dict) or not any(str(v or "").strip() for v in row.values()):
             continue
         cleaned = {str(k).strip(): v for k, v in row.items() if k is not None}
         lowered = {k.lower(): v for k, v in cleaned.items()}
         metrics = normalize(cleaned)
-        asin = str(metrics.get("asin") or lowered.get("asin") or lowered.get("(child) asin") or f"ROW-{index}").strip()
+        asin = str(metrics.get("asin") or lowered.get("asin") or lowered.get("(child) asin") or "").strip().upper()
         if not asin:
+            # No ASIN at all — fall back to a row label so the engine can
+            # still analyse rows that have metrics but no ID column.
+            asin = f"ROW-{index}"
+        elif not _asin_re.match(asin) and not asin.startswith("ROW-"):
+            # Real ASIN-shaped value but invalid format — skip row and count.
+            skipped_invalid_asins += 1
             continue
         metrics["asin"] = asin
         item = {"asin": asin, "metrics": metrics, "blockers": []}
@@ -2366,6 +2378,12 @@ def parse_csv_text(text: str) -> list[dict]:
         if category:
             item["category"] = category
         items.append(item)
+    if skipped_invalid_asins > 0 and items:
+        # Attach an audit-trail note on the first item so data_quality can
+        # surface it (the diagnose handler reads this and bubbles it up).
+        items[0].setdefault("_parse_warnings", []).append(
+            f"{skipped_invalid_asins} row(s) skipped — ASIN value didn't match Amazon's 10-character format."
+        )
     return items
 
 
@@ -2745,6 +2763,64 @@ def _detect_contradictions(m: dict) -> list[str]:
             "actual stockout risk may be lower than the days-of-cover number suggests."
         )
 
+    # ── Hostile-input sanity checks (Stream-4 audit, 2026-05) ──────────────
+    # The following rules catch impossible value combinations that a stale or
+    # corrupt CSV can produce. Without them, the engine gives a confident
+    # "healthy" verdict on data that is internally contradictory — the most
+    # dangerous failure mode (a seller trusts a green light on garbage data).
+
+    # T19 — Conversion >0 but sessions=0 is physically impossible.
+    if ses == 0 and cvr > 0:
+        contradictions.append(
+            f"Conversion rate is {cvr:.1%} but sessions = 0 — impossible combination, "
+            "input may be corrupt. Re-export the Business Report to verify."
+        )
+
+    # T20 — Price = 0 is almost always a parsing or report-export bug.
+    price = float(m.get("price") or 0)
+    if price <= 0 and ses > 0:
+        contradictions.append(
+            "Price is $0 — most likely a corrupt export. Diagnosis ignores this row."
+        )
+
+    # T16 — Negative ACOS is impossible (cost / revenue can't be negative).
+    if acos < 0:
+        contradictions.append(
+            f"ACOS reads {acos:.0%} (negative) — impossible value, input may be corrupt."
+        )
+
+    # T17 — Inventory cover > 365 days is almost always a report glitch.
+    if cover > 365:
+        contradictions.append(
+            f"Inventory cover is {int(cover)} days — value out of range, "
+            "likely a Business Report bug. Excluded from inventory analysis."
+        )
+
+    # T10 — Physically implausible CTR / conversion (>50%) point to a parsing
+    # error (mid-row newline split a row in two). Flag rather than emit a
+    # narrative line that uses these values.
+    if ctr > 0.5:
+        contradictions.append(
+            f"CTR reads {ctr:.0%} — physically implausible, likely a CSV parse glitch."
+        )
+    if cvr > 0.5:
+        contradictions.append(
+            f"Conversion rate reads {cvr:.0%} — physically implausible, likely a CSV parse glitch."
+        )
+
+    # T15 — ACOS clamped to 1000% (engine caps elsewhere; surface to user).
+    raw_acos = m.get("_raw_acos")  # set upstream when clamping occurred
+    if raw_acos is not None:
+        try:
+            ra = float(raw_acos)
+            if ra > 10:
+                contradictions.append(
+                    f"ACOS in your file was {ra:.0%} — capped at 1000% for analysis. "
+                    "Verify the original Business Report value."
+                )
+        except (TypeError, ValueError):
+            pass
+
     return contradictions
 
 
@@ -3097,9 +3173,13 @@ def api_diagnose():
         return jsonify({"error": error}), 400
 
     # Cap total ASINs to prevent runaway processing
+    original_item_count = len(items)
+    truncated_rows = 0
     if len(items) > _MAX_ASINS_PER_REQUEST:
+        truncated_rows = len(items) - _MAX_ASINS_PER_REQUEST
         items = items[:_MAX_ASINS_PER_REQUEST]
-        log.info("Truncated request to %d ASINs (IP: %s)", _MAX_ASINS_PER_REQUEST, ip)
+        log.info("Truncated request from %d to %d ASINs (IP: %s)",
+                 original_item_count, _MAX_ASINS_PER_REQUEST, ip)
 
     # ── Feature 1: Break-even ACOS ────────────────────────────────────────
     # Optional product_cost (dollars per unit) lets us compute the seller's
@@ -3411,6 +3491,26 @@ def api_diagnose():
         # Cap the displayed overall score at 75 so the user understands the
         # number is provisional, not a green light.
         score = min(score, 75)
+
+    # Stream-4 fix: ANY contradiction (not just 2+) flagged as a hard sanity
+    # violation (sessions=0+cvr>0, negative ACOS, price=$0, cover>365,
+    # implausible CTR/CVR) must prevent a "healthy" verdict. Cap score and
+    # demote confidence so the headline won't claim a green light on
+    # internally inconsistent data.
+    _hard_keywords = (
+        "impossible combination",
+        "negative",
+        "physically implausible",
+        "Price is $0",
+        "out of range",
+    )
+    has_hard_violation = any(
+        any(kw in c for kw in _hard_keywords) for c in all_contradictions
+    )
+    if has_hard_violation:
+        min_conf = "low"
+        score = min(score, 70)
+
     overall_confidence = min_conf
 
     # ── Problems list — include confidence + warnings ────────────────────
@@ -3506,6 +3606,27 @@ def api_diagnose():
         data_quality["mixed_signals"] = all_contradictions
     if all_missing:
         data_quality["missing_fields"] = all_missing
+    # Stream-4 fix T22: surface silent truncation. A user uploading a 500-row
+    # CSV silently got results for only 200; the other 300 were invisible.
+    # They could trust an "8 issues found" summary as comprehensive when it
+    # actually skipped 60% of their catalog.
+    if truncated_rows > 0:
+        data_quality["truncated_rows"] = truncated_rows
+        data_quality["truncation_note"] = (
+            f"Your file had {original_item_count} rows. "
+            f"Diagnosis covers the first {_MAX_ASINS_PER_REQUEST} only — "
+            f"{truncated_rows} rows were not analyzed. "
+            "Split the file or upgrade for a higher limit."
+        )
+    # Bubble up parser warnings (invalid ASIN rows skipped, etc.)
+    parse_warnings: list[str] = []
+    for it in items:
+        if isinstance(it.get("_parse_warnings"), list):
+            for w in it["_parse_warnings"]:
+                if isinstance(w, str) and w not in parse_warnings:
+                    parse_warnings.append(w[:200])
+    if parse_warnings:
+        data_quality["parse_warnings"] = parse_warnings
 
     # Increment the public "diagnoses run" counter (non-critical)
     _increment_stat("diagnoses_run")

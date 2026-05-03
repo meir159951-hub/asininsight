@@ -22,7 +22,7 @@
   <text x="80" y="360" font-family="Georgia, serif" font-size="56" font-weight="700" fill="#1f5fa8" letter-spacing="-1">We tell you which line.</text>
 
   <!-- Sub text -->
-  <text x="80" y="440" font-family="'Segoe UI', Arial, sans-serif" font-size="26" fill="#617184">Upload your CSV. Get the one fix that matters most. 30 seconds.</text>
+  <text x="80" y="440" font-family="'Segoe UI', Arial, sans-serif" font-size="26" fill="#617184">Upload your CSV. Get the one fix that matters most. Under a minute.</text>
 
   <!-- Metric chips -->
   <rect x="80" y="490" width="108" height="44" rx="22" fill="#e8f0fa"/>
