@@ -147,18 +147,15 @@
     }
     .cat-select:focus { border-color: var(--blue); }
 
-    /* ── Break-even ACOS inputs (Feature 1) ── */
+    /* ── Break-even ACOS inputs (Feature 1) — always-visible variant ── */
     .be-block { margin: 12px 0 14px; border-radius: 12px; border: 1px solid #c8e1d1; background: #f3fbf4; overflow: hidden; }
-    .be-block[open] { background: #fff; }
-    .be-block summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: center; gap: 10px; user-select: none; }
-    .be-block summary::-webkit-details-marker { display: none; }
+    .be-block-open { background: #fff; }
+    .be-header { padding: 12px 14px 8px; display: flex; align-items: center; gap: 10px; }
     .be-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #1d6a42; color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0; font-family: Georgia, serif; }
     .be-summary-text { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
     .be-summary-title { font-size: 13px; font-weight: 700; color: #15263d; }
     .be-summary-sub { font-size: 12px; color: var(--muted); line-height: 1.4; }
-    .be-chev { color: #94a3b8; font-size: 14px; transition: transform .15s; flex-shrink: 0; }
-    .be-block[open] .be-chev { transform: rotate(180deg); }
-    .be-body { padding: 4px 14px 14px; border-top: 1px solid #e7f3eb; }
+    .be-body { padding: 4px 14px 14px; }
     .be-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     @media (max-width: 520px) { .be-grid { grid-template-columns: 1fr; } }
     .be-field { display: flex; flex-direction: column; gap: 5px; }
@@ -411,10 +408,19 @@
     /* ── Page notice bar ── */
     .notice-bar { padding: 10px 24px; font-size: 13px; font-weight: 600; text-align: center; }
 
+    /* ── Tool footer (CCPA / legal links) ── */
+    .tool-footer {
+      max-width: 600px; margin: 0 auto; padding: 24px 16px 40px;
+      text-align: center; font-size: 12px; color: #64748b;
+      display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .tool-footer a { color: #64748b; text-decoration: none; }
+    .tool-footer a:hover { color: var(--blue); text-decoration: underline; }
+
     /* ── Print / PDF export ── */
     @media print {
       .topnav, .progress-bar, .result-actions, #emailModal, #leadModal,
-      #pageNotice, .btn, footer, [id*="cookie"], [id*="Cookie"] { display: none !important; }
+      #pageNotice, .btn, footer, .tool-footer, [id*="cookie"], [id*="Cookie"] { display: none !important; }
       body { background: #fff; color: #000; font-size: 13px; }
       .shell { max-width: 100%; padding: 0; }
       .panel { border: none; border-radius: 0; box-shadow: none; padding: 0; }
@@ -623,19 +629,19 @@
       </select>
     </div>
 
-    <!-- Optional Break-even ACOS inputs — feature 1.
-         When seller adds their cost, we tell them their break-even ACOS and
-         exactly how much money each ad-driven sale loses (or makes). No other
-         tool computes this from a single CSV upload. -->
-    <details class="be-block" id="beBlock">
-      <summary>
+    <!-- Break-even ACOS — feature 1, surfaced ABOVE the fold (no longer hidden
+         in a collapsed details). When the seller fills in cost, the result
+         page shows the single most actionable number we have: "every ad sale
+         loses you $X". Audit found that hiding this behind a closed details
+         caused most users to never see our strongest output. -->
+    <div class="be-block be-block-open" id="beBlock">
+      <div class="be-header">
         <span class="be-icon">$</span>
         <span class="be-summary-text">
-          <span class="be-summary-title">Optional: Get your break-even ACOS</span>
+          <span class="be-summary-title">Get your break-even ACOS <span class="be-optional">(optional)</span></span>
           <span class="be-summary-sub">Add your cost — we'll show exactly how much each ad sale costs you.</span>
         </span>
-        <span class="be-chev">▾</span>
-      </summary>
+      </div>
       <div class="be-body">
         <div class="be-grid">
           <label class="be-field">
@@ -653,9 +659,9 @@
             </span>
           </label>
         </div>
-        <p class="be-fineprint">We assume a 15% Amazon referral fee. Most categories. Adjust below if yours is different.</p>
+        <p class="be-fineprint">We assume a 15% Amazon referral fee. Most categories.</p>
       </div>
-    </details>
+    </div>
 
     <div class="upload-actions">
       <button id="analyzeBtn" class="btn btn-primary btn-full" disabled onclick="startAnalysis()">
@@ -894,6 +900,19 @@
   </div>
 
 </main>
+
+<!-- Footer (CCPA-required Do Not Sell link must appear on every page that
+     processes personal info; the audit tool counts). Hidden in print to keep
+     the PDF clean. -->
+<footer class="tool-footer">
+  <a href="/privacy">Privacy</a>
+  <span aria-hidden="true">·</span>
+  <a href="/terms">Terms</a>
+  <span aria-hidden="true">·</span>
+  <a href="/privacy#do-not-sell">Do Not Sell or Share My Info</a>
+  <span aria-hidden="true">·</span>
+  <span style="color:#94a3b8;">© 2026 ASINInsight</span>
+</footer>
 
 <!-- Email Modal -->
 <div id="emailModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -1455,8 +1474,17 @@ function _vaBuild(format) {
   const rawSteps = actionText.split(/(?=\b\d+\.\s)/g).map(s => s.replace(/^\d+\.\s*/, '').trim()).filter(Boolean);
   const steps = rawSteps.length ? rawSteps : (actionText ? [actionText] : []);
 
+  // Multi-ASIN portfolio handoff: when the seller uploaded >1 ASIN, list the
+  // top 5 worst ASINs (by score) so the VA gets a real portfolio task list,
+  // not just one entry. Audit feedback: "VA hand-off only ships ONE ASIN's
+  // actions" — fixed here.
+  const isMulti = perAsin.length > 1;
+  const topWorst = isMulti
+    ? [...perAsin].sort((a,b) => (a.score ?? 100) - (b.score ?? 100)).slice(0, 5)
+    : [];
+
   if (format === 'markdown') {
-    let md = `# ASINInsight Audit — ${targetAsin}\n\n`;
+    let md = `# ASINInsight Audit — ${isMulti ? `${perAsin.length} ASINs (focus: ${targetAsin})` : targetAsin}\n\n`;
     md += `**Deadline:** ${deadline}\n`;
     md += `**Overall score:** ${score}/100\n`;
     md += `**Diagnosis:** ${headline}\n\n`;
@@ -1470,8 +1498,16 @@ function _vaBuild(format) {
       else if (be.current_acos_pct != null) md += `- Margin per ad sale: $${be.margin_per_ad_sale}\n\n`;
     }
     if (steps.length) {
-      md += `## Action plan\n\n`;
+      md += `## Action plan (worst ASIN first)\n\n`;
       steps.forEach((s, i) => { md += `${i+1}. ${s}\n`; });
+      md += `\n`;
+    }
+    if (topWorst.length) {
+      md += `## Other ASINs needing attention (top ${topWorst.length} by score)\n\n`;
+      md += `| ASIN | Score | Top issue | Severity |\n|---|---|---|---|\n`;
+      topWorst.forEach(row => {
+        md += `| ${row.asin || '—'} | ${row.score ?? '—'}/100 | ${row.top_issue || '—'} | ${row.severity || '—'} |\n`;
+      });
       md += `\n`;
     }
     md += `\n— Auto-generated from ASINInsight diagnosis (asininsight.com)\n`;
@@ -1479,7 +1515,7 @@ function _vaBuild(format) {
   }
 
   // Default: plain-text Slack/Notion friendly
-  let out = `Hi — ASINInsight audit results for ${targetAsin}.\n`;
+  let out = `Hi — ASINInsight audit results${isMulti ? ` for ${perAsin.length} ASINs (focus: ${targetAsin})` : ` for ${targetAsin}`}.\n`;
   out += `Please complete by ${deadline}.\n\n`;
   out += `Score: ${score}/100 — ${headline}\n\n`;
   if (problem.title) {
@@ -1497,8 +1533,15 @@ function _vaBuild(format) {
     else out += `\n`;
   }
   if (steps.length) {
-    out += `Action plan:\n`;
+    out += `Action plan (worst ASIN first):\n`;
     steps.forEach((s, i) => { out += `${i+1}. ${s}\n`; });
+    out += `\n`;
+  }
+  if (topWorst.length) {
+    out += `Other ASINs needing attention (top ${topWorst.length} by score):\n`;
+    topWorst.forEach(row => {
+      out += `  • ${row.asin || '—'} — score ${row.score ?? '—'}/100 — ${row.top_issue || '—'} (${row.severity || '—'})\n`;
+    });
     out += `\n`;
   }
   out += `— Generated from ASINInsight (https://asininsight.com)`;

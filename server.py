@@ -37,6 +37,13 @@ load_dotenv(BASE_DIR / ".env")
 
 app = Flask(__name__, static_folder=None)
 
+# Cap inbound request body size at 3 MB. The CSV upload path enforces 2 MB
+# per-file but the JSON body path for /api/diagnose previously had no
+# global cap, so a 100 MB JSON payload would be fully buffered in RAM
+# before we got a chance to check size. Flask aborts with 413 before
+# reading further. Belt-and-suspenders DoS defense.
+app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
+
 secret_key = os.getenv("FLASK_SECRET_KEY")
 _INSECURE_KEY_EXAMPLES = {
     "asininsight-secret-2026-xk9mp3",
@@ -717,8 +724,61 @@ def _process_reaudit_reminders():
                 log.warning("Failed to mark reminder %d as sent: %s", row_id, e)
 
 
+_LAST_RETENTION_PURGE = 0.0  # epoch of last successful purge run
+
+
+def _process_retention_purge():
+    """Enforce the retention windows promised in privacy policy §7.
+
+    Runs at most once per 24h. Hard-deletes rows older than the published
+    cutoff. Without this the policy says "auto-purged after 12 months"
+    while the DB never actually deletes anything — which becomes a
+    contractual breach on day 366.
+
+    Windows (from privacy.html §7):
+      - analyses: 365 days
+      - email_leads: 730 days (24 months)
+      - email_drip_queue: 90 days (sent rows only — quota housekeeping)
+      - reaudit_reminders: 90 days (sent rows only)
+      - email_unsubscribes: indefinite (legal-obligation basis)
+    """
+    global _LAST_RETENTION_PURGE
+    now = time.time()
+    if now - _LAST_RETENTION_PURGE < 24 * 3600:
+        return  # already ran today
+
+    _LAST_RETENTION_PURGE = now
+    cutoffs = {
+        "analyses":         now - 365 * 86400,
+        "email_leads":      now - 730 * 86400,
+        "email_drip_queue": now -  90 * 86400,
+        "reaudit_reminders": now -  90 * 86400,
+    }
+    deleted = {}
+    try:
+        with _db() as (cur, ph):
+            cur.execute(f"DELETE FROM analyses WHERE created_at < {ph}", (cutoffs["analyses"],))
+            deleted["analyses"] = cur.rowcount or 0
+            cur.execute(f"DELETE FROM email_leads WHERE created_at < {ph}", (cutoffs["email_leads"],))
+            deleted["email_leads"] = cur.rowcount or 0
+            # Drip queue: only purge already-sent rows, keep pending forever
+            cur.execute(
+                f"DELETE FROM email_drip_queue WHERE sent_at IS NOT NULL AND sent_at < {ph}",
+                (cutoffs["email_drip_queue"],)
+            )
+            deleted["email_drip_queue"] = cur.rowcount or 0
+            cur.execute(
+                f"DELETE FROM reaudit_reminders WHERE sent_at IS NOT NULL AND sent_at < {ph}",
+                (cutoffs["reaudit_reminders"],)
+            )
+            deleted["reaudit_reminders"] = cur.rowcount or 0
+        log.info("Retention purge complete: %s", deleted)
+    except Exception as e:
+        log.warning("Retention purge error: %s", e)
+
+
 def _drip_worker_loop():
-    """Background thread: process drip queue + re-audit reminders every 20 minutes."""
+    """Background thread: drip queue + re-audit reminders + daily retention purge."""
     time.sleep(60)  # wait for server to fully boot
     while True:
         try:
@@ -729,6 +789,10 @@ def _drip_worker_loop():
             _process_reaudit_reminders()
         except Exception as e:
             log.warning("Re-audit reminder worker error: %s", e)
+        try:
+            _process_retention_purge()
+        except Exception as e:
+            log.warning("Retention purge worker error: %s", e)
         time.sleep(20 * 60)  # 20 minutes
 
 
@@ -3179,6 +3243,14 @@ def api_diagnose():
         if not raw_bls:
             m_raw = item.get("metrics") if isinstance(item.get("metrics"), dict) else item
             m_norm = normalize(m_raw)
+            # Preserve _category through normalisation. The normalize() helper
+            # only keeps keys present in _COL_MAP — so a literal "_category"
+            # injected upstream gets silently dropped, which then defaults the
+            # ACOS multiplier to 1.0 and makes Beauty/Electronics/default all
+            # produce the *same* output. Re-inject so _build_rules can actually
+            # tighten / loosen the threshold for the picked category.
+            if isinstance(m_raw, dict) and m_raw.get("_category"):
+                m_norm["_category"] = m_raw["_category"]
             raw_bls = detect(m_norm)
 
         bls = [b for b in raw_bls if isinstance(b, dict)]
