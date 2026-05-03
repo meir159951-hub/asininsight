@@ -3510,6 +3510,13 @@ def api_diagnose():
     if has_hard_violation:
         min_conf = "low"
         score = min(score, 70)
+        # Override the "looks healthy" headline so corrupt input doesn't
+        # appear as a green light. This must run AFTER the headline cascade
+        # above; the cascade only sees blocker count, not data-quality.
+        headline = (
+            "Diagnosis paused — input data appears corrupt. "
+            "Verify your Business Report and re-upload."
+        )
 
     overall_confidence = min_conf
 
