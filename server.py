@@ -2729,12 +2729,14 @@ def _detect_contradictions(m: dict) -> list[str]:
             "too little data for a reliable ACOS diagnosis."
         )
 
-    # Strong rating and significant review base → trust is not the bottleneck
-    if rating >= 4.5 and reviews >= 20:
-        contradictions.append(
-            f"Rating is {rating:.1f} with {reviews} reviews — "
-            "trust signals are strong; a different metric is the likely constraint."
-        )
+    # NOTE: a "rating >= 4.5 AND reviews >= 20" rule used to fire here as a
+    # contradiction. Removed (2026-05) — it is a *positive* signal, not an
+    # unreliability warning, but downstream logic counts every contradiction
+    # toward confidence demotion. Result: a perfectly healthy 5-ASIN CSV
+    # produced 5 "trust strong" entries → 2+ contradictions → high confidence
+    # got bumped down to medium. The healthier the listing, the lower the
+    # confidence the engine reported. Backwards. Information already conveyed
+    # by score + headline + primary-issue, so removing the rule has no UX cost.
 
     # Very low sessions with critical inventory → actual sell-through risk is lower than cover implies
     if 0 < cover < 5 and ses < 50:
@@ -3482,7 +3484,13 @@ def api_diagnose():
 
     rev = rev or (
         "Healthy ASIN — focus on scaling traffic." if not ranked else
-        f"{urgent} urgent {iw} are suppressing revenue. Fix the top blocker first." if urgent >= 3 else
+        # NameError fix: the variables `urgent` / `iw` were renamed to
+        # `n_urgent` / `iw_urg` at line ~3353 during an earlier refactor,
+        # but this fallback string was not updated. Result: any diagnosis
+        # where rev hadn't been set in the loop above (low-traffic listings,
+        # brand-new launches with 0 sessions) crashed with 500 — exactly
+        # the seller most likely to test the tool first.
+        f"{n_urgent} urgent {iw_urg} are suppressing revenue. Fix the top blocker first." if n_urgent >= 3 else
         "Fixing the top blocker typically recovers 15–25% of suppressed revenue within 30–60 days."
     )
 
@@ -3564,7 +3572,14 @@ def api_diagnose():
         "data_quality":             data_quality,
         "model_used":               "rule-based+claude" if llm_insights else "rule-based",
         # Per-ASIN breakdown — only populated for multi-ASIN uploads (batch view)
-        "per_asin":                 per_asin if len(items) > 1 else [],
+        # Sort per-ASIN list by severity (worst-first) so the table the
+        # user scans top-down is already triage-ordered. CSV-input order
+        # made the critical ASIN show up arbitrarily — the audit caught
+        # cases where it was buried mid-list under healthy entries.
+        "per_asin":                 (sorted(per_asin, key=lambda r: (
+                                        SEV_W.get(r.get("severity", "low"), 9),
+                                        r.get("score", 100),
+                                    )) if len(items) > 1 else []),
         # LLM-enhanced insights for Pro+ tiers (empty array on Free or LLM failure)
         "llm_insights":             llm_insights,
         # Break-even ACOS — only present when seller provided product_cost
