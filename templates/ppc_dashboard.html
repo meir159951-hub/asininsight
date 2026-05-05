@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>PPC Dashboard, SellerCopilot</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    :root {
+      --bg:        #f8f6f1;
+      --panel:    #ffffff;
+      --ink:      #15263d;
+      --muted:    #617184;
+      --line:     #e6e1d8;
+      --blue:     #1f5fa8;
+      --blue-d:   #174a85;
+      --green:    #1d6a42;
+      --amber:    #92400e;
+      --red:      #b14a3a;
+      --shadow:   0 1px 0 rgba(15, 38, 71, .04), 0 4px 14px rgba(15, 38, 71, .06);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .topnav {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topnav .brand {
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+    .topnav .meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .shell {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px 18px 64px;
+    }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(24px, 4vw, 30px);
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .card h2 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 14px;
+    }
+    .conn-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .conn-row:last-child { border-bottom: 0; }
+    .conn-meta { font-size: 13px; color: var(--muted); }
+    .conn-name { font-size: 15px; font-weight: 600; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-active { background: #e3f2e9; color: var(--green); }
+    .badge-inactive { background: #fbe6e0; color: var(--red); }
+    .empty {
+      padding: 24px 0 8px;
+      text-align: center;
+    }
+    .empty p {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0 0 18px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--blue);
+      color: #fff;
+      border: 1px solid var(--blue);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      min-height: 44px;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--blue-d); border-color: var(--blue-d); text-decoration: none; }
+    .btn-secondary {
+      background: var(--panel);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn-secondary:hover { background: #f1ede4; }
+    .placeholder {
+      padding: 16px 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .placeholder strong { color: var(--ink); }
+    @media (max-width: 540px) {
+      .conn-row { flex-direction: column; align-items: flex-start; }
+      .shell { padding: 22px 14px 64px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Main">
+  <div class="brand">SellerCopilot</div>
+  <div class="meta">Customer ID, {{ customer_id }}</div>
+</nav>
+
+<main class="shell">
+  <h1>PPC Dashboard</h1>
+  <p class="subtitle">
+    Monitor your connected Amazon accounts and review AI-suggested PPC changes.
+    All changes require your approval before they go live.
+  </p>
+
+  <!-- Connected Accounts -->
+  <section class="card" aria-labelledby="conns-heading">
+    <h2 id="conns-heading">Connected Accounts</h2>
+
+    {% if connections and connections|length > 0 %}
+      {% for c in connections %}
+        <div class="conn-row">
+          <div>
+            <div class="conn-name">
+              {% if c.seller_id %}
+                Seller {{ c.seller_id }}
+              {% else %}
+                Connection #{{ c.id }}
+              {% endif %}
+              {% if c.active %}
+                <span class="badge badge-active">Active</span>
+              {% else %}
+                <span class="badge badge-inactive">Inactive</span>
+              {% endif %}
+            </div>
+            <div class="conn-meta">
+              Marketplace, {{ c.marketplace_id }}
+              {% if c.last_synced_at %}
+                &middot; Last synced {{ c.last_synced_at|int }}s epoch
+              {% else %}
+                &middot; Not yet synced
+              {% endif %}
+            </div>
+          </div>
+          <div class="conn-meta">ID, {{ c.id }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">
+        <p>You have not connected an Amazon account yet.</p>
+        <button id="connect-btn" class="btn" type="button">Connect Amazon Account</button>
+      </div>
+    {% endif %}
+  </section>
+
+  <!-- Connect another account (only shown if at least one already exists) -->
+  {% if connections and connections|length > 0 %}
+    <section class="card">
+      <h2>Connect Another Account</h2>
+      <p class="placeholder">
+        Connect additional Seller Central accounts (one per marketplace) to manage
+        them from the same dashboard.
+      </p>
+      <button id="connect-more-btn" class="btn btn-secondary" type="button">
+        Connect Another Amazon Account
+      </button>
+    </section>
+  {% endif %}
+
+  <!-- Suggestions placeholder (week 5 of MVP plan) -->
+  <section class="card" aria-labelledby="suggestions-heading">
+    <h2 id="suggestions-heading">Pending Suggestions</h2>
+    <div class="placeholder">
+      <strong>Coming in week 5 of the MVP build.</strong>
+      <br>
+      Once your account is connected and the first PPC snapshot has been
+      fetched, the AI agent will analyse your campaigns and post specific
+      suggestions here for your approval. No action is taken on your account
+      without an explicit approval click.
+    </div>
+  </section>
+</main>
+
+<script>
+  // Vanilla JS, no framework. The two connect buttons both POST to /ppc/connect
+  // which then redirects to Amazon's OAuth consent screen.
+  function startConnectFlow() {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "/ppc/connect";
+    document.body.appendChild(form);
+    form.submit();
+  }
+  const btn1 = document.getElementById("connect-btn");
+  const btn2 = document.getElementById("connect-more-btn");
+  if (btn1) btn1.addEventListener("click", startConnectFlow);
+  if (btn2) btn2.addEventListener("click", startConnectFlow);
+</script>
+
+</body>
+</html>

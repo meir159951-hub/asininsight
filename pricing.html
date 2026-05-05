@@ -182,10 +182,11 @@
   <div class="wrap">
     <div class="plans">
 
-      <!-- Free -->
+      <!-- Free Diagnostic -->
       <div class="plan">
-        <h3>Free</h3>
-        <p class="plan-desc">Test it on your worst ASIN before spending a dollar.</p>
+        <div class="plan-badge" style="background:#1d6a42;">Available now</div>
+        <h3>Free Diagnostic</h3>
+        <p class="plan-desc">Upload your Business Report CSV. Get the one fix costing you the most. No Amazon login required.</p>
         <div class="price">$0 <small>/ mo</small></div>
         <ul>
           <li>3 audits per month</li>
@@ -193,29 +194,30 @@
           <li>Revenue impact estimate</li>
           <li>Email report delivery</li>
         </ul>
-        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">No credit card. No Amazon login.</p>
+        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">No credit card. No Amazon login. CSV only.</p>
         <form action="/checkout/free" method="post">
-          <button type="submit" class="btn btn-secondary">Start free</button>
+          <button type="submit" class="btn btn-secondary">Start free diagnosis</button>
         </form>
       </div>
 
-      <!-- Pro -->
+      <!-- Pro AI Agent -->
       <div class="plan pro">
-        <div class="plan-badge">Most popular</div>
+        <div class="plan-badge">Private beta</div>
         <h3>Pro</h3>
-        <p class="plan-desc">For sellers who audit weekly and act on what they find.</p>
-        <div class="price">$49 <small>/ mo</small></div>
+        <p class="plan-desc">AI agent connects via SP-API, monitors PPC and listings, sends weekly change suggestions. You approve. AI pushes. 30-day rollback.</p>
+        <div class="price">$299 <small>/ mo</small></div>
         <ul>
-          <li><strong>Unlimited audits</strong></li>
-          <li>Severity-ranked action plan</li>
-          <li>Revenue impact estimate</li>
-          <li>Email + downloadable PDF reports</li>
-          <li>Audit history (last 30 audits)</li>
+          <li>Up to 10 ASINs managed</li>
+          <li>PPC bid optimisation, autonomous after approval</li>
+          <li>Listing copy and keyword suggestions</li>
+          <li>Search-term report waste detector</li>
+          <li>30-day rollback on every change</li>
+          <li>Full audit log (Amazon Agent Policy compliant)</li>
         </ul>
-        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">One-click cancel. No retention calls. No charges after canceling.</p>
+        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">Currently in private beta with selected sellers. Join the waitlist for early access.</p>
         <button class="btn btn-primary" id="proBtn" type="button" style="gap:8px;width:100%;justify-content:center;">
-          <svg aria-hidden="true" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          Get Pro $49/mo
+          <svg aria-hidden="true" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Join Pro waitlist
         </button>
         <div class="checkout-err" id="proErr">Checkout failed. Please try again or contact support.</div>
         <!-- Payment trust strip -->
@@ -241,21 +243,23 @@
         </div>
       </div>
 
-      <!-- Agency -->
+      <!-- Agency AI Agent -->
       <div class="plan">
+        <div class="plan-badge">Private beta</div>
         <h3>Agency</h3>
-        <p class="plan-desc">For teams managing multiple Amazon accounts.</p>
-        <div class="price">$199 <small>/ mo</small></div>
+        <p class="plan-desc">For teams managing multiple Amazon brands. Same agent, multi-account dashboard, white-label option.</p>
+        <div class="price">$799 <small>/ mo</small></div>
         <ul>
           <li>Everything in Pro</li>
-          <li>Multiple client accounts</li>
-          <li>Bulk CSV upload</li>
-          <li>Priority email support</li>
+          <li>Up to 50 ASINs across accounts</li>
+          <li>Multi-brand dashboard</li>
+          <li>White-label option for agency resellers</li>
+          <li>Priority email support, 12-hour response SLA</li>
         </ul>
-        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">One-click cancel. No retention calls.</p>
+        <p style="font-size:12px;color:#617184;margin:4px 0 12px;">Currently in private beta. Join the waitlist for agency tier.</p>
         <button class="btn btn-secondary" id="agencyBtn" type="button" style="gap:8px;width:100%;justify-content:center;">
-          <svg aria-hidden="true" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-          Get Agency $199/mo
+          <svg aria-hidden="true" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Join Agency waitlist
         </button>
         <div class="checkout-err" id="agencyErr">Checkout failed. Please try again or contact support.</div>
         <!-- Payment trust strip -->
@@ -288,8 +292,8 @@
 <section class="section">
   <div class="wrap">
     <div class="note">
-      <h2>Run it on your worst ASIN first.</h2>
-      <p>Pick the listing that's costing you the most right now. Run the diagnosis. If the fix recovers more than $49 that month, Pro paid for itself on one ASIN. If it doesn't, cancel in 14 days and you won't be charged again.</p>
+      <h2>Try the free diagnostic before joining the Pro waitlist.</h2>
+      <p>Upload your Business Report CSV. The free diagnostic shows you the kind of analysis the AI agent runs on autopilot. If you can see yourself approving these suggestions every week instead of paying $2,200 to an agency, the Pro waitlist is for you.</p>
     </div>
   </div>
 </section>

@@ -4,3 +4,7 @@ gunicorn>=21.0.0
 requests>=2.31.0
 psycopg2-binary>=2.9.0
 anthropic>=0.42.0
+# PPC Agent dependencies (Amazon SP-API + Ads API)
+python-amazon-sp-api>=1.7.0
+python-amazon-ad-api>=0.6.0
+cryptography>=41.0.0

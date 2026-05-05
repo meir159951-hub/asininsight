@@ -6,6 +6,7 @@ import os
 import re
 import csv
 import io
+import json
 import hmac
 import hashlib
 import html
@@ -836,6 +837,17 @@ def _db_get_customer(customer_id: str) -> dict | None:
 
 
 _init_db()
+
+# ── PPC Bid Manager (NEW, 2026-05) ─────────────────────────────────────────
+# AI agent that manages Amazon PPC campaigns: fetches data via SP-API +
+# Ads API, generates bid-change suggestions, applies after user approval,
+# tracks impact, auto-rollbacks if performance degrades. See ppc_agent.py.
+try:
+    import ppc_agent
+    ppc_agent.init_ppc_db(_db, DATABASE_URL)
+    ppc_agent.register_routes(app)
+except Exception as e:  # noqa: BLE001
+    log.warning("PPC Agent initialization failed (non-fatal): %s", e)
 
 
 # ── Rate limiter ───────────────────────────────────────────────────────────
