@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ READ FIRST: PROJECT.md
+
+**Before responding to any strategic, product, or business question, read `PROJECT.md` in the repo root.**
+
+`PROJECT.md` is the persistent project definition — it survives across sessions. The user (Meir) speaks Hebrew, has no technical/startup/Amazon-seller background, and is bootstrapping solo. The active product direction is **SellerCopilot** (AI PPC agent with persistent memory), not ASINInsight (the older CSV audit tool that still lives in this repo).
+
+When the user says "the project" / "פרויקט" / "פרויקט סאס" — they mean what's defined in `PROJECT.md`. Do not reinvent the strategy each session.
+
 ## Repo orientation
 
 The README describes the original "zero-dependency local prototype" (an `audit_engine.py` CLI that renders an HTML report from `sample_data/demo_store.json`). The product has since grown into a full Flask web app — **`server.py` (~4200 lines) is the real entry point**. The CLI in `audit_engine.py` is still usable but is no longer the product.
