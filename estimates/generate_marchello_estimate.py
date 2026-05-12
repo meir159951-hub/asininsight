@@ -129,26 +129,19 @@ def build_page_1(story):
     # --- Project title block ---
     story.append(
         Paragraph(
-            "<font size=8 color='#A07E4F'><b>PROJECT</b></font>",
-            ParagraphStyle("ptl", fontSize=9, leading=11, spaceAfter=2),
+            "<font name='Times-Bold' size=26 color='#1A2238'>Backyard Redwood Feature</font>",
+            ParagraphStyle("pth", fontSize=26, leading=30, spaceAfter=2),
         )
     )
     story.append(
         Paragraph(
-            "<font name='Times-Bold' size=24 color='#1A2238'>Backyard Redwood Feature</font>",
-            ParagraphStyle("pth", fontSize=24, leading=28, spaceAfter=2),
-        )
-    )
-    story.append(
-        Paragraph(
-            "<font size=9.5 color='#475569'>"
-            "Two custom planter boxes and a 16ft × 6ft redwood wall, "
-            "built and installed at 738 Forestdale Avenue, Glendora."
+            "<font size=10 color='#475569'>"
+            "738 Forestdale Avenue, Glendora, CA 91740"
             "</font>",
             ParagraphStyle("pts", fontSize=10, leading=13),
         )
     )
-    story.append(Spacer(1, 0.12 * inch))
+    story.append(Spacer(1, 0.14 * inch))
 
     # --- Client / PM info row ---
     prep_block = Paragraph(
@@ -192,11 +185,10 @@ def build_page_1(story):
     # --- Personal note ---
     note = Paragraph(
         "<font color='#0F172A'>"
-        "Kelly, thank you for inviting us to your home. Below is the full "
-        "estimate for the two planter boxes and the 16ft × 6ft redwood wall "
-        "we walked through. Pricing is <b>all-inclusive</b> — the number you "
-        "choose is the number you pay. I'll be your single point of contact "
-        "from contract signing through final walkthrough."
+        "Kelly — thanks for having us out. Below is the estimate for the two "
+        "planter boxes and the 16ft × 6ft redwood wall we walked through. "
+        "Both prices cover everything: labor, materials, hardware, taxes, and "
+        "insurance. Any questions, my direct number is above."
         "</font>",
         ParagraphStyle("n", fontSize=9.5, leading=13),
     )
@@ -217,12 +209,11 @@ def build_page_1(story):
                 ParagraphStyle("n1", alignment=TA_CENTER, fontSize=9),
             ),
             Paragraph(
-                "<b><font size=10 color='#1A2238'>Custom Redwood Planter Boxes (×2)</font></b><br/>"
+                "<b><font size=10 color='#1A2238'>Redwood Planter Boxes (×2)</font></b><br/>"
                 "<font size=8.5 color='#0F172A'>"
-                "Built to fit your space from premium-grade redwood. Square edges, "
-                "mitered corners, sealed seams, and color-matched screws (wood-tone "
-                "finish) so fasteners disappear into the grain. Set level and plumb "
-                "on the existing concrete patio."
+                "Two planter boxes built on site from redwood. Square edges, mitered "
+                "corners, sealed seams, and color-matched screws. Set level on the "
+                "existing concrete patio."
                 "</font>",
                 ParagraphStyle("r1", fontSize=9, leading=12),
             ),
@@ -233,12 +224,11 @@ def build_page_1(story):
                 ParagraphStyle("n2", alignment=TA_CENTER, fontSize=9),
             ),
             Paragraph(
-                "<b><font size=10 color='#1A2238'>Redwood Feature Wall — 16ft × 6ft</font></b><br/>"
+                "<b><font size=10 color='#1A2238'>Redwood Wall — 16ft × 6ft</font></b><br/>"
                 "<font size=8.5 color='#0F172A'>"
-                "Horizontal-slat redwood wall, matching the reference photo. "
-                "Premium-grade boards, hidden framing, color-matched fasteners "
-                "throughout. Tightened, plumbed, sealed at all cut lines, and "
-                "inspected before sign-off."
+                "Horizontal-slat redwood wall, matching the reference photo. Hidden "
+                "framing, color-matched screws, cut lines sealed before install. "
+                "Plumbed and tightened before sign-off."
                 "</font>",
                 ParagraphStyle("r2", fontSize=9, leading=12),
             ),
@@ -249,12 +239,10 @@ def build_page_1(story):
                 ParagraphStyle("n3", alignment=TA_CENTER, fontSize=9),
             ),
             Paragraph(
-                "<b><font size=10 color='#1A2238'>Installation, Cleanup &amp; Warranty</font></b><br/>"
+                "<b><font size=10 color='#1A2238'>Install, Cleanup &amp; 1-Year Warranty</font></b><br/>"
                 "<font size=8.5 color='#0F172A'>"
-                "All anchoring, leveling, and structural fastening on site. End-grain "
-                "sealed before installation to lock in color. Daily debris haul-off, "
-                "final walkthrough with you, and a <b>1-year workmanship warranty</b> "
-                "on everything we install."
+                "All anchoring and fastening done on site. Daily cleanup, final "
+                "walkthrough with you, and a 1-year warranty on our workmanship."
                 "</font>",
                 ParagraphStyle("r3", fontSize=9, leading=12),
             ),
@@ -291,22 +279,19 @@ def build_page_1(story):
         img_cell = Paragraph("[reference]", ParagraphStyle("x", fontSize=9))
 
     materials = Paragraph(
-        "<font size=7.5 color='#A07E4F'><b>MATERIALS &amp; CRAFTSMANSHIP</b></font><br/>"
-        "<b><font size=10 color='#1A2238'>Premium Redwood. Hardware You Won't See.</font></b>"
-        "<br/><br/>"
-        "<font size=8.5 color='#0F172A'>"
-        "Every board is hand-selected for color, grain, and weather resistance. "
-        "Exposed fasteners are <b>color-matched to the wood tone</b> so the finished "
-        "surface reads clean and seamless. Cut edges and end grain are "
-        "<b>sealed before installation</b> to slow weathering and lock in color "
-        "from day one."
+        "<font size=7.5 color='#A07E4F'><b>MATERIALS</b></font><br/><br/>"
+        "<font size=9 color='#0F172A'>"
+        "Boards are picked on site for color, grain, and weather resistance. "
+        "Screws are color-matched to the wood tone so the finished surface "
+        "stays clean — no silver heads showing. Cut ends and end grain are "
+        "sealed before install to slow weathering."
         "</font><br/><br/>"
-        "<font size=7.5 color='#A07E4F'><b>WHAT WE SUPPLY</b></font><br/>"
-        "<font size=8 color='#0F172A'>"
-        "The two planter boxes and the redwood feature wall, fully built and "
-        "installed. Reference image shows the finished aesthetic."
+        "<font size=7.5 color='#A07E4F'><b>SCOPE</b></font><br/>"
+        "<font size=9 color='#0F172A'>"
+        "We build and install the two planter boxes and the 16ft × 6ft redwood "
+        "wall. The reference photo shows the finished look we're matching."
         "</font>",
-        ParagraphStyle("mat", fontSize=9, leading=11),
+        ParagraphStyle("mat", fontSize=9, leading=12),
     )
     bottom = Table([[img_cell, materials]], colWidths=[2.2 * inch, 5.1 * inch])
     bottom.setStyle(
@@ -332,12 +317,12 @@ def build_page_1(story):
 # -----------------------------------------------------------------------------
 def build_page_2(story):
     section_label = Paragraph(
-        "<font size=7.5 color='#A07E4F'><b>INVESTMENT &amp; TERMS</b></font><br/>"
-        "<font name='Times-Bold' size=22 color='#1A2238'>Two Material Grades. One Beautiful Result.</font><br/>"
-        "<font size=9 color='#475569'>"
-        "Same scope, same crew, same workmanship — choose the redwood grade "
-        "that fits your goals. Both prices are <b>all-inclusive</b>: labor, "
-        "materials, color-matched hardware, equipment, insurance, and taxes."
+        "<font size=7.5 color='#A07E4F'><b>PRICING</b></font><br/>"
+        "<font name='Times-Bold' size=24 color='#1A2238'>Two Options</font><br/>"
+        "<font size=9.5 color='#475569'>"
+        "Same scope and same crew either way — just two redwood grades to "
+        "choose from. Both prices below cover labor, materials, hardware, "
+        "taxes, and insurance."
         "</font>",
         ParagraphStyle("sl", fontSize=10, leading=16),
     )
@@ -347,7 +332,7 @@ def build_page_2(story):
     # --- Two pricing cards ---
     def card(label, name, price, bullets, recommended):
         rec_tag = (
-            '<br/><font size=7 color="#A07E4F"><b>★ RECOMMENDED FOR LONGEVITY</b></font>'
+            '<br/><font size=7.5 color="#A07E4F"><b>OUR RECOMMENDATION</b></font>'
             if recommended
             else ""
         )
@@ -396,29 +381,29 @@ def build_page_2(story):
 
     opt_a = card(
         "OPTION A",
-        "Premium Grade",
+        "Clear Heart Redwood",
         "$7,200",
         [
-            "Clear All-Heart Redwood — top grade",
-            "Hand-selected boards, uniform grain",
-            "Virtually knot-free, premium color depth",
-            "Stainless color-matched fasteners",
-            "Full end-grain &amp; cut-line sealing",
-            "Longest service life, finest finish",
+            "Top grade — Clear All-Heart Redwood",
+            "Hand-picked boards, uniform grain",
+            "Virtually knot-free",
+            "Stainless color-matched screws",
+            "End grain and cut lines fully sealed",
+            "Holds color and finish the longest",
         ],
         recommended=True,
     )
     opt_b = card(
         "OPTION B",
-        "Standard Grade",
+        "Construction Common Redwood",
         "$6,300",
         [
-            "Construction Common Redwood — quality grade",
-            "Sound, durable, weather-resistant boards",
-            "Minor sound knots permitted (natural look)",
-            "Color-matched fasteners throughout",
-            "End-grain sealed at all cuts",
-            "Strong value, holds up well outdoors",
+            "Construction Common grade redwood",
+            "Sound, weather-resistant boards",
+            "Some small knots (natural look)",
+            "Color-matched screws throughout",
+            "End grain sealed at cuts",
+            "Solid value, holds up well outdoors",
         ],
         recommended=False,
     )
@@ -503,41 +488,40 @@ def build_page_2(story):
 
     # --- Why Ariel · Timeline · Next Steps three-column ---
     why = Paragraph(
-        "<font size=7.5 color='#A07E4F'><b>WHY ARIEL</b></font><br/><br/>"
-        "<font size=8.5 color='#0F172A'>"
-        "·&nbsp;&nbsp;CSLB Class B — licensed &amp; in good standing<br/>"
-        "·&nbsp;&nbsp;General liability + workers' comp on file<br/>"
-        "·&nbsp;&nbsp;Outdoor specialists — wood, hardscape, kitchens<br/>"
-        "·&nbsp;&nbsp;1-Year workmanship warranty<br/>"
-        "·&nbsp;&nbsp;One point of contact from start to finish"
+        "<font size=7.5 color='#A07E4F'><b>WHO WE ARE</b></font><br/><br/>"
+        "<font size=9 color='#0F172A'>"
+        "·&nbsp;&nbsp;CSLB Class B licensed &amp; bonded<br/>"
+        "·&nbsp;&nbsp;General liability + workers' comp<br/>"
+        "·&nbsp;&nbsp;We only do outdoor work<br/>"
+        "·&nbsp;&nbsp;1-year warranty on workmanship<br/>"
+        "·&nbsp;&nbsp;One point of contact start to finish"
         "</font>",
-        ParagraphStyle("w", fontSize=9, leading=12),
+        ParagraphStyle("w", fontSize=9, leading=13),
     )
     timeline = Paragraph(
         "<font size=7.5 color='#A07E4F'><b>TIMELINE</b></font><br/><br/>"
         "<b><font size=13 color='#1A2238'>3 – 5 working days</font></b><br/>"
         "<font size=8.5 color='#475569'>"
-        "From mobilization to walkthrough. Same timeline for both options; "
-        "confirmed at contract signing."
+        "From start to walkthrough. Confirmed at contract signing."
         "</font><br/><br/>"
         "<font size=7.5 color='#A07E4F'><b>NOT INCLUDED</b></font><br/>"
-        "<font size=8 color='#0F172A'>"
-        "Decorative metal screens · plants · soil · irrigation · concrete · "
-        "electrical · stain/paint · HOA fees · permits"
+        "<font size=8.5 color='#0F172A'>"
+        "Metal screens · plants · soil · irrigation · concrete · electrical · "
+        "stain · paint · HOA fees · permits"
         "</font>",
         ParagraphStyle("t", fontSize=9, leading=12),
     )
     next_steps = Paragraph(
-        "<font size=7.5 color='#A07E4F'><b>NEXT STEPS</b></font><br/><br/>"
-        "<font size=8.5 color='#0F172A'>"
-        "Kelly — call or text me directly at <b>(323) 513-4865</b> to select "
-        "an option and we'll schedule the contract signing. The formal "
-        "home-improvement contract includes the California Mechanics Lien "
-        "Warning, 3-day Right to Cancel, and all CSLB disclosures.<br/><br/>"
-        "<b>Jacob Hayon</b><br/>"
-        "<i>Project Manager · Ariel Outdoor Renovation</i>"
-        "</font>",
-        ParagraphStyle("ns", fontSize=9, leading=12),
+        "<font size=7.5 color='#A07E4F'><b>NEXT STEP</b></font><br/><br/>"
+        "<font size=9 color='#0F172A'>"
+        "Kelly — call or text me at <b>(323) 513-4865</b> to pick an option "
+        "and we'll set up the contract signing. The contract itself covers "
+        "the Mechanics Lien Warning, 3-day Right to Cancel, and the rest of "
+        "the CSLB disclosures."
+        "</font><br/><br/>"
+        "<font size=9 color='#0F172A'><b>Jacob Hayon</b><br/>"
+        "<i>Project Manager · Ariel Outdoor Renovation</i></font>",
+        ParagraphStyle("ns", fontSize=9, leading=13),
     )
     three = Table(
         [[why, timeline, next_steps]],
@@ -560,64 +544,17 @@ def build_page_2(story):
         )
     )
     story.append(three)
-    story.append(Spacer(1, 0.16 * inch))
+    story.append(Spacer(1, 0.18 * inch))
 
-    # --- Signature block ---
-    sig_text = Paragraph(
-        "<font size=8 color='#475569'><i>"
-        "This is an estimate, not a contract. Pricing valid 30 days from the "
-        "issue date. A formal home-improvement contract supersedes this "
-        "document upon signing."
+    disclaimer = Paragraph(
+        "<font size=8.5 color='#64748B'><i>"
+        "This is an estimate, not a contract. Pricing is valid 30 days from "
+        "the issue date. A formal home-improvement contract will be provided "
+        "for signing once an option is selected."
         "</i></font>",
-        ParagraphStyle("st", fontSize=9, leading=11, alignment=TA_CENTER),
+        ParagraphStyle("st", fontSize=9, leading=11.5, alignment=TA_CENTER),
     )
-    story.append(sig_text)
-    story.append(Spacer(1, 0.08 * inch))
-
-    sig_block = Table(
-        [
-            [
-                Paragraph(
-                    "<font size=8 color='#64748B'><b>OPTION SELECTED</b></font><br/>"
-                    "<font size=10 color='#0F172A'>"
-                    "&#9744;&nbsp;&nbsp;Option A · $7,200 &nbsp;&nbsp;&nbsp;&nbsp; "
-                    "&#9744;&nbsp;&nbsp;Option B · $6,300"
-                    "</font>",
-                    ParagraphStyle("o", fontSize=9, leading=14),
-                ),
-                Paragraph(
-                    "<font size=8 color='#64748B'><b>CLIENT SIGNATURE</b></font><br/>"
-                    "<font size=10 color='#0F172A'>"
-                    "________________________________"
-                    "</font>",
-                    ParagraphStyle("cs", fontSize=9, leading=14),
-                ),
-                Paragraph(
-                    "<font size=8 color='#64748B'><b>DATE</b></font><br/>"
-                    "<font size=10 color='#0F172A'>"
-                    "____________________"
-                    "</font>",
-                    ParagraphStyle("d", fontSize=9, leading=14),
-                ),
-            ],
-        ],
-        colWidths=[2.8 * inch, 2.8 * inch, 1.7 * inch],
-    )
-    sig_block.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 12),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
-                ("TOPPADDING", (0, 0), (-1, -1), 12),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 12),
-                ("BOX", (0, 0), (-1, -1), 0.7, NAVY),
-                ("LINEAFTER", (0, 0), (0, 0), 0.3, LINE),
-                ("LINEAFTER", (1, 0), (1, 0), 0.3, LINE),
-            ]
-        )
-    )
-    story.append(sig_block)
+    story.append(disclaimer)
 
 
 # -----------------------------------------------------------------------------
