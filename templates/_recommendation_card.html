@@ -1,0 +1,157 @@
+{#
+  Smart Recommendation Card partial.
+
+  Required context (from `ppc_suggestions.build_card_view`):
+    card.id, card.suggestion_type, card.type_label, card.status,
+    card.confidence, card.is_lift, card.risk_label, card.headline,
+    card.financial_impact_text, card.estimated_impact,
+    card.why_this_matters, card.memory_hint,
+    card.recommended_action_lines (list[str]), card.reject_hint,
+    card.queued_status_note, card.learn_more (dict).
+
+  Optional context:
+    mode      "live"  (default; renders Approve / Reject / Edit buttons)
+              "preview" (CSV path; no buttons, shows the no-live-link note)
+
+  Read-only with respect to Amazon: the live mode's Approve button only
+  flips DB status. No path here ever calls the Amazon Ads API.
+#}
+{% set _mode = mode|default('live') %}
+{% set _is_lift = card.is_lift %}
+{% set _risk = card.risk_label %}
+{% set _risk_class = (
+     'risk-low'    if _risk == 'LOW RISK'    else
+     'risk-medium' if _risk == 'MEDIUM RISK' else
+     'risk-high'
+   ) %}
+
+<article class="rec-card{% if card.status and card.status != 'pending' %} is-decided is-{{ card.status|replace('approved_pending_apply','approved')|replace('rejected','rejected') }}{% endif %}"
+         data-suggestion-id="{{ card.id }}"
+         data-suggestion-type="{{ card.suggestion_type }}">
+
+  <header class="rec-head">
+    <span class="badge rec-risk {{ _risk_class }}">{{ _risk }}</span>
+    <span class="rec-type-label">{{ card.type_label }}</span>
+    <span class="badge rec-conf rec-conf-{{ card.confidence }}">{{ card.confidence }}</span>
+  </header>
+
+  <h3 class="rec-headline">{{ card.headline }}</h3>
+
+  <div class="rec-impact-row">
+    <div>
+      <div class="rec-impact-label">Likely impact</div>
+      <div class="rec-impact-amount {% if _is_lift %}lift{% endif %}">
+        {{ card.financial_impact_text }}
+      </div>
+    </div>
+  </div>
+
+  <section class="rec-section" aria-label="Why this matters">
+    <h4>Why this matters</h4>
+    <p>{{ card.why_this_matters }}</p>
+  </section>
+
+  <section class="rec-section rec-memory rec-memory-{{ card.memory_kind|default('neutral') }}" aria-label="Memory">
+    <h4>
+      Memory
+      {% if card.memory_kind == 'approval_match' %}
+        <span class="badge rec-memory-badge rec-memory-badge-approval">Matches your pattern</span>
+      {% elif card.memory_kind == 'rejection_resurface' %}
+        <span class="badge rec-memory-badge rec-memory-badge-rejection">Back from rejection</span>
+      {% endif %}
+    </h4>
+    <p>{{ card.memory_hint }}</p>
+  </section>
+
+  <section class="rec-section" aria-label="Recommended action">
+    <h4>Recommended action</h4>
+    {% if card.recommended_action_lines and card.recommended_action_lines|length > 0 %}
+      <ul class="rec-action-list">
+        {% for line in card.recommended_action_lines %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+
+  {% if card.reject_hint %}
+    <p class="rec-reject-hint" aria-label="When to reject">
+      <strong>You might reject if:</strong> {{ card.reject_hint }}
+    </p>
+  {% endif %}
+
+  {% if _mode == 'live' %}
+    <div class="rec-actions" role="group" aria-label="Decide on this recommendation">
+      <button class="btn btn-approve" type="button"
+              data-action="approve" data-suggestion-id="{{ card.id }}">
+        Approve
+      </button>
+      <button class="btn btn-reject" type="button"
+              data-action="reject" data-suggestion-id="{{ card.id }}">
+        Reject
+      </button>
+      <button class="btn btn-secondary btn-edit" type="button"
+              data-action="edit" data-suggestion-id="{{ card.id }}"
+              disabled aria-disabled="true"
+              title="Edit lands in a later release. Approve queues this as-is; Reject removes it from rotation.">
+        Edit (coming soon)
+      </button>
+    </div>
+    <p class="rec-status-note">{{ card.queued_status_note }}</p>
+
+    <div class="rec-decision-msg approved" role="status">
+      <span class="label">Approved</span>
+      Recorded in your decision history. Not sent to Amazon yet.
+      The live applier will ask for a final confirmation before any
+      change reaches Seller Central.
+    </div>
+    <div class="rec-decision-msg rejected" role="status">
+      <span class="label">Rejected</span>
+      Removed from this rotation. Saved to your decision history so the
+      assistant learns not to surface this pattern again.
+    </div>
+  {% else %}
+    <p class="rec-status-note rec-preview-note">
+      Read-only preview. Connect the live dashboard to act on this with
+      Approve / Reject per item.
+    </p>
+  {% endif %}
+
+  <details class="rec-learnmore">
+    <summary>Learn more</summary>
+    <dl class="rec-math">
+      <dt>Observed spend</dt>
+      <dd>${{ '%.2f' | format(card.learn_more.observed_spend) }}</dd>
+
+      <dt>Attributed sales</dt>
+      <dd>${{ '%.2f' | format(card.learn_more.attributed_sales) }}</dd>
+
+      <dt>Orders</dt>
+      <dd>{{ card.learn_more.orders }}</dd>
+
+      <dt>Clicks</dt>
+      <dd>{{ card.learn_more.clicks }}</dd>
+
+      <dt>Target ACOS used</dt>
+      <dd>{{ card.learn_more.target_acos_label }}</dd>
+
+      <dt>Observed waste</dt>
+      <dd>${{ '%.2f' | format(card.learn_more.observed_waste) }}</dd>
+
+      <dt>Evidence multiplier</dt>
+      <dd>{{ '%.2f' | format(card.learn_more.evidence_multiplier) }}</dd>
+
+      <dt>Sales-risk multiplier</dt>
+      <dd>{{ '%.2f' | format(card.learn_more.sales_risk_multiplier) }}</dd>
+
+      <dt>Action multiplier</dt>
+      <dd>{{ '%.2f' | format(card.learn_more.action_multiplier) }}</dd>
+
+      <dt>Estimated impact formula</dt>
+      <dd><code>{{ card.learn_more.estimated_impact_formula }}</code></dd>
+
+      <dt>Why this is {{ _risk|lower }}</dt>
+      <dd>{{ card.learn_more.risk_explanation }}</dd>
+    </dl>
+  </details>
+</article>

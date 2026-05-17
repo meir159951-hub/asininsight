@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Preview the PPC Agent, SellerCopilot</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    :root {
+      --bg:        #f8f6f1;
+      --panel:    #ffffff;
+      --ink:      #15263d;
+      --muted:    #617184;
+      --line:     #e6e1d8;
+      --blue:     #1f5fa8;
+      --blue-d:   #174a85;
+      --green:    #1d6a42;
+      --amber:    #92400e;
+      --red:      #b14a3a;
+      --shadow:   0 1px 0 rgba(15, 38, 71, .04), 0 4px 14px rgba(15, 38, 71, .06);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .topnav {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topnav .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+    .shell { max-width: 920px; margin: 0 auto; padding: 28px 18px 64px; }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(24px, 4vw, 30px);
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 12px; padding: 20px 22px;
+      box-shadow: var(--shadow); margin-bottom: 18px;
+    }
+    .card h2 {
+      font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--muted); margin: 0 0 14px;
+    }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .badge-type     { background: #eef3fb; color: var(--blue-d); margin-right: 6px; }
+    .badge-conf-high   { background: #e3f2e9; color: var(--green); }
+    .badge-conf-medium { background: #fbeacb; color: var(--amber); }
+
+    .upload-row {
+      display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+      margin-top: 8px;
+    }
+    .upload-row input[type="file"] {
+      flex: 1 1 280px; min-width: 240px; font-size: 14px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--blue); color: #fff; border: 1px solid var(--blue);
+      padding: 10px 18px; border-radius: 10px;
+      font-weight: 600; font-size: 14px; cursor: pointer;
+      min-height: 44px; text-decoration: none;
+    }
+    .btn:hover { background: var(--blue-d); border-color: var(--blue-d); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .error-box {
+      background: #fbe6e0; border: 1px solid #e6b6a8; color: var(--red);
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 14px; margin-bottom: 16px;
+    }
+    .info-box {
+      background: #f3f7fb; border: 1px solid #d8e3ef; color: var(--blue-d);
+      padding: 12px 14px; border-radius: 10px;
+      font-size: 13px; margin-bottom: 16px;
+    }
+    .money-banner {
+      display: flex; align-items: baseline; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px; padding: 10px 14px;
+      background: #f3f7fb; border: 1px solid #d8e3ef;
+      border-radius: 10px; margin: 0 0 14px;
+    }
+    .money-banner.growth-banner { background: #fbf6ee; border-color: #ead9c1; }
+    .money-banner .amount {
+      font-family: Georgia, serif; font-size: 24px; font-weight: 700;
+    }
+    .money-banner .savings-amount { color: var(--green); }
+    .money-banner .growth-amount  { color: var(--blue-d); }
+    .money-banner .label { color: var(--muted); font-size: 13px; }
+
+    /* Smart Recommendation Card (shared with templates/_recommendation_card.html) */
+    .rec-card {
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 16px 18px; margin-bottom: 14px; background: var(--panel);
+    }
+    .rec-card:last-child { margin-bottom: 0; }
+    .rec-head {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; margin-bottom: 8px;
+    }
+    .rec-type-label { font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
+    .rec-risk { font-size: 11px; letter-spacing: 0.06em; }
+    .risk-low    { background: #e3f2e9; color: var(--green); }
+    .risk-medium { background: #fbeacb; color: var(--amber); }
+    .risk-high   { background: #fbe6e0; color: var(--red);   }
+    .rec-conf-high   { background: #e3f2e9; color: var(--green); }
+    .rec-conf-medium { background: #fbeacb; color: var(--amber); }
+    .rec-conf-low    { background: #f1ede4; color: var(--muted); }
+    .rec-headline {
+      font-family: Georgia, serif; font-size: 17px; font-weight: 600;
+      letter-spacing: -0.01em; margin: 4px 0 10px; color: var(--ink);
+    }
+    .rec-impact-row {
+      display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px;
+      padding: 8px 0 12px; border-bottom: 1px dashed var(--line);
+      margin-bottom: 10px;
+    }
+    .rec-impact-label {
+      font-size: 12px; color: var(--muted);
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .rec-impact-amount { font-size: 18px; font-weight: 700; color: var(--green); }
+    .rec-impact-amount.lift { color: var(--blue-d); }
+    .rec-section { font-size: 14px; margin: 0 0 10px; line-height: 1.55; }
+    .rec-section h4 {
+      margin: 0 0 4px; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted);
+    }
+    .rec-section p { margin: 0; }
+    .rec-action-list { margin: 0; padding-left: 18px; }
+    .rec-action-list li { margin-bottom: 2px; }
+    .rec-memory p { color: var(--muted); font-size: 13px; font-style: italic; }
+    .rec-reject-hint { font-size: 13px; color: var(--muted); margin: 6px 0 12px; }
+    .rec-status-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+    .rec-preview-note { font-style: italic; }
+    .rec-learnmore {
+      margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+      font-size: 13px; color: var(--muted);
+    }
+    .rec-learnmore summary {
+      cursor: pointer; font-weight: 600; color: var(--ink); letter-spacing: 0.02em;
+    }
+    .rec-math {
+      display: grid; grid-template-columns: minmax(140px, max-content) 1fr;
+      column-gap: 12px; row-gap: 4px; margin: 8px 0 0;
+    }
+    .rec-math dt { color: var(--muted); }
+    .rec-math dd { margin: 0; color: var(--ink); }
+    .rec-math code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #f1ede4; padding: 1px 6px; border-radius: 4px;
+    }
+    .rec-overflow {
+      margin-top: 14px; border: 1px dashed var(--line);
+      border-radius: 10px; padding: 8px 14px; background: #fbfaf6;
+    }
+    .rec-overflow > summary {
+      cursor: pointer; font-weight: 600; font-size: 13px;
+      color: var(--ink); letter-spacing: 0.02em; padding: 4px 0;
+    }
+    .rec-overflow .rec-overflow-hint {
+      font-weight: 400; color: var(--muted); margin-left: 6px;
+    }
+    .rec-overflow-list { margin-top: 8px; }
+    .summary-list {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      font-size: 13px; color: var(--muted);
+    }
+    .summary-list span {
+      background: #f1ede4;
+      padding: 2px 10px; border-radius: 999px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="topnav" aria-label="Main">
+  <div class="brand">SellerCopilot</div>
+  <div class="meta"><a href="/ppc/dashboard">Live dashboard</a></div>
+</nav>
+
+<main class="shell">
+  <h1>Preview the PPC Agent from a Search Term Report</h1>
+  <p class="subtitle">
+    This is a temporary beta bridge while live account connection (Amazon
+    Ads OAuth and SP-API Production approval) is being prepared. The real
+    product is continuous monitoring, approve / reject control, seller
+    memory, and eventually approved changes sent to Amazon. This preview
+    page is read-only and lets you see the same agent reasoning against
+    your own export.
+  </p>
+
+  <div class="info-box">
+    <strong>Approval-first preview.</strong> The agent reads your CSV in
+    memory, returns a short list of recommendations with reasons and
+    dollar impact, and then forgets the file. No Amazon API calls are
+    made, no database row is written, and no Approve button is shown
+    here because there is no live link to push a change. When live
+    access is ready, connect via the
+    <a href="/ppc/dashboard">live dashboard</a> for the full agent loop:
+    continuous recommendations, decision history, and (future) approved
+    apply-to-Amazon.
+  </div>
+
+  {% if error %}
+    <div class="error-box" role="alert">{{ error }}</div>
+  {% endif %}
+
+  <section class="card">
+    <h2>Run the agent on a Search Term report</h2>
+    <form action="/ppc/csv/analyze" method="POST" enctype="multipart/form-data">
+      <div class="upload-row">
+        <input type="file" name="file" accept=".csv,text/csv" required>
+        <button class="btn" type="submit">Run agent preview</button>
+      </div>
+      <p class="subtitle" style="margin-top:10px;">
+        In Seller Central: Reports &rarr; Advertising Reports &rarr; Sponsored
+        Products &rarr; Search Term Report &rarr; CSV format &rarr; Last 30
+        Days. Up to 3 MB.
+        <br>
+        Don't have a report yet? <a href="/ppc/csv/sample.csv">Download a
+        sample CSV</a> to see the shape the agent expects, then upload
+        it back here.
+      </p>
+    </form>
+  </section>
+
+  {% if ingest_summary %}
+    <section class="card">
+      <h2>Parsed</h2>
+      <div class="summary-list">
+        <span>Campaigns: {{ ingest_summary.get("campaigns", 0) }}</span>
+        <span>Ad groups: {{ ingest_summary.get("ad_groups", 0) }}</span>
+        <span>Keywords: {{ ingest_summary.get("keywords", 0) }}</span>
+        <span>Search-term rows: {{ ingest_summary.get("search_terms", 0) }}</span>
+      </div>
+    </section>
+  {% endif %}
+
+  {% if suggestions is not none %}
+    {% if is_sample %}
+      <div class="info-box" role="status">
+        <strong>Demo data.</strong> You uploaded the SellerCopilot sample CSV,
+        so the recommendations below are computed from synthetic numbers crafted to show how the agent reasons.
+        They are not real account data and should not be used in
+        screenshots claiming actual savings.
+      </div>
+    {% endif %}
+    <section class="card">
+      <h2>What the agent found</h2>
+
+      <p class="subtitle" style="margin-top:-2px;margin-bottom:14px;">
+        The agent surfaced these recommendations from your uploaded
+        rows. All dollar figures are estimates.
+        Past performance does not guarantee future results, and figures will vary once you act in Seller Central.
+        Bid figures shown are derived from the cost-per-click in the
+        report, not the literal bid you set in Seller Central; connect
+        via the live dashboard to see the literal bid alongside an
+        Approve / Reject control per item.
+      </p>
+
+      <div class="money-banner">
+        <div>
+          <div class="label">Money you can save (real cost reduction)</div>
+          <div class="amount savings-amount">${{ '%.2f' | format(savings) }}</div>
+          {% if savings > 0 %}
+            <div class="label" style="margin-top: 4px;">
+              {% set _save_names = {
+                "spend_no_sales": "Waste",
+                "high_acos":      "ACOS",
+                "bid_too_high":   "Overbids",
+              } %}
+              {% set _parts = [] %}
+              {% for key, label in _save_names.items() %}
+                {% if breakdown.get(key, 0) > 0 %}
+                  {% set _ = _parts.append(label ~ ' $' ~ '%.2f' | format(breakdown[key])) %}
+                {% endif %}
+              {% endfor %}
+              {{ _parts | join(' &middot; ') | safe }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="label">{{ suggestions|length }} suggestion{{ '' if suggestions|length == 1 else 's' }}</div>
+      </div>
+
+      <div class="money-banner growth-banner">
+        <div>
+          <div class="label">Growth opportunity (projected extra revenue if approved)</div>
+          <div class="amount growth-amount">+${{ '%.2f' | format(growth) }}</div>
+          {% if growth > 0 %}
+            <div class="label" style="margin-top: 4px;">
+              {% set _growth_names = {
+                "scale_profitable":    "Scale",
+                "promote_search_term": "Promote",
+              } %}
+              {% set _gparts = [] %}
+              {% for key, label in _growth_names.items() %}
+                {% if breakdown.get(key, 0) > 0 %}
+                  {% set _ = _gparts.append(label ~ ' $' ~ '%.2f' | format(breakdown[key])) %}
+                {% endif %}
+              {% endfor %}
+              {{ _gparts | join(' &middot; ') | safe }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="label">Estimates only, not a guarantee</div>
+      </div>
+
+      {% set _r = ranking|default({'top': [], 'hidden': [], 'extra_count': 0}) %}
+      {% set top_cards    = _r.top %}
+      {% set hidden_cards = _r.hidden %}
+      {% set extra_count  = _r.extra_count %}
+
+      {% if (top_cards and top_cards|length > 0) or (hidden_cards and hidden_cards|length > 0) %}
+        {% if top_cards and top_cards|length > 0 %}
+          <div class="suggestions-list">
+            {% for card in top_cards %}
+              {% with mode='preview' %}
+                {% include "_recommendation_card.html" %}
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="rec-empty-strong" style="padding:14px 16px;border:1px dashed var(--line);border-radius:10px;background:#fbfaf6;">
+            <strong>No strong recommendations from this report.</strong>
+            Nothing met the $50/month minimum impact threshold for the
+            first view. {{ extra_count }} lower-confidence
+            recommendation{{ '' if extra_count == 1 else 's' }} below.
+          </p>
+        {% endif %}
+
+        {% if hidden_cards and hidden_cards|length > 0 %}
+          <details class="rec-overflow">
+            <summary>
+              Show {{ extra_count }} more
+              <span class="rec-overflow-hint">
+                (below first-view threshold or beyond today's top {{ top_cards|length }})
+              </span>
+            </summary>
+            <div class="suggestions-list rec-overflow-list">
+              {% for card in hidden_cards %}
+                {% with mode='preview' %}
+                  {% include "_recommendation_card.html" %}
+                {% endwith %}
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+      {% else %}
+        <p style="color: var(--muted); font-size: 14px;">
+          The CSV parsed but the engine produced no suggestions. That can
+          mean your account is healthy, or that the report covered too
+          short a window. Try a 30-day export.
+        </p>
+      {% endif %}
+    </section>
+
+    <section class="card" aria-label="Read-only preview footer">
+      <h2>What just happened</h2>
+      <p style="font-size: 14px; margin: 0 0 8px;">
+        The agent read your file in memory and discarded it.
+        No Amazon API calls were made, no database row was written, and the file is not stored on our server.
+        This page is a beta preview, not a report product or a saved audit.
+      </p>
+      <p style="font-size: 14px; color: var(--muted); margin: 0;">
+        The full agent loop, continuous monitoring with approve / reject
+        per recommendation, decision history, and (later) approved
+        apply-to-Amazon, is on the
+        <a href="/ppc/dashboard">live dashboard</a> once OAuth is
+        connected.
+      </p>
+    </section>
+  {% endif %}
+</main>
+
+</body>
+</html>
