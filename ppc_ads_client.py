@@ -65,9 +65,24 @@ _REGION_TO_BASE_URL = {
 ADS_API_REGION   = os.getenv("ADS_API_REGION", "NA")
 ADS_API_BASE_URL = _REGION_TO_BASE_URL.get(ADS_API_REGION, _REGION_TO_BASE_URL["NA"])
 
-# Required by Amazon's March 2026 Agent Policy. Self-identifies our agent
-# in every API call. Format: ProductName/Version (Type, optional fields).
-USER_AGENT = "SellerCopilot/1.0 (AI Agent)"
+# BSA Agent Policy compliance (Amazon BSA effective 2026-03-04, enforcement
+# from early June 2026). Per the policy: "All AI agents must clearly identify
+# themselves as automated systems at all times."
+#
+# This User-Agent string:
+#   - names SellerCopilot and the version,
+#   - explicitly self-identifies as an automated AI agent (not a human),
+#   - declares BSA Agent Policy compliance with the effective date,
+#   - links to a human-readable compliance page Amazon can audit.
+#
+# The string is also asserted by a CI test (test_user_agent_self_identifies_*)
+# so accidental edits that drop the AI / BSA markers fail loudly.
+USER_AGENT = (
+    "SellerCopilot/1.0 "
+    "(Automated AI Agent; "
+    "Amazon-BSA-Agent-Policy=2026-03-04-compliant; "
+    "+https://sellercopilot.app/legal/agent-policy)"
+)
 
 # Same client id used for LWA. Every Ads API call sends it as a header so
 # Amazon can attribute the call to our registered Solution Provider app.

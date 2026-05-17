@@ -102,8 +102,14 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
-    .badge-active { background: #e3f2e9; color: var(--green); }
+    .badge-active   { background: #e3f2e9; color: var(--green); }
     .badge-inactive { background: #fbe6e0; color: var(--red); }
+    .badge-type     { background: #eef3fb; color: var(--blue-d); margin-right: 6px; }
+    .badge-conf-high   { background: #e3f2e9; color: var(--green); }
+    .badge-conf-medium { background: #fbeacb; color: var(--amber); }
+    .badge-conf-low    { background: #f1ede4; color: var(--muted); }
+    .badge-stale       { background: #fbeacb; color: var(--amber); margin-left: 6px; }
+
     .empty {
       padding: 24px 0 8px;
       text-align: center;
@@ -127,12 +133,31 @@
       text-decoration: none;
     }
     .btn:hover { background: var(--blue-d); border-color: var(--blue-d); text-decoration: none; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-secondary {
       background: var(--panel);
       color: var(--ink);
       border: 1px solid var(--line);
     }
     .btn-secondary:hover { background: #f1ede4; }
+    .btn-approve {
+      background: var(--green);
+      border-color: var(--green);
+      padding: 8px 14px;
+      min-height: 36px;
+      font-size: 13px;
+    }
+    .btn-approve:hover { background: #155433; border-color: #155433; }
+    .btn-reject {
+      background: var(--panel);
+      color: var(--red);
+      border-color: var(--red);
+      padding: 8px 14px;
+      min-height: 36px;
+      font-size: 13px;
+    }
+    .btn-reject:hover { background: #fbe6e0; }
+
     .placeholder {
       padding: 16px 0;
       color: var(--muted);
@@ -140,9 +165,309 @@
       line-height: 1.6;
     }
     .placeholder strong { color: var(--ink); }
+
+    .money-banner {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 14px;
+      background: #f3f7fb;
+      border: 1px solid #d8e3ef;
+      border-radius: 10px;
+      margin: 0 0 14px;
+    }
+    .money-banner.growth-banner {
+      background: #fbf6ee;
+      border-color: #ead9c1;
+    }
+    .money-banner .amount {
+      font-family: Georgia, serif;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    .money-banner .savings-amount { color: var(--green); }
+    .money-banner .growth-amount  { color: var(--blue-d); }
+    .money-banner .label {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* Smart Recommendation Card (used by templates/_recommendation_card.html) */
+    .rec-card {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+      background: var(--panel);
+    }
+    .rec-card:last-child { margin-bottom: 0; }
+    .rec-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .rec-type-label {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    .rec-risk { font-size: 11px; letter-spacing: 0.06em; }
+    .risk-low    { background: #e3f2e9; color: var(--green); }
+    .risk-medium { background: #fbeacb; color: var(--amber); }
+    .risk-high   { background: #fbe6e0; color: var(--red);   }
+    .rec-conf-high   { background: #e3f2e9; color: var(--green); }
+    .rec-conf-medium { background: #fbeacb; color: var(--amber); }
+    .rec-conf-low    { background: #f1ede4; color: var(--muted); }
+    .rec-headline {
+      font-family: Georgia, serif;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin: 4px 0 10px;
+      color: var(--ink);
+    }
+    .rec-impact-row {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 8px 0 12px;
+      border-bottom: 1px dashed var(--line);
+      margin-bottom: 10px;
+    }
+    .rec-impact-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .rec-impact-amount {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green);
+    }
+    .rec-impact-amount.lift { color: var(--blue-d); }
+    .rec-section { font-size: 14px; margin: 0 0 10px; line-height: 1.55; }
+    .rec-section h4 {
+      margin: 0 0 4px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .rec-section p { margin: 0; }
+    .rec-action-list { margin: 0; padding-left: 18px; }
+    .rec-action-list li { margin-bottom: 2px; }
+    .rec-memory p { color: var(--muted); font-size: 13px; font-style: italic; }
+    .rec-reject-hint { font-size: 13px; color: var(--muted); margin: 6px 0 12px; }
+    .rec-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .btn-edit { cursor: not-allowed; opacity: 0.6; }
+    .rec-card.is-decided .rec-actions { display: none; }
+    .rec-status-note { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+    .rec-decision-msg {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .rec-decision-msg .label {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 11px;
+      margin-right: 6px;
+    }
+    .rec-card.is-approved .rec-decision-msg.approved {
+      display: block;
+      background: #e3f2e9;
+      border: 1px solid #c2dfca;
+      color: var(--green);
+    }
+    .rec-card.is-rejected .rec-decision-msg.rejected {
+      display: block;
+      background: #fbe6e0;
+      border: 1px solid #e6b6a8;
+      color: var(--red);
+    }
+    .rec-learnmore {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .rec-learnmore summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+    }
+    .rec-math {
+      display: grid;
+      grid-template-columns: minmax(140px, max-content) 1fr;
+      column-gap: 12px;
+      row-gap: 4px;
+      margin: 8px 0 0;
+    }
+    .rec-math dt { color: var(--muted); }
+    .rec-math dd { margin: 0; color: var(--ink); }
+    .rec-math code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: #f1ede4;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .rec-overflow {
+      margin-top: 14px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 8px 14px;
+      background: #fbfaf6;
+    }
+    .rec-overflow > summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--ink);
+      letter-spacing: 0.02em;
+      padding: 4px 0;
+    }
+    .rec-overflow .rec-overflow-hint {
+      font-weight: 400;
+      color: var(--muted);
+      margin-left: 6px;
+    }
+    .rec-overflow-list { margin-top: 8px; }
+    .rec-empty-strong {
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #fbfaf6;
+    }
+    /* Seller-memory pill (cycle-18 / Task 3) */
+    .rec-memory-pill {
+      margin: -4px 0 14px;
+      border: 1px solid #d8e3ef;
+      border-radius: 10px;
+      padding: 8px 14px;
+      background: #f3f7fb;
+    }
+    .rec-memory-pill > summary {
+      cursor: pointer;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+      padding: 4px 0;
+      color: var(--blue-d);
+      list-style: none;
+    }
+    .rec-memory-pill > summary::-webkit-details-marker { display: none; }
+    .rec-memory-pill-label { font-weight: 700; }
+    .rec-memory-pill-hint  { color: var(--muted); margin-left: 6px; font-weight: 400; }
+    .rec-memory-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      list-style: disc;
+    }
+    .rec-memory-item { margin-bottom: 8px; }
+    .rec-memory-item:last-child { margin-bottom: 0; }
+    .rec-memory-type   { color: var(--muted); font-size: 12px; margin-left: 4px; }
+    .rec-memory-dates  { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .rec-memory-reason {
+      font-size: 13px;
+      color: var(--ink);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    /* Approval projection block (Task 4 / Minimal Proof of Impact) */
+    .approved-projections {
+      margin: -4px 0 14px;
+      border: 1px solid #d6e7d6;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f4faf4;
+    }
+    .approved-projections-heading {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px;
+    }
+    .approved-projections-disclaimer {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0 0 10px;
+      line-height: 1.5;
+    }
+    .approved-projections-list {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    .approved-card {
+      border-top: 1px solid #e0eee0;
+      padding: 8px 0;
+    }
+    .approved-card:first-child { border-top: 0; padding-top: 0; }
+    .approved-card-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: baseline;
+    }
+    .approved-card-label  { font-weight: 700; }
+    .approved-card-type   { color: var(--muted); font-size: 12px; }
+    .approved-card-date   { color: var(--muted); font-size: 12px; margin-left: auto; }
+    .approved-card-impact {
+      margin-top: 2px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+    .approved-card-impact .label { color: var(--muted); margin-right: 4px; }
+    .approved-card-baseline {
+      margin-top: 6px;
+      font-size: 12px;
+    }
+    .approved-card-baseline > summary {
+      cursor: pointer;
+      color: var(--blue-d);
+      list-style: none;
+    }
+    .approved-card-baseline > summary::-webkit-details-marker { display: none; }
+    .approved-card-baseline-list {
+      margin: 6px 0 0;
+      padding-left: 16px;
+      list-style: disc;
+      color: var(--ink);
+    }
+    .approved-card-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 6px 0 0;
+      font-style: italic;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .toolbar .status-msg {
+      font-size: 13px;
+      color: var(--muted);
+      align-self: center;
+    }
+
     @media (max-width: 540px) {
       .conn-row { flex-direction: column; align-items: flex-start; }
       .shell { padding: 22px 14px 64px; }
+      .suggestion .savings { margin-left: 0; }
     }
   </style>
 </head>
@@ -154,10 +479,14 @@
 </nav>
 
 <main class="shell">
-  <h1>PPC Dashboard</h1>
+  <h1>Today's PPC decisions</h1>
   <p class="subtitle">
-    Monitor your connected Amazon accounts and review AI-suggested PPC changes.
-    All changes require your approval before they go live.
+    Your personal PPC decision assistant. A short list of recommendations,
+    each with a plain-English reason and a dollar impact. Approve,
+    reject, or edit per item. Approving records the decision in your
+    decision history and queues it; nothing is sent to Amazon yet, and
+    the live applier will ask for a final confirmation before any push
+    to Seller Central.
   </p>
 
   <!-- Connected Accounts -->
@@ -182,10 +511,14 @@
             </div>
             <div class="conn-meta">
               Marketplace, {{ c.marketplace_id }}
-              {% if c.last_synced_at %}
-                &middot; Last synced {{ c.last_synced_at|int }}s epoch
+              {% set snap_at = latest_snapshot_at_by_connection.get(c.id) if latest_snapshot_at_by_connection else None %}
+              {% if snap_at %}
+                &middot; Latest snapshot,
+                <span class="rel-time" data-epoch="{{ snap_at|int }}">{{ snap_at|int }}s epoch</span>
+                <span class="badge badge-stale stale-marker"
+                      data-epoch="{{ snap_at|int }}" data-threshold="86400" hidden>Stale</span>
               {% else %}
-                &middot; Not yet synced
+                &middot; No snapshot yet
               {% endif %}
             </div>
           </div>
@@ -214,34 +547,316 @@
     </section>
   {% endif %}
 
-  <!-- Suggestions placeholder (week 5 of MVP plan) -->
-  <section class="card" aria-labelledby="suggestions-heading">
-    <h2 id="suggestions-heading">Pending Suggestions</h2>
-    <div class="placeholder">
-      <strong>Coming in week 5 of the MVP build.</strong>
-      <br>
-      Once your account is connected and the first PPC snapshot has been
-      fetched, the AI agent will analyse your campaigns and post specific
-      suggestions here for your approval. No action is taken on your account
-      without an explicit approval click.
-    </div>
-  </section>
+  <!-- Per-connection suggestions -->
+  {% for c in connections %}
+    {% set sugs    = suggestions_by_connection.get(c.id, []) if suggestions_by_connection else [] %}
+    {% set cards   = cards_by_connection.get(c.id, []) if cards_by_connection else [] %}
+    {% set ranking = ranking_by_connection.get(c.id, {'top': [], 'hidden': [], 'extra_count': 0}) if ranking_by_connection else {'top': [], 'hidden': [], 'extra_count': 0} %}
+    {% set top_cards    = ranking.top %}
+    {% set hidden_cards = ranking.hidden %}
+    {% set extra_count  = ranking.extra_count %}
+    {% set skipped = skipped_by_connection.get(c.id, []) if skipped_by_connection else [] %}
+    {% set savings = savings_by_connection.get(c.id, 0.0) if savings_by_connection else 0.0 %}
+    {% set growth  = growth_by_connection.get(c.id, 0.0) if growth_by_connection else 0.0 %}
+
+    <section class="card" aria-labelledby="sugs-{{ c.id }}-heading" data-connection-id="{{ c.id }}">
+      <h2 id="sugs-{{ c.id }}-heading">
+        Suggestions for connection #{{ c.id }}{% if c.seller_id %} ({{ c.seller_id }}){% endif %}
+      </h2>
+
+      {% if skipped and skipped|length > 0 %}
+        <details class="rec-memory-pill" id="memory-pill-{{ c.id }}">
+          <summary>
+            <span class="rec-memory-pill-label">
+              Skipped {{ skipped|length }} recommendation{{ '' if skipped|length == 1 else 's' }} you recently rejected
+            </span>
+            <span class="rec-memory-pill-hint">(click to expand)</span>
+          </summary>
+          <ul class="rec-memory-list">
+            {% for sk in skipped %}
+              <li class="rec-memory-item">
+                <div>
+                  <strong>{{ sk.label }}</strong>
+                  <span class="rec-memory-type">({{ sk.suggestion_type|replace('_', ' ') }})</span>
+                </div>
+                <div class="rec-memory-dates">
+                  Rejected on {{ sk.rejected_at_iso }} &middot;
+                  Next check after {{ sk.next_eligible_iso }}
+                </div>
+                <div class="rec-memory-reason">{{ sk.reason }}</div>
+              </li>
+            {% endfor %}
+          </ul>
+        </details>
+      {% endif %}
+
+      {% set approved = approved_by_connection.get(c.id, []) if approved_by_connection else [] %}
+      {% if approved and approved|length > 0 %}
+        <section class="approved-projections" id="approved-projections-{{ c.id }}"
+                 aria-labelledby="approved-projections-heading-{{ c.id }}">
+          <h3 class="approved-projections-heading" id="approved-projections-heading-{{ c.id }}">
+            Approved (pending apply): {{ approved|length }} recommendation{{ '' if approved|length == 1 else 's' }}
+          </h3>
+          <p class="approved-projections-disclaimer">
+            Projection only.
+            Calculated from the prior 30 days.
+            Nothing has been applied to Amazon yet.
+            Real results will differ.
+          </p>
+          <ul class="approved-projections-list">
+            {% for ap in approved %}
+              <li class="approved-card" data-suggestion-id="{{ ap.id }}">
+                <div class="approved-card-head">
+                  <span class="approved-card-label">{{ ap.keyword_label or 'this keyword' }}</span>
+                  <span class="approved-card-type">({{ ap.suggestion_type|replace('_', ' ') }})</span>
+                  <span class="approved-card-date">Approved {{ ap.approved_at_iso }}</span>
+                </div>
+                <div class="approved-card-impact">
+                  <span class="label">Projected impact:</span>
+                  ${{ '%.2f' | format(ap.estimated_impact) }} / month
+                </div>
+                <details class="approved-card-baseline">
+                  <summary>Baseline at approval</summary>
+                  <ul class="approved-card-baseline-list">
+                    <li>Spend (last 30 days): ${{ '%.2f' | format(ap.cost_30d) }}</li>
+                    <li>Sales (last 30 days): ${{ '%.2f' | format(ap.sales_30d) }}</li>
+                    <li>Orders (last 30 days): {{ ap.orders_30d }}</li>
+                    <li>Clicks (last 30 days): {{ ap.clicks_30d }}</li>
+                    {% if ap.acos_30d is not none %}
+                      <li>ACOS at approval: {{ '%.0f' | format(ap.acos_30d * 100) }}%</li>
+                    {% endif %}
+                    {% if ap.target_acos_used is not none %}
+                      <li>Target ACOS used: {{ '%.0f' | format(ap.target_acos_used * 100) }}%</li>
+                    {% endif %}
+                  </ul>
+                  <p class="approved-card-note">{{ ap.note }}</p>
+                </details>
+              </li>
+            {% endfor %}
+          </ul>
+        </section>
+      {% endif %}
+
+      {% set bd = breakdown_by_connection.get(c.id, {}) if breakdown_by_connection else {} %}
+      <div class="money-banner">
+        <div>
+          <div class="label">Money you can save (real cost reduction, last 30 days)</div>
+          <div class="amount savings-amount" id="savings-{{ c.id }}">${{ '%.2f' | format(savings) }}</div>
+          {% if savings > 0 %}
+            <div class="label" style="margin-top: 4px;">
+              {% set _save_names = {
+                "spend_no_sales": "Waste",
+                "high_acos":      "ACOS",
+                "bid_too_high":   "Overbids",
+              } %}
+              {% set _parts = [] %}
+              {% for key, label in _save_names.items() %}
+                {% if bd.get(key, 0) > 0 %}
+                  {% set _ = _parts.append(label ~ ' $' ~ '%.2f' | format(bd[key])) %}
+                {% endif %}
+              {% endfor %}
+              {{ _parts | join(' &middot; ') | safe }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="label">{{ sugs|length }} pending suggestion{{ '' if sugs|length == 1 else 's' }}</div>
+      </div>
+
+      {% if growth > 0 or sugs|length > 0 %}
+      <div class="money-banner growth-banner">
+        <div>
+          <div class="label">Growth opportunity (projected extra revenue if approved)</div>
+          <div class="amount growth-amount" id="growth-{{ c.id }}">+${{ '%.2f' | format(growth) }}</div>
+          {% if growth > 0 %}
+            <div class="label" style="margin-top: 4px;">
+              {% set _growth_names = {
+                "scale_profitable":    "Scale",
+                "promote_search_term": "Promote",
+              } %}
+              {% set _gparts = [] %}
+              {% for key, label in _growth_names.items() %}
+                {% if bd.get(key, 0) > 0 %}
+                  {% set _ = _gparts.append(label ~ ' $' ~ '%.2f' | format(bd[key])) %}
+                {% endif %}
+              {% endfor %}
+              {{ _gparts | join(' &middot; ') | safe }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="label">Estimates only, not a guarantee</div>
+      </div>
+      {% endif %}
+
+      <div class="toolbar">
+        <button class="btn btn-secondary refresh-btn" type="button" data-connection-id="{{ c.id }}">
+          Refresh suggestions
+        </button>
+        <span class="status-msg" id="status-{{ c.id }}"></span>
+      </div>
+
+      {% if (top_cards and top_cards|length > 0) or (hidden_cards and hidden_cards|length > 0) %}
+        {% if top_cards and top_cards|length > 0 %}
+          <div class="suggestions-list" id="suggestions-{{ c.id }}">
+            {% for card in top_cards %}
+              {% with mode='live' %}
+                {% include "_recommendation_card.html" %}
+              {% endwith %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="placeholder rec-empty-strong">
+            <strong>No strong recommendations today.</strong>
+            <br>
+            Nothing met the $50/month minimum impact threshold for the
+            first view. {{ extra_count }} lower-confidence
+            recommendation{{ '' if extra_count == 1 else 's' }} below.
+          </div>
+        {% endif %}
+
+        {% if hidden_cards and hidden_cards|length > 0 %}
+          <details class="rec-overflow" id="overflow-{{ c.id }}">
+            <summary>
+              Show {{ extra_count }} more
+              <span class="rec-overflow-hint">
+                (below first-view threshold or beyond today's top {{ top_cards|length }})
+              </span>
+            </summary>
+            <div class="suggestions-list rec-overflow-list">
+              {% for card in hidden_cards %}
+                {% with mode='live' %}
+                  {% include "_recommendation_card.html" %}
+                {% endwith %}
+              {% endfor %}
+            </div>
+          </details>
+        {% endif %}
+      {% else %}
+        <div class="placeholder">
+          <strong>No pending suggestions yet.</strong>
+          <br>
+          Click "Refresh suggestions" to analyse the latest snapshot. If no
+          snapshot has been fetched yet, connect an Amazon account or wait
+          for the next scheduled fetch.
+        </div>
+      {% endif %}
+    </section>
+  {% endfor %}
 </main>
 
 <script>
-  // Vanilla JS, no framework. The two connect buttons both POST to /ppc/connect
-  // which then redirects to Amazon's OAuth consent screen.
-  function startConnectFlow() {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "/ppc/connect";
-    document.body.appendChild(form);
-    form.submit();
+/*
+ * Vanilla JS, no framework. Three flows:
+ * 1. Connect / Connect another account -> POST /ppc/connect.
+ * 2. Refresh suggestions -> POST /ppc/suggestions/refresh, reload the page.
+ * 3. Approve / Reject -> POST /ppc/suggestions/<id>/<action>, hide the row.
+ *
+ * Read-only with respect to Amazon: approve only flips DB status. The applier
+ * (week 6) is what actually pushes changes to the Ads API.
+ */
+
+function startConnectFlow() {
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "/ppc/connect";
+  document.body.appendChild(form);
+  form.submit();
+}
+
+document.querySelectorAll("#connect-btn, #connect-more-btn").forEach(function (btn) {
+  btn.addEventListener("click", startConnectFlow);
+});
+
+// Render any element with data-epoch as a human-readable relative time.
+// Example: <span data-epoch="1714838400">...</span> -> "3 hours ago".
+function renderRelativeTime(el) {
+  const epoch = parseInt(el.getAttribute("data-epoch") || "0", 10);
+  if (!epoch) return;
+  const now = Math.floor(Date.now() / 1000);
+  const delta = now - epoch;
+  if (delta < 60)            { el.textContent = "just now"; return; }
+  if (delta < 3600)          { el.textContent = Math.floor(delta / 60)    + " min ago"; return; }
+  if (delta < 86400)         { el.textContent = Math.floor(delta / 3600)  + " hr ago";  return; }
+  if (delta < 7 * 86400)     { el.textContent = Math.floor(delta / 86400) + " d ago";   return; }
+  // Older than a week: show absolute date.
+  const d = new Date(epoch * 1000);
+  el.textContent = d.toISOString().slice(0, 10);
+}
+document.querySelectorAll(".rel-time").forEach(renderRelativeTime);
+
+// Show "Stale" badge if a snapshot is older than its declared threshold (default 24h).
+document.querySelectorAll(".stale-marker").forEach(function (el) {
+  const epoch     = parseInt(el.getAttribute("data-epoch") || "0", 10);
+  const threshold = parseInt(el.getAttribute("data-threshold") || "86400", 10);
+  if (!epoch) return;
+  const ageSec = Math.floor(Date.now() / 1000) - epoch;
+  if (ageSec >= threshold) {
+    el.hidden = false;
   }
-  const btn1 = document.getElementById("connect-btn");
-  const btn2 = document.getElementById("connect-more-btn");
-  if (btn1) btn1.addEventListener("click", startConnectFlow);
-  if (btn2) btn2.addEventListener("click", startConnectFlow);
+});
+
+document.querySelectorAll(".refresh-btn").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    const cid = btn.getAttribute("data-connection-id");
+    const status = document.getElementById("status-" + cid);
+    btn.disabled = true;
+    if (status) status.textContent = "Refreshing...";
+    fetch("/ppc/suggestions/refresh", {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      credentials: "same-origin",
+    })
+      .then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+      .then(function (out) {
+        if (!out.r.ok) {
+          if (status) status.textContent = "Refresh failed.";
+          btn.disabled = false;
+          return;
+        }
+        // Easiest correct UI: reload so server-rendered list matches DB.
+        window.location.reload();
+      })
+      .catch(function () {
+        if (status) status.textContent = "Network error during refresh.";
+        btn.disabled = false;
+      });
+  });
+});
+
+document.querySelectorAll(".rec-card .rec-actions button").forEach(function (btn) {
+  btn.addEventListener("click", function () {
+    if (btn.disabled || btn.getAttribute("aria-disabled") === "true") return;
+    const action = btn.getAttribute("data-action");
+    const sid    = btn.getAttribute("data-suggestion-id");
+    if (!action || !sid) return;
+    // Edit is reserved but not wired yet; never POST it.
+    if (action !== "approve" && action !== "reject") return;
+
+    const card = btn.closest(".rec-card");
+    btn.disabled = true;
+
+    fetch("/ppc/suggestions/" + encodeURIComponent(sid) + "/" + encodeURIComponent(action), {
+      method: "POST",
+      headers: { "Accept": "application/json" },
+      credentials: "same-origin",
+    })
+      .then(function (r) { return r.json().then(function (j) { return { r: r, j: j }; }); })
+      .then(function (out) {
+        if (out.r.ok) {
+          if (card) {
+            card.classList.add("is-decided");
+            card.classList.add(action === "approve" ? "is-approved" : "is-rejected");
+          }
+        } else {
+          btn.disabled = false;
+          alert(out.j.error || "Could not " + action + " suggestion.");
+        }
+      })
+      .catch(function () {
+        btn.disabled = false;
+        alert("Network error. Please try again.");
+      });
+  });
+});
 </script>
 
 </body>

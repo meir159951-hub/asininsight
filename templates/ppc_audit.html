@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Decision Audit — SellerCopilot</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <style>
+    :root {
+      --bg:        #f8f6f1;
+      --panel:    #ffffff;
+      --ink:      #15263d;
+      --muted:    #617184;
+      --line:     #e6e1d8;
+      --blue:     #1f5fa8;
+      --blue-d:   #174a85;
+      --green:    #1d6a42;
+      --green-bg: #e3f2e9;
+      --amber:    #92400e;
+      --amber-bg: #fbeacb;
+      --red:      #b14a3a;
+      --red-bg:   #fbe6e0;
+      --soft:     #f1ede4;
+      --shadow:   0 1px 0 rgba(15, 38, 71, .04), 0 4px 14px rgba(15, 38, 71, .06);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg); color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .topnav {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 22px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topnav .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
+    .topnav-links a { font-size: 13px; color: var(--muted); margin-left: 14px; }
+    .topnav-links a.active { color: var(--blue); font-weight: 600; }
+    .shell { max-width: 980px; margin: 0 auto; padding: 28px 18px 64px; }
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(24px, 4vw, 30px);
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+    }
+    .card h2 {
+      font-size: 14px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--muted); margin: 0 0 14px;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .summary-tile {
+      background: var(--soft);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+    .summary-tile .num {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+    .summary-tile .lbl {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    .summary-tile.green { background: var(--green-bg); }
+    .summary-tile.green .num { color: var(--green); }
+    .summary-tile.amber { background: var(--amber-bg); }
+    .summary-tile.amber .num { color: var(--amber); }
+    .summary-tile.red   { background: var(--red-bg); }
+    .summary-tile.red   .num { color: var(--red); }
+
+    .anti-overclaim-banner {
+      margin: 18px 0;
+      padding: 12px 16px;
+      background: var(--amber-bg);
+      border-left: 4px solid var(--amber);
+      border-radius: 6px;
+      color: #4a2306;
+      font-size: 13.5px;
+    }
+
+    .actions {
+      display: flex; gap: 8px;
+      margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--blue);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .btn:hover { background: var(--soft); }
+    .btn-primary {
+      background: var(--blue); color: #fff; border-color: var(--blue);
+    }
+    .btn-primary:hover { background: var(--blue-d); color: #fff; text-decoration: none; }
+
+    .decision {
+      border-bottom: 1px solid var(--line);
+      padding: 16px 0;
+    }
+    .decision:last-child { border-bottom: 0; }
+    .decision-head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; flex-wrap: wrap;
+    }
+    .decision-meta {
+      font-size: 12px; color: var(--muted);
+    }
+    .decision-kw {
+      font-size: 15px; font-weight: 600; color: var(--ink);
+      margin: 4px 0;
+    }
+    .decision-prop {
+      font-size: 13.5px; color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .badge-approved { background: var(--green-bg); color: var(--green); }
+    .badge-rejected { background: var(--red-bg);   color: var(--red); }
+    .badge-pending  { background: var(--soft);     color: var(--muted); }
+    .badge-better   { background: var(--green-bg); color: var(--green); }
+    .badge-worse    { background: var(--red-bg);   color: var(--red); }
+    .badge-nochange { background: var(--soft);     color: var(--muted); }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 10px;
+    }
+    @media (max-width: 600px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-block {
+      background: var(--soft);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .metric-block.observed {
+      background: var(--panel);
+      border: 1px dashed var(--line);
+    }
+    .metric-title {
+      font-size: 11px; letter-spacing: 0.06em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 6px; font-weight: 700;
+    }
+    .metric-row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; padding: 2px 0;
+    }
+    .metric-row .k { color: var(--muted); }
+    .metric-row .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .empty {
+      text-align: center; padding: 24px 0 8px;
+      color: var(--muted); font-size: 14px;
+    }
+    .empty-cta {
+      display: inline-block; margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topnav">
+  <div class="brand">SellerCopilot</div>
+  <div class="topnav-links">
+    <a href="/ppc/dashboard">Dashboard</a>
+    <a href="/ppc/audit" class="active">Decision Audit</a>
+  </div>
+</div>
+
+<div class="shell">
+
+<h1>Decision Audit</h1>
+<p class="subtitle">Every approve and reject you have made on SellerCopilot, with the data we saw at the time and the metric movement we observed afterwards. Tax-ready, agency-defensible.</p>
+
+{% if not connections %}
+  <div class="card">
+    <div class="empty">
+      <p>You have not connected an Amazon Ads account yet. Once you do, every decision you make on the dashboard will appear here.</p>
+      <a class="btn btn-primary empty-cta" href="/ppc/dashboard">Go to dashboard</a>
+    </div>
+  </div>
+{% endif %}
+
+{% for c in connections %}
+  {% set cid = c.id %}
+  {% set decisions = decisions_by_connection.get(cid, []) %}
+  {% set counts = counts_by_connection.get(cid, {}) %}
+
+  <div class="card">
+    <h2>{{ c.seller_id or ('Connection #' ~ cid) }}</h2>
+
+    <div class="summary-row">
+      <div class="summary-tile">
+        <div class="num">{{ counts.total or 0 }}</div>
+        <div class="lbl">Total decisions</div>
+      </div>
+      <div class="summary-tile green">
+        <div class="num">{{ counts.approved or 0 }}</div>
+        <div class="lbl">Approved</div>
+      </div>
+      <div class="summary-tile">
+        <div class="num">{{ counts.rejected or 0 }}</div>
+        <div class="lbl">Rejected</div>
+      </div>
+      <div class="summary-tile green">
+        <div class="num">{{ counts.metrics_moved_better or 0 }}</div>
+        <div class="lbl">Metrics moved better</div>
+      </div>
+      <div class="summary-tile red">
+        <div class="num">{{ counts.metrics_moved_worse or 0 }}</div>
+        <div class="lbl">Metrics moved worse</div>
+      </div>
+      <div class="summary-tile amber">
+        <div class="num">{{ counts.pending_observation or 0 }}</div>
+        <div class="lbl">Pending observation</div>
+      </div>
+    </div>
+
+    <div class="anti-overclaim-banner">
+      SellerCopilot does not write to Amazon. Outcome rows describe how the metrics moved between the baseline and the observation window. They are correlation only, not causation.
+    </div>
+
+    <div class="actions">
+      <a class="btn" href="/ppc/audit/export.csv">Export CSV</a>
+    </div>
+
+    {% if not decisions %}
+      <div class="empty">
+        <p>No decisions logged yet. Approve or reject a recommendation on the dashboard to start the audit trail.</p>
+      </div>
+    {% endif %}
+
+    {% for d in decisions %}
+      <div class="decision">
+        <div class="decision-head">
+          <div>
+            {% if d.decision == 'approved' %}
+              <span class="badge badge-approved">Approved</span>
+            {% elif d.decision == 'rejected' %}
+              <span class="badge badge-rejected">Rejected</span>
+            {% else %}
+              <span class="badge badge-pending">{{ d.decision }}</span>
+            {% endif %}
+
+            {% if d.classification == 'metrics_moved_better' %}
+              <span class="badge badge-better">{{ classification_label(d.classification) }}</span>
+            {% elif d.classification == 'metrics_moved_worse' %}
+              <span class="badge badge-worse">{{ classification_label(d.classification) }}</span>
+            {% elif d.classification in ('no_change', 'inconclusive') %}
+              <span class="badge badge-nochange">{{ classification_label(d.classification) }}</span>
+            {% else %}
+              <span class="badge badge-pending">{{ classification_label(d.classification) }}</span>
+            {% endif %}
+          </div>
+          <div class="decision-meta">
+            Decided {{ d.decided_at_iso }}
+            {% if d.observed_at_iso %} &middot; Observed {{ d.observed_at_iso }}{% endif %}
+          </div>
+        </div>
+
+        <div class="decision-kw">
+          {{ d.suggestion_type|replace('_', ' ')|title }}: {{ d.keyword_label or d.keyword_id }}
+        </div>
+        <div class="decision-prop">{{ d.proposed_summary }}</div>
+
+        <div class="metrics-grid">
+          <div class="metric-block">
+            <div class="metric-title">Baseline at decision time</div>
+            <div class="metric-row"><span class="k">Cost (30d)</span><span class="v">${{ '%.2f'|format(d.baseline_cost_30d) }}</span></div>
+            <div class="metric-row"><span class="k">Sales (30d)</span><span class="v">${{ '%.2f'|format(d.baseline_sales_30d) }}</span></div>
+            <div class="metric-row"><span class="k">Clicks (30d)</span><span class="v">{{ d.baseline_clicks_30d }}</span></div>
+            {% if d.baseline_acos_30d is not none %}
+              <div class="metric-row"><span class="k">ACOS</span><span class="v">{{ '%.0f'|format(d.baseline_acos_30d * 100) }}%</span></div>
+            {% endif %}
+          </div>
+          <div class="metric-block observed">
+            <div class="metric-title">
+              {% if d.observed_at_iso %}Observed after window{% else %}Observation pending{% endif %}
+            </div>
+            {% if d.observed_at_iso %}
+              <div class="metric-row"><span class="k">Cost (30d)</span><span class="v">${{ '%.2f'|format(d.observed_cost_30d) }}</span></div>
+              <div class="metric-row"><span class="k">Sales (30d)</span><span class="v">${{ '%.2f'|format(d.observed_sales_30d) }}</span></div>
+              <div class="metric-row"><span class="k">Clicks (30d)</span><span class="v">{{ d.observed_clicks_30d }}</span></div>
+            {% else %}
+              <div class="metric-row"><span class="k" style="font-style:italic;">Awaiting observation window — no claim made.</span></div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+  </div>
+{% endfor %}
+
+</div>
+
+</body>
+</html>

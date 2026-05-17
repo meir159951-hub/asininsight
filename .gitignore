@@ -54,6 +54,7 @@ diag_*.json
 test_data.csv
 output/
 validation_output/
+validation/real_data/
 
 # Tooling state ───────────────────────────────────────────────────────────
 .claude/

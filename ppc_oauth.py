@@ -77,7 +77,11 @@ TOKEN_EXPIRY_BUFFER_SECONDS = 60
 #  copy and we accept O(workers) extra LWA calls per hour per connection.
 
 _token_cache: dict[int, tuple[str, float]] = {}
-_token_cache_lock = threading.Lock()
+# Reentrant: get_active_token() holds this lock when it calls
+# mark_connection_inactive() on invalid_grant, and mark_connection_inactive()
+# in turn calls invalidate_cached_token() which re-acquires the lock. A
+# plain Lock would deadlock the calling thread.
+_token_cache_lock = threading.RLock()
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -270,8 +274,31 @@ def get_active_token(connection_id: int) -> str:
             if expires_at - time.time() > TOKEN_EXPIRY_BUFFER_SECONDS:
                 return access_token
 
-        # Refresh from LWA.
-        result = refresh_access_token(plaintext_refresh)
+        # Refresh from LWA. Two failure classes need different handling:
+        # - invalid_grant   the seller revoked us, or the refresh_token
+        #                   expired. Flip the connection inactive so the
+        #                   cron stops trying and the dashboard can prompt
+        #                   for reconnect. Then re-raise so the caller
+        #                   sees the failure.
+        # - anything else   surface the original LWAError unchanged.
+        try:
+            result = refresh_access_token(plaintext_refresh)
+        except LWAError as e:
+            if e.lwa_error_code == "invalid_grant":
+                # mark_connection_inactive opens its own DB connection and
+                # does not block on _token_cache_lock; safe to call from
+                # within this critical section.
+                try:
+                    mark_connection_inactive(
+                        connection_id,
+                        reason="lwa_invalid_grant_on_refresh",
+                    )
+                except Exception:
+                    log.exception(
+                        "mark_connection_inactive failed during invalid_grant "
+                        "handling for connection_id=%d", connection_id,
+                    )
+            raise
 
         access_token = result["access_token"]
         expires_in   = int(result.get("expires_in", 3600))
@@ -300,6 +327,70 @@ def invalidate_cached_token(connection_id: int) -> None:
             log.info("Invalidated cached token for connection_id=%d", connection_id)
 
 
+def mark_connection_inactive(connection_id: int, reason: str) -> bool:
+    """
+    Flip amazon_connections.active = 0 for the given connection.
+
+    Called when LWA returns `invalid_grant` on a refresh attempt, which means
+    the seller revoked our app from Seller Central (or Amazon expired the
+    refresh token). The connection cannot be used to call Ads / SP-API
+    again until the seller re-authorises us. The dashboard already displays
+    inactive connections with a "reconnect" badge.
+
+    Side effects, in order:
+    1. UPDATE amazon_connections SET active = 0 WHERE id = ?  (only if currently active)
+    2. Drop any cached access_token for the same connection.
+
+    Args:
+        connection_id: amazon_connections.id row.
+        reason:        short string for the log line. Tracks why we flipped
+                       so an operator scanning logs can distinguish revoke
+                       events from operator-initiated deactivation.
+
+    Returns:
+        True  if a row was actually flipped from active to inactive.
+        False if the row did not exist or was already inactive.
+
+    Lazy-imports `server._db` for the same reason as
+    `_read_encrypted_refresh_token`: server -> ppc_agent -> ppc_oauth would
+    close the import cycle if we did it at module top.
+    """
+    from server import _db
+
+    flipped = False
+    try:
+        with _db() as (cur, ph):
+            cur.execute(
+                f"""
+                UPDATE amazon_connections
+                SET active = 0
+                WHERE id = {ph} AND active = 1
+                """,
+                (connection_id,),
+            )
+            flipped = bool(cur.rowcount)
+    except Exception as e:
+        # Don't let the inactive-flip failure mask the original LWA error;
+        # log and return False so the caller still raises the underlying
+        # LWAError to surface the auth problem.
+        log.warning(
+            "mark_connection_inactive failed for connection_id=%d reason=%s err=%s",
+            connection_id, reason, e,
+        )
+        return False
+
+    # Whether or not we flipped the row, drop any cached access_token. A
+    # stale cache entry would otherwise mask the inactive flag for an hour.
+    invalidate_cached_token(connection_id)
+
+    if flipped:
+        log.warning(
+            "Marked connection_id=%d INACTIVE reason=%s. Seller must reconnect.",
+            connection_id, reason,
+        )
+    return flipped
+
+
 # ──────────────────────────────────────────────────────────────────────────
 #  Internal helpers
 # ──────────────────────────────────────────────────────────────────────────
@@ -324,6 +415,10 @@ def _post_to_lwa(payload: dict[str, str], operation: str) -> dict[str, Any]:
     Raises:
         LWAError: on any failure mode.
     """
+    # Import lazily to avoid a circular dependency: ppc_ads_client also
+    # imports from ppc_oauth.
+    from ppc_ads_client import USER_AGENT as _BSA_USER_AGENT
+
     try:
         resp = requests.post(
             LWA_TOKEN_URL,
@@ -331,6 +426,11 @@ def _post_to_lwa(payload: dict[str, str], operation: str) -> dict[str, Any]:
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept":       "application/json",
+                # BSA Agent Policy self-identification (2026-03-04).
+                # LWA is part of Amazon's surface area; the policy says
+                # "AI agents must self-identify at all times", not just
+                # on Ads API.
+                "User-Agent":   _BSA_USER_AGENT,
             },
             timeout=LWA_TIMEOUT_SECONDS,
         )

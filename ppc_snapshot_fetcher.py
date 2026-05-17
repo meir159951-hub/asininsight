@@ -26,11 +26,19 @@ Failure handling: each step is wrapped in try/except. A failed step is
 recorded in the summary but does not abort later steps. We accept a
 partial snapshot over no snapshot, because suggestions can still be made
 from campaigns + ad groups even if the search-term report failed.
+
+Local development without Amazon credentials
+--------------------------------------------
+This module never falls back to mock data. If credentials are missing or
+the seller has not connected an account, the fetcher fails loudly. To
+exercise the suggestion engine and dashboard locally without live access,
+seed `ppc_snapshots` directly via `mock_ppc_data.seed_mock_snapshot`.
 """
 
 from __future__ import annotations
 
 import json
+import secrets
 import time
 import logging
 from datetime import date, timedelta
@@ -53,6 +61,23 @@ SEARCH_TERM_LOOKBACK_DAYS = 30
 # How stale a connection's last sync can be before fetch_all_active picks
 # it up. Same effective default as ppc_agent.PPC_SNAPSHOT_TTL_SECONDS.
 SYNC_STALENESS_SECONDS = 6 * 60 * 60
+
+# Default retention window for ppc_snapshots. Beyond this many days, raw
+# Amazon Ads payloads are deleted by run_retention(). 90 days is enough to
+# satisfy the 30-day rule lookback plus 60 days of operator forensic
+# headroom; longer retention triggers an Amazon reviewer flag for data
+# over-retention. Tuneable via ppc_agent env / settings if a customer
+# specifically requires a different window.
+SNAPSHOT_RETENTION_DAYS = 90
+
+# Required data_types for a "complete" snapshot run. A run missing any of
+# these cannot drive the suggestion engine without combining stale data
+# with fresh, so generate_suggestions refuses to overwrite pending rows
+# from such a run. profiles is intentionally excluded: rules don't read
+# profiles, and a missing profile row simply means we never finished the
+# Ads API auth handshake, which is already caught by an empty campaigns
+# list downstream.
+REQUIRED_DATA_TYPES = ("campaigns", "ad_groups", "keywords", "search_terms")
 
 
 # ──────────────────────────────────────────────────────────────────────────
@@ -88,8 +113,18 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
     so a single failing connection does not abort a multi-connection cron run.
     """
     started_at = time.time()
+    # snapshot_run_id ties together every row this fetch writes so the
+    # suggestion engine can read a coherent batch (no mixing fresh keywords
+    # with stale search-terms from a half-completed prior run). Format is
+    # "<connection_id>-<epoch_ms>-<random>" so an operator can correlate a
+    # row to a single fetch in logs without parsing JSON.
+    run_id = (
+        f"{connection_id}-{int(started_at * 1000)}-"
+        f"{secrets.token_hex(4)}"
+    )
     summary: dict[str, Any] = {
         "connection_id":      connection_id,
+        "snapshot_run_id":    run_id,
         "profiles_count":     0,
         "campaigns_count":    0,
         "ad_groups_count":    0,
@@ -106,7 +141,7 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
         client_no_profile = ppc_ads_client.AdsClient(connection_id)
         profiles = client_no_profile.list_profiles()
         summary["profiles_count"] = len(profiles)
-        _store_snapshot(connection_id, "profiles", profiles)
+        _store_snapshot(connection_id, "profiles", profiles, run_id)
     except Exception as e:
         msg = f"profiles fetch failed: {e}"
         log.warning("connection_id=%d %s", connection_id, msg)
@@ -134,7 +169,7 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
     try:
         campaigns = client.list_campaigns()
         summary["campaigns_count"] = len(campaigns)
-        _store_snapshot(connection_id, "campaigns", campaigns)
+        _store_snapshot(connection_id, "campaigns", campaigns, run_id)
     except Exception as e:
         msg = f"campaigns fetch failed: {e}"
         log.warning("connection_id=%d %s", connection_id, msg)
@@ -155,7 +190,7 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
                 f"ad_groups fetch failed for campaign {cid}: {e}"
             )
     summary["ad_groups_count"] = len(all_ad_groups)
-    _store_snapshot(connection_id, "ad_groups", all_ad_groups)
+    _store_snapshot(connection_id, "ad_groups", all_ad_groups, run_id)
 
     # Step 4: keywords per ad group
     all_keywords: list[dict[str, Any]] = []
@@ -171,7 +206,7 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
                 f"keywords fetch failed for ad_group {agid}: {e}"
             )
     summary["keywords_count"] = len(all_keywords)
-    _store_snapshot(connection_id, "keywords", all_keywords)
+    _store_snapshot(connection_id, "keywords", all_keywords, run_id)
 
     # Step 5: search-term report. This is the slow step (1 to 10 minutes
     # via the async Reports v3 API). Failures here are common when Amazon's
@@ -185,7 +220,7 @@ def fetch_ppc_snapshot(connection_id: int) -> dict[str, Any]:
             end_date.isoformat(),
         )
         summary["search_terms_count"] = len(st_rows)
-        _store_snapshot(connection_id, "search_terms", st_rows)
+        _store_snapshot(connection_id, "search_terms", st_rows, run_id)
     except Exception as e:
         msg = f"search_term_report fetch failed: {e}"
         log.warning("connection_id=%d %s", connection_id, msg)
@@ -273,10 +308,18 @@ def fetch_all_active_connections() -> dict[str, int]:
 # ──────────────────────────────────────────────────────────────────────────
 
 def _store_snapshot(connection_id: int, data_type: str,
-                    data: list[dict[str, Any]]) -> None:
+                    data: list[dict[str, Any]],
+                    snapshot_run_id: str | None = None) -> None:
     """
     Insert one snapshot row. The data list is JSON-serialised before insert.
     Postgres column is JSONB; SQLite is TEXT. Both accept the same payload.
+
+    snapshot_run_id is set by `fetch_ppc_snapshot` so every data_type written
+    inside one fetch shares the same id. The suggestion engine reads only
+    rows with matching run_id so a half-completed fetch never poisons the
+    next analysis with stale rows from a different run. Pass None for
+    legacy callers (mock seeders, ad-hoc inserts); the column will be NULL
+    and the engine will fall back to the per-data_type latest read.
     """
     from server import _db
 
@@ -286,11 +329,78 @@ def _store_snapshot(connection_id: int, data_type: str,
     with _db() as (cur, ph):
         cur.execute(
             f"""
-            INSERT INTO ppc_snapshots (connection_id, fetched_at, data_type, data)
-            VALUES ({ph}, {ph}, {ph}, {ph})
+            INSERT INTO ppc_snapshots
+              (connection_id, fetched_at, data_type, data, snapshot_run_id)
+            VALUES ({ph}, {ph}, {ph}, {ph}, {ph})
             """,
-            (connection_id, now, data_type, payload),
+            (connection_id, now, data_type, payload, snapshot_run_id),
         )
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  Retention
+# ──────────────────────────────────────────────────────────────────────────
+
+def run_retention(days: int = SNAPSHOT_RETENTION_DAYS,
+                  db_ctx_factory=None) -> int:
+    """
+    Delete ppc_snapshots rows older than `days` days. Returns rows deleted.
+
+    Why this exists
+    ---------------
+    Amazon's policy review (and basic data minimization) expects raw seller
+    data to be retained only as long as the product needs it. The
+    suggestion engine reads "the latest snapshot per data_type" so anything
+    older than the current run is dead weight. Keeping 90 days gives an
+    operator enough forensic headroom to debug a "why did this suggestion
+    fire on May 3?" question without growing storage unboundedly.
+
+    Call site
+    ---------
+    A daily Railway cron (or the founder's admin endpoint, week 4) calls
+    this once per 24 hours. Safe to run more often: it only deletes rows
+    that already exceeded the retention cap.
+
+    Args:
+        days:             retention window in days. Defaults to
+                          SNAPSHOT_RETENTION_DAYS (90). Pass a smaller
+                          value during a manual cleanup.
+        db_ctx_factory:   callable returning the (cur, placeholder) context
+                          manager. Defaults to `server._db`. Tests pass a
+                          fake.
+
+    Returns:
+        Number of rows deleted, as an int. 0 means nothing was beyond the
+        cutoff (e.g. the table is younger than `days` days, which is the
+        normal case for the first three months of operation).
+
+    Never raises on transient DB errors: caller cron logs the failure and
+    retries the next day. Re-raises only on programmer error
+    (negative `days`, missing table).
+    """
+    if days < 1:
+        raise ValueError(f"run_retention requires days >= 1, got {days}")
+
+    if db_ctx_factory is None:
+        from server import _db as db_ctx_factory   # lazy to avoid cycle
+
+    cutoff = time.time() - days * 86400
+    try:
+        with db_ctx_factory() as (cur, ph):
+            cur.execute(
+                f"DELETE FROM ppc_snapshots WHERE fetched_at < {ph}",
+                (cutoff,),
+            )
+            deleted = int(cur.rowcount or 0)
+    except Exception as e:
+        log.warning("run_retention failed: %s", e)
+        return 0
+
+    log.info(
+        "ppc_snapshots retention done: deleted=%d days=%d cutoff_epoch=%.0f",
+        deleted, days, cutoff,
+    )
+    return deleted
 
 
 def _update_last_synced(connection_id: int) -> None:
