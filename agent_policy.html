@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Amazon BSA Agent Policy Compliance — SellerCopilot</title>
+  <meta name="description" content="How SellerCopilot satisfies the Amazon BSA Agent Policy that takes effect 2026-03-04. Full self-identification, OAuth-only data access, code-backed kill switch.">
+  <link rel="canonical" href="https://asininsight.com/legal/agent-policy">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta name="robots" content="index,follow">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.6 "Segoe UI", Arial, sans-serif; background: #f6f3ec; color: #15263d; -webkit-font-smoothing: antialiased; }
+    h1, h2, h3 { margin: 0; font-family: Georgia, "Times New Roman", serif; letter-spacing: -0.03em; }
+    p { margin: 0; }
+    a { color: #1f5fa8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    :root {
+      --muted: #617184; --line: #ddd4c6; --paper: #fffdfa;
+      --blue: #1f5fa8; --blue-dark: #184d87;
+      --green: #1d6a42; --green-soft: #e7f3eb;
+      --red: #9e402e; --red-soft: #f8e8e2;
+      --amber: #92400e; --amber-soft: #fef3c7;
+    }
+    .wrap { width: min(760px, calc(100% - 32px)); margin: 0 auto; }
+    nav { position: sticky; top: 0; z-index: 50; background: rgba(246,243,236,.96); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(221,212,198,.8); }
+    .nav-inner { width: min(880px, calc(100% - 32px)); margin: 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .logo { font: 700 22px Georgia, serif; }
+    .logo span { color: var(--blue); }
+    .nav-links { display: flex; align-items: center; gap: 14px; }
+    .nav-link { font-size: 14px; color: var(--muted); }
+    .nav-link:hover { color: var(--blue); }
+
+    .hero { padding: 60px 0 24px; }
+    .hero-label { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green); background: var(--green-soft); padding: 5px 12px; border-radius: 999px; margin-bottom: 20px; }
+    .hero h1 { font-size: clamp(30px, 4.6vw, 44px); line-height: 1.1; max-width: 720px; }
+    .hero-sub { margin-top: 18px; max-width: 640px; font-size: 17px; color: var(--muted); }
+    .meta-row { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+    .section { padding: 24px 0 40px; }
+    .section-label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .section h2 { font-size: clamp(22px, 3vw, 30px); line-height: 1.2; margin-bottom: 12px; }
+    .section p { margin-bottom: 14px; max-width: 720px; }
+
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; margin: 20px 0; }
+    .card h3 { font-size: 19px; margin-bottom: 8px; }
+    .card-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+    code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    code { background: #efeae0; padding: 2px 6px; border-radius: 4px; font-size: 13.5px; }
+    pre { background: #1a2a40; color: #e8eef7; padding: 16px 18px; border-radius: 10px; overflow-x: auto; font-size: 13px; line-height: 1.55; margin: 14px 0; }
+
+    table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14.5px; }
+    th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { background: #efeae0; font-weight: 700; }
+    tr:last-child td { border-bottom: none; }
+
+    .callout-green { background: var(--green-soft); border-left: 4px solid var(--green); padding: 14px 18px; border-radius: 6px; color: #0b3a23; margin: 18px 0; font-size: 15px; }
+    .callout-amber { background: var(--amber-soft); border-left: 4px solid var(--amber); padding: 14px 18px; border-radius: 6px; color: #4a2306; margin: 18px 0; font-size: 15px; }
+
+    footer { border-top: 1px solid var(--line); padding: 28px 0 36px; margin-top: 30px; font-size: 13px; color: var(--muted); }
+    footer .foot-links { display: flex; gap: 14px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="logo">Seller<span>Copilot</span></a>
+    <div class="nav-links">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/pricing" class="nav-link">Pricing</a>
+      <a href="/legal/agent-policy" class="nav-link" style="color:var(--blue);font-weight:600;">Agent Policy</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="hero-label">Amazon BSA Agent Policy Compliance</span>
+    <h1>SellerCopilot satisfies the new Amazon Agent Policy by design, not by patch.</h1>
+    <p class="hero-sub">Amazon updated its Business Solutions Agreement on 2026-03-04 to add an Agent Policy for AI tools that act on a seller's behalf. Enforcement starts in early June 2026. This page documents how SellerCopilot meets each requirement, with citations to our own code.</p>
+    <p class="meta-row">Last reviewed: 2026-05-09. Policy in effect: BSA updated 2026-03-04. Author: SellerCopilot engineering.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">What the policy requires</p>
+    <h2>Three obligations for any AI agent that touches Amazon on a seller's behalf</h2>
+    <p>The 2026-03-04 update introduces a defined category of "AI agents" and three explicit obligations. Coverage from <a href="https://ppc.land/amazons-new-ai-agent-rules-shake-up-sellers-before-march-4-deadline/">PPC.land</a> and <a href="https://www.ecommercebytes.com/2026/02/18/amazon-sellers-have-2-weeks-to-ensure-compliance-of-tools-they-use/">EcommerceBytes</a> summarizes the rules:</p>
+    <ol style="max-width:720px;margin:8px 0 18px 18px;">
+      <li>AI agents must clearly identify themselves as automated systems at all times.</li>
+      <li>AI agents must comply with the new Agent Policy at all times.</li>
+      <li>AI agents must cease access immediately if Amazon requests it.</li>
+    </ol>
+    <p>The same coverage explicitly notes: "Browser automation tools, those that control a browser to interact with Seller Central as if they were a human user, are the most directly targeted and are now explicitly prohibited regardless of what actions they perform."</p>
+    <div class="callout-amber">
+      Most existing PPC tools were not built around this policy. The 90-day grace window ends in early June 2026. Sellers using non-compliant tools risk having their connected apps revoked by Amazon.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">How we satisfy each requirement</p>
+
+    <div class="card">
+      <h3>1. Self-identification on every Amazon API call</h3>
+      <p class="card-meta">Implementation: <code>ppc_ads_client.USER_AGENT</code> constant.</p>
+      <p>Every outbound HTTP request from SellerCopilot to an Amazon endpoint sends a User-Agent header that names the tool, declares it as an automated AI agent, and references the policy version it complies with:</p>
+<pre>SellerCopilot/1.0 (Automated AI Agent;
+  Amazon-BSA-Agent-Policy=2026-03-04-compliant;
+  +https://sellercopilot.app/legal/agent-policy)</pre>
+      <p>It is sent on every Amazon Ads API call (campaigns, ad groups, keywords, search-term reports) and every Login With Amazon OAuth token exchange. A continuous-integration test asserts that any code change which removes the policy markers from this header fails the build before the change can ship.</p>
+    </div>
+
+    <div class="card">
+      <h3>2. Architecture that complies by design</h3>
+      <p class="card-meta">Implementation: data-access posture across the full codebase.</p>
+      <table>
+        <thead><tr><th>Policy concern</th><th>SellerCopilot posture</th></tr></thead>
+        <tbody>
+          <tr><td>Browser automation</td><td>Not used. We never control a browser to interact with Seller Central.</td></tr>
+          <tr><td>Scraping</td><td>Not used. We use the official Sponsored Ads API and SP-API only.</td></tr>
+          <tr><td>Unauthorised data pipelines</td><td>Not used. Every byte of seller data comes from OAuth-authorised endpoints the seller explicitly connects to SellerCopilot.</td></tr>
+          <tr><td>Unidentified automation</td><td>Mitigated by the User-Agent header above.</td></tr>
+          <tr><td>Unbounded data pulling</td><td>Mitigated by a 6-hour cache TTL plus per-app rate limits in our snapshot fetcher.</td></tr>
+        </tbody>
+      </table>
+      <p>None of these are recent additions. The architecture has been OAuth-only and API-only since the first commit. We chose this posture before the BSA update was published.</p>
+    </div>
+
+    <div class="card">
+      <h3>3. Code-backed kill switch for cessation on Amazon's request</h3>
+      <p class="card-meta">Implementation: <code>ppc_agent._kill_switch_disconnect_all()</code>.</p>
+      <p>If Amazon asks us to cease access for a specific seller or for all sellers, we can do it in one call. The kill switch flips every active Amazon connection to inactive in a single transaction. Encrypted refresh tokens are preserved so the seller can reconnect later, but no further outbound API call happens until the seller takes that action.</p>
+      <p>Every kill-switch invocation appends a forensic record to our audit log: who triggered it, when, and how many connections were disconnected. We can produce that audit trail to Amazon on request.</p>
+      <p>Continuous-integration tests cover the refusal path when the admin token is unset, the refusal path on a bad token, the success path on a correct token, idempotency on a second call, and the invariant that refresh tokens are preserved through the disconnect.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">Read-only safety mode</p>
+    <h2>SellerCopilot does not write to Amazon. Period.</h2>
+    <p>This is a stronger posture than the policy requires, but it is the heart of how the product works. The policy is about how AI tools should behave when they act on a seller's behalf. SellerCopilot answers a different question: "what if the AI does not act at all, and the seller does?"</p>
+    <p>Every recommendation our engine produces is queued in your dashboard with the math, the evidence, and a one-sentence reason you might still reject it. You read it. You decide. Nothing reaches Amazon until you click apply, and the apply path will require an explicit second confirmation when it ships.</p>
+    <div class="callout-green">
+      A tool that cannot push changes cannot make a billing-surprise change, an account-suspending change, or a profit-destroying change. The structural answer to autopilot risk is to not be on autopilot.
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <p class="section-label">What this page does not cover</p>
+    <h2>Honest scope</h2>
+    <p>This page covers the Amazon Ads and SP-API integration in our current MVP. It does not cover DSP or AMC compliance (we do not call those APIs yet), multi-marketplace data residency beyond the United States (architecture supports it but we have not certified it for EU or JP yet), or any future in-app browser-automation features (we explicitly do not build browser automation).</p>
+    <p>If your workflow needs any of these, write to <a href="mailto:support@asininsight.com">support@asininsight.com</a> and we will tell you whether and when we can support it. We will not pretend we already do.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+    <div>SellerCopilot, an ASINInsight product. Compliance memo last reviewed 2026-05-09.</div>
+    <div class="foot-links">
+      <a href="/">Home</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/privacy">Privacy</a>
+      <a href="/terms">Terms</a>
+      <a href="/refund">Refund</a>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+</body>
+</html>

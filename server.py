@@ -1432,6 +1432,37 @@ def refund():
     return send_from_directory(BASE_DIR, "refund.html")
 
 
+# ── Public BSA Agent Policy compliance page ────────────────────────────────
+# Effective 2026-03-04, enforcement starts early June 2026. This page is
+# the public-facing companion to legal/AGENT_POLICY_COMPLIANCE.md.
+# None of 25 surveyed competitors have a public compliance page as of
+# 2026-05-09 (see research/COMPETITOR_DEEP_DIVE_2026-05-09.md).
+
+@app.route("/legal/agent-policy")
+def legal_agent_policy():
+    return send_from_directory(BASE_DIR, "agent_policy.html")
+
+
+# ── AdLabs head-to-head comparison page ────────────────────────────────────
+# AdLabs is the direct competitor on positioning (verbatim approval-first
+# language). This page is honest about where they are stronger and where
+# we are different, with verbatim quotes from their site sourced 2026-05-09.
+
+@app.route("/compare/adlabs")
+def compare_adlabs():
+    return send_from_directory(BASE_DIR, "compare_adlabs.html")
+
+
+# ── Perpetua head-to-head comparison page ──────────────────────────────────
+# Perpetua is the autopilot category leader. The split is structural:
+# they auto-apply, we cannot push at all. This page is honest about
+# where they are stronger and where we are different.
+
+@app.route("/compare/perpetua")
+def compare_perpetua():
+    return send_from_directory(BASE_DIR, "compare_perpetua.html")
+
+
 # ── Paddle config for frontend ─────────────────────────────────────────────
 
 @app.route("/api/paddle-config")
