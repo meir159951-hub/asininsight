@@ -1,5 +1,5 @@
 """
-Amazon Ads API client wrapper for SellerCopilot.
+Amazon Ads API client wrapper for ASINInsight.
 
 Read-only HTTP client over the Amazon Ads API. Write operations land in
 week 6 when we implement the suggestion applier. The client does three
@@ -15,7 +15,7 @@ jobs the raw SDK does not:
    expiry (rare but documented).
 
 3. Self-identifies in User-Agent per Amazon's March 2026 Agent Policy.
-   Every request carries SellerCopilot/1.0 (AI Agent) so Amazon can
+   Every request carries ASINInsight/1.0 (AI Agent) so Amazon can
    distinguish our automated traffic from the seller's manual activity.
 
 Rate limit: best-effort 5 requests per second, process-local. Documented
@@ -70,7 +70,7 @@ ADS_API_BASE_URL = _REGION_TO_BASE_URL.get(ADS_API_REGION, _REGION_TO_BASE_URL["
 # themselves as automated systems at all times."
 #
 # This User-Agent string:
-#   - names SellerCopilot and the version,
+#   - names ASINInsight and the version,
 #   - explicitly self-identifies as an automated AI agent (not a human),
 #   - declares BSA Agent Policy compliance with the effective date,
 #   - links to a human-readable compliance page Amazon can audit.
@@ -78,10 +78,10 @@ ADS_API_BASE_URL = _REGION_TO_BASE_URL.get(ADS_API_REGION, _REGION_TO_BASE_URL["
 # The string is also asserted by a CI test (test_user_agent_self_identifies_*)
 # so accidental edits that drop the AI / BSA markers fail loudly.
 USER_AGENT = (
-    "SellerCopilot/1.0 "
+    "ASINInsight/1.0 "
     "(Automated AI Agent; "
     "Amazon-BSA-Agent-Policy=2026-03-04-compliant; "
-    "+https://sellercopilot.app/legal/agent-policy)"
+    "+https://asininsight.com/legal/agent-policy)"
 )
 
 # Same client id used for LWA. Every Ads API call sends it as a header so

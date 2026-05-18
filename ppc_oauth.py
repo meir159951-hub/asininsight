@@ -2,7 +2,7 @@
 PPC OAuth helper, Amazon Login With Amazon (LWA) token exchange and refresh.
 
 This module handles the three OAuth operations needed to connect a seller's
-Amazon Seller Central account to SellerCopilot:
+Amazon Seller Central account to ASINInsight:
 
 1. exchange_oauth_code: one-time exchange of the authorization code returned
    by Amazon after the seller approves consent. Returns a long-lived

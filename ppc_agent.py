@@ -1225,7 +1225,7 @@ def csv_sample_download():
         mimetype="text/csv; charset=utf-8",
         headers={
             "Content-Disposition":
-                'attachment; filename="sellercopilot-sample-search-term.csv"',
+                'attachment; filename="asininsight-sample-search-term.csv"',
             "Cache-Control": "public, max-age=3600",
         },
     )
@@ -1351,12 +1351,12 @@ def csv_analyze():
     # as demo data. Both signals must agree: filename matches the sample
     # asset AND the body contains the synthetic-only marker text. The
     # filename alone is too easy to spoof; the marker alone would
-    # false-positive on a real seller who happens to use "sellercopilot
+    # false-positive on a real seller who happens to use "asininsight
     # demo-marker" in a keyword (vanishingly unlikely). Together they're
     # tight enough for an honesty banner.
     is_sample = (
         (upload.filename or "").lower()
-        == "sellercopilot-sample-search-term.csv"
+        == "asininsight-sample-search-term.csv"
         and "demo no-sales term" in text
     )
 
@@ -1644,7 +1644,7 @@ def ppc_audit_export_csv():
     # should read this if they import the file.
     writer.writerow([])
     writer.writerow([
-        "# SellerCopilot does not write to Amazon. All proposed changes are queued",
+        "# ASINInsight does not write to Amazon. All proposed changes are queued",
         "# for the seller to apply manually. 'classification' describes how the",
         "# observed metrics moved relative to baseline, never causation.",
     ])
@@ -1652,7 +1652,7 @@ def ppc_audit_export_csv():
     csv_bytes = buf.getvalue().encode("utf-8-sig")  # BOM for Excel
     from flask import Response
     headers = {
-        "Content-Disposition": 'attachment; filename="sellercopilot_decision_audit.csv"',
+        "Content-Disposition": 'attachment; filename="asininsight_decision_audit.csv"',
         "Content-Type": "text/csv; charset=utf-8",
     }
     log.info("audit_export_csv served %d rows for customer_id=%s", total_rows, customer_id)

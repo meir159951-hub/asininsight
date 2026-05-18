@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Amazon BSA Agent Policy Compliance, SellerCopilot</title>
-  <meta name="description" content="How SellerCopilot satisfies the Amazon BSA Agent Policy that takes effect 2026-03-04. Full self-identification, OAuth-only data access, code-backed kill switch.">
+  <title>Amazon BSA Agent Policy Compliance, ASINInsight</title>
+  <meta name="description" content="How ASINInsight satisfies the Amazon BSA Agent Policy that takes effect 2026-03-04. Full self-identification, OAuth-only data access, code-backed kill switch.">
   <link rel="canonical" href="https://asininsight.com/legal/agent-policy">
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
   <meta name="robots" content="index,follow">
@@ -80,9 +80,9 @@
 <section class="hero">
   <div class="wrap">
     <span class="hero-label">Amazon BSA Agent Policy Compliance</span>
-    <h1>SellerCopilot satisfies the new Amazon Agent Policy by design, not by patch.</h1>
-    <p class="hero-sub">Amazon updated its Business Solutions Agreement on 2026-03-04 to add an Agent Policy for AI tools that act on a seller's behalf. Enforcement starts in early June 2026. This page documents how SellerCopilot meets each requirement, with citations to our own code.</p>
-    <p class="meta-row">Last reviewed: 2026-05-09. Policy in effect: BSA updated 2026-03-04. Author: SellerCopilot engineering.</p>
+    <h1>ASINInsight satisfies the new Amazon Agent Policy by design, not by patch.</h1>
+    <p class="hero-sub">Amazon updated its Business Solutions Agreement on 2026-03-04 to add an Agent Policy for AI tools that act on a seller's behalf. Enforcement starts in early June 2026. This page documents how ASINInsight meets each requirement, with citations to our own code.</p>
+    <p class="meta-row">Last reviewed: 2026-05-09. Policy in effect: BSA updated 2026-03-04. Author: ASINInsight engineering.</p>
   </div>
 </section>
 
@@ -110,10 +110,10 @@
     <div class="card">
       <h3>1. Self-identification on every Amazon API call</h3>
       <p class="card-meta">Implementation: <code>ppc_ads_client.USER_AGENT</code> constant.</p>
-      <p>Every outbound HTTP request from SellerCopilot to an Amazon endpoint sends a User-Agent header that names the tool, declares it as an automated AI agent, and references the policy version it complies with:</p>
-<pre>SellerCopilot/1.0 (Automated AI Agent;
+      <p>Every outbound HTTP request from ASINInsight to an Amazon endpoint sends a User-Agent header that names the tool, declares it as an automated AI agent, and references the policy version it complies with:</p>
+<pre>ASINInsight/1.0 (Automated AI Agent;
   Amazon-BSA-Agent-Policy=2026-03-04-compliant;
-  +https://sellercopilot.app/legal/agent-policy)</pre>
+  +https://asininsight.com/legal/agent-policy)</pre>
       <p>It is sent on every Amazon Ads API call (campaigns, ad groups, keywords, search-term reports) and every Login With Amazon OAuth token exchange. A continuous-integration test asserts that any code change which removes the policy markers from this header fails the build before the change can ship.</p>
     </div>
 
@@ -121,11 +121,11 @@
       <h3>2. Architecture that complies by design</h3>
       <p class="card-meta">Implementation: data-access posture across the full codebase.</p>
       <table>
-        <thead><tr><th>Policy concern</th><th>SellerCopilot posture</th></tr></thead>
+        <thead><tr><th>Policy concern</th><th>ASINInsight posture</th></tr></thead>
         <tbody>
           <tr><td>Browser automation</td><td>Not used. We never control a browser to interact with Seller Central.</td></tr>
           <tr><td>Scraping</td><td>Not used. We use the official Sponsored Ads API and SP-API only.</td></tr>
-          <tr><td>Unauthorised data pipelines</td><td>Not used. Every byte of seller data comes from OAuth-authorised endpoints the seller explicitly connects to SellerCopilot.</td></tr>
+          <tr><td>Unauthorised data pipelines</td><td>Not used. Every byte of seller data comes from OAuth-authorised endpoints the seller explicitly connects to ASINInsight.</td></tr>
           <tr><td>Unidentified automation</td><td>Mitigated by the User-Agent header above.</td></tr>
           <tr><td>Unbounded data pulling</td><td>Mitigated by a 6-hour cache TTL plus per-app rate limits in our snapshot fetcher.</td></tr>
         </tbody>
@@ -146,8 +146,8 @@
 <section class="section">
   <div class="wrap">
     <p class="section-label">Read-only safety mode</p>
-    <h2>SellerCopilot does not write to Amazon. Period.</h2>
-    <p>This is a stronger posture than the policy requires, but it is the heart of how the product works. The policy is about how AI tools should behave when they act on a seller's behalf. SellerCopilot answers a different question: "what if the AI does not act at all, and the seller does?"</p>
+    <h2>ASINInsight does not write to Amazon. Period.</h2>
+    <p>This is a stronger posture than the policy requires, but it is the heart of how the product works. The policy is about how AI tools should behave when they act on a seller's behalf. ASINInsight answers a different question: "what if the AI does not act at all, and the seller does?"</p>
     <p>Every recommendation our engine produces is queued in your dashboard with the math, the evidence, and a one-sentence reason you might still reject it. You read it. You decide. Nothing reaches Amazon until you click apply, and the apply path will require an explicit second confirmation when it ships.</p>
     <div class="callout-green">
       A tool that cannot push changes cannot make a billing-surprise change, an account-suspending change, or a profit-destroying change. The structural answer to autopilot risk is to not be on autopilot.
@@ -166,7 +166,7 @@
 
 <footer>
   <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
-    <div>SellerCopilot, an ASINInsight product. Compliance memo last reviewed 2026-05-09.</div>
+    <div>ASINInsight, an ASINInsight product. Compliance memo last reviewed 2026-05-09.</div>
     <div class="foot-links">
       <a href="/">Home</a>
       <a href="/pricing">Pricing</a>

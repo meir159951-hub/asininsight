@@ -1,5 +1,5 @@
 """
-Mock PPC snapshot data for SellerCopilot dev / tests.
+Mock PPC snapshot data for ASINInsight dev / tests.
 
 Why this exists
 ---------------

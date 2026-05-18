@@ -835,7 +835,7 @@ def test_csv_upload_form_links_to_sample(client):
 
 def test_csv_analyze_flags_sample_upload_as_demo_data(client):
     """
-    When a prospect downloads sellercopilot-sample-search-term.csv from
+    When a prospect downloads asininsight-sample-search-term.csv from
     /ppc/csv/sample.csv and re-uploads it, the findings page must show a
     'Demo data' banner so screenshots can't be confused with a real
     seller's PPC waste. Detection requires both: the canonical filename
@@ -845,7 +845,7 @@ def test_csv_analyze_flags_sample_upload_as_demo_data(client):
     sample = client.get("/ppc/csv/sample.csv").get_data(as_text=True)
     data = {
         "file": (io.BytesIO(sample.encode("utf-8")),
-                 "sellercopilot-sample-search-term.csv"),
+                 "asininsight-sample-search-term.csv"),
     }
     resp = client.post("/ppc/csv/analyze", data=data,
                        content_type="multipart/form-data")
@@ -877,7 +877,7 @@ def test_csv_analyze_does_not_flag_filename_spoof_as_demo(client):
     """
     data = {
         "file": (io.BytesIO(SEARCH_TERM_CSV.encode("utf-8")),
-                 "sellercopilot-sample-search-term.csv"),
+                 "asininsight-sample-search-term.csv"),
     }
     resp = client.post("/ppc/csv/analyze", data=data,
                        content_type="multipart/form-data")
@@ -1196,7 +1196,7 @@ def test_csv_preview_does_not_render_projection_block(client):
 def test_user_agent_self_identifies_as_automated_ai_agent():
     from ppc_ads_client import USER_AGENT
     ua_lower = USER_AGENT.lower()
-    assert "sellercopilot" in ua_lower
+    assert "asininsight" in ua_lower
     assert "automated" in ua_lower
     assert "ai agent" in ua_lower
 

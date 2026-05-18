@@ -1,5 +1,5 @@
 """
-CSV ingest path for SellerCopilot PPC Agent.
+CSV ingest path for ASINInsight PPC Agent.
 
 Why this module exists
 ----------------------

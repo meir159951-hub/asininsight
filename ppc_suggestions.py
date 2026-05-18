@@ -1,5 +1,5 @@
 """
-PPC suggestion engine for SellerCopilot.
+PPC suggestion engine for ASINInsight.
 
 Reads the latest `ppc_snapshots` rows for one connection, runs five rules over
 the data, and writes the findings to `ppc_suggestions`. The flow stays
@@ -294,7 +294,7 @@ def money_found_breakdown(suggestions: list[dict[str, Any]]) -> dict[str, float]
 # The math is deliberately conservative: the headline shows an
 # evidence-weighted "likely impact" smaller than the raw 30-day cost the
 # rule already reports as `estimated_savings`. The raw number stays in
-# `estimated_savings` for banner totals; the card is where SellerCopilot's
+# `estimated_savings` for banner totals; the card is where ASINInsight's
 # per-recommendation explanation depth lives.
 #
 # Pure: no DB, no clock dependence except through inputs. Deterministic.
@@ -999,7 +999,7 @@ def rank_recommendations(cards: list[dict[str, Any]],
 #  Minimal seller memory (cycle-18 / Task 3)
 # ──────────────────────────────────────────────────────────────────────────
 #
-# Goal: SellerCopilot visibly remembers what the seller rejected, without
+# Goal: ASINInsight visibly remembers what the seller rejected, without
 # building a vector store or a per-rule learning model. The whole layer
 # is two helpers, one filter, and one render-side query:
 #
@@ -2819,7 +2819,7 @@ def _maybe_load_json(value: Any) -> dict[str, Any]:
 # classification + honest summary string.
 #
 # CRITICAL ANTI-OVERCLAIM RULE:
-#   The summary MUST describe what the metrics did, never what SellerCopilot
+#   The summary MUST describe what the metrics did, never what ASINInsight
 #   did. The product cannot write to Amazon, so any change is at most
 #   correlated with the decision, never caused by it. Test
 #   `test_decision_outcomes.py::test_no_summary_claims_causation` enforces
@@ -2844,9 +2844,9 @@ OUTCOME_CAUSATION_FORBIDDEN_PHRASES: tuple[str, ...] = (
     "our recommendation worked",
     "we improved",
     "we caused",
-    "sellercopilot improved",
-    "sellercopilot increased",
-    "sellercopilot decreased",
+    "asininsight improved",
+    "asininsight increased",
+    "asininsight decreased",
     "as a result of our",
     "due to our",
 )

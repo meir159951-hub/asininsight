@@ -2,7 +2,7 @@
 Tests for decision-outcome classification (Track B 2026-05-09 sprint).
 
 The classifier is deliberately strict about what it claims: it describes
-metric movements, never causation, because SellerCopilot does not write
+metric movements, never causation, because ASINInsight does not write
 to Amazon. The "no causation" rule is enforced both at runtime and in
 this test file. If a future change loosens the language, these tests
 break the build before it ships.
@@ -657,7 +657,7 @@ def test_audit_classification_label_never_claims_causation():
     from ppc_suggestions import audit_classification_label
 
     forbidden = ("worked", "succeeded", "we caused", "our recommendation",
-                 "sellercopilot", "we improved", "as a result")
+                 "asininsight", "we improved", "as a result")
 
     classifications = [
         "metrics_moved_better", "metrics_moved_worse", "no_change",
@@ -862,7 +862,7 @@ def test_load_recent_approvals_filters_by_status_and_window(observer_db):
 # ──────────────────────────────────────────────────────────────────────────
 #
 # These tests grep static assets and user-facing template files for
-# language that would imply SellerCopilot caused a metric movement.
+# language that would imply ASINInsight caused a metric movement.
 # They are the stack-wide enforcement of the rule that classify_outcome
 # enforces at the data layer.
 #
@@ -907,16 +907,16 @@ ANTI_OVERCLAIM_FORBIDDEN_PHRASES = (
     "we caused this",
     "due to our recommendation",
     "as a result of our",
-    "sellercopilot improved",
-    "sellercopilot increased",
-    "sellercopilot decreased",
+    "asininsight improved",
+    "asininsight increased",
+    "asininsight decreased",
     "guaranteed result",
     "guaranteed outcome",
 )
 
 
 def test_no_template_claims_causation():
-    """No customer-facing file claims SellerCopilot caused a movement."""
+    """No customer-facing file claims ASINInsight caused a movement."""
     for path in ANTI_OVERCLAIM_FILES:
         content = _read_file(path).lower()
         if not content:
@@ -924,7 +924,7 @@ def test_no_template_claims_causation():
         for forbidden in ANTI_OVERCLAIM_FORBIDDEN_PHRASES:
             assert forbidden not in content, (
                 f"Anti-overclaim violation in {path}: forbidden phrase "
-                f"{forbidden!r} found. SellerCopilot does not write to "
+                f"{forbidden!r} found. ASINInsight does not write to "
                 f"Amazon, so causation language is dishonest."
             )
 

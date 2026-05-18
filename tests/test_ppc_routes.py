@@ -595,7 +595,7 @@ def test_dashboard_subtitle_does_not_imply_live_apply(client, db):
     built. Dashboard must explicitly disclose that approving queues, and
     must NOT phrase Approve as the trigger that pushes to Amazon.
 
-    Per SELLERCOPILOT_POSITIONING_UPDATE.md section 8, "approval-first" is
+    Per ASININSIGHT_POSITIONING_UPDATE.md section 8, "approval-first" is
     now trust scaffolding rather than the headline; the page leads with
     the decision-assistant framing.
     """

@@ -1,6 +1,6 @@
 # REAL DATA VALIDATION PLAN
 
-For internal use only. Operational protocol for running SellerCopilot
+For internal use only. Operational protocol for running ASINInsight
 (the PPC Agent) against real seller PPC data before any beta outreach.
 This document turns Section 6 of
 [INTERNAL_MVP_DEMO_CHECKLIST.md](INTERNAL_MVP_DEMO_CHECKLIST.md) from
@@ -13,7 +13,7 @@ no commits to main, no live Amazon writes wired.
 A predecessor doc from the pre-pivot era lives at
 [REAL_DATA_VALIDATION_PLAN_LEGACY_ASININSIGHT.md](REAL_DATA_VALIDATION_PLAN_LEGACY_ASININSIGHT.md).
 That doc covers the older ASINInsight Business Reports tool and is
-not authoritative for SellerCopilot. Ignore it unless you are
+not authoritative for ASINInsight. Ignore it unless you are
 researching the pivot history.
 
 ## Scope: what this plan tests, and what it does not
@@ -323,7 +323,7 @@ failure mode and fix are usually one of:
 
 This is the most subjective metric and the most important one. A
 recommendation is **obvious** if the seller would have caught it
-within their next 7-day Excel review without SellerCopilot. A
+within their next 7-day Excel review without ASINInsight. A
 recommendation is **non-obvious** if they would have missed it
 entirely or for 30+ days.
 
@@ -490,7 +490,7 @@ Per-CSV verdict: PASS / FAIL
 the parser, or the seller's reaction. one to three short
 paragraphs.>
 
-## Follow-up actions for SellerCopilot itself
+## Follow-up actions for ASINInsight itself
 
 <bullet list of code, copy, or rule changes this CSV revealed.
 empty list is fine if nothing surfaced.>

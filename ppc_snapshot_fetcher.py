@@ -1,5 +1,5 @@
 """
-Daily PPC snapshot fetcher for SellerCopilot.
+Daily PPC snapshot fetcher for ASINInsight.
 
 Orchestrates the periodic pull of PPC data from Amazon Ads API into the
 local Postgres ppc_snapshots table. The suggestion generator reads from
