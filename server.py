@@ -3552,7 +3552,12 @@ def api_diagnose():
     )
     if has_hard_violation:
         min_conf = "low"
-        score = min(score, 70)
+        # Score is meaningless when the input is internally contradictory
+        # (sessions=0+orders, negative ACOS, $0 price). Returning 60 alongside
+        # a "paused — corrupt" headline lets the UI render misleading
+        # severity badges and revenue estimates as if the findings were
+        # actionable. Drop to 0 and let the frontend hide the gauge.
+        score = 0
         # Override the "looks healthy" headline so corrupt input doesn't
         # appear as a green light. This must run AFTER the headline cascade
         # above; the cascade only sees blocker count, not data-quality.
@@ -3731,6 +3736,21 @@ def api_diagnose():
                 "margin_per_ad_sale":    round(margin_per_ad_sale_at_be, 2),
                 "selling_price_source":  "user" if selling_price_input > 0 else "csv_average",
             }
+
+    # When the input contained hard sanity violations (impossible metrics),
+    # suppress the misleading findings entirely. The headline already tells
+    # the user the diagnosis is paused; returning critical-severity per-ASIN
+    # rows and confident revenue estimates alongside it contradicts that
+    # message. Frontend reads data_quality.data_corrupt to skip rendering
+    # gauge/cards/table.
+    if has_hard_violation:
+        data_quality["data_corrupt"] = True
+        problems       = []
+        recs           = []
+        per_asin       = []
+        rev            = ""
+        break_even     = None
+        llm_insights   = []
 
     return jsonify({
         "overall_score":            score,

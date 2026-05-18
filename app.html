@@ -1205,6 +1205,27 @@ function renderResults(data) {
   const problem  = Array.isArray(data.problems) && data.problems.length ? data.problems[0] : null;
   const rec      = Array.isArray(data.recommendations) && data.recommendations.length ? data.recommendations[0] : null;
   const revenue  = data.revenue_impact || data.estimated_revenue_impact || '';
+  const dataCorrupt = !!(data.data_quality && data.data_quality.data_corrupt);
+
+  // Corrupt-input short-circuit. When the server flags the upload as having
+  // hard sanity violations (sessions=0 with orders, negative ACOS, $0 price,
+  // physically impossible CTR/CVR), don't render gauge/cards/table — they'd
+  // contradict the "Diagnosis paused" headline.
+  if (dataCorrupt) {
+    document.getElementById('scoreNum').textContent = '—';
+    const circle = document.getElementById('scoreCircle');
+    circle.className = 'score-circle score-crit';
+    document.getElementById('headline').textContent = headline;
+    const badge = document.getElementById('confBadge');
+    badge.textContent = 'Input check failed';
+    badge.className = 'conf-badge conf-low';
+    ['resultsContext','benchPill','batchSection','issueCard','impactCard',
+     'aiInsightsCard','confNote','followUpNote','breakEvenPanel','reauditCard']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.hidden = true; });
+    const list = document.getElementById('actionList');
+    if (list) list.innerHTML = '<li class="action-step" style="border-left-color:#dc2626;"><div class="step-num" style="background:#dc2626;">!</div><div class="step-body"><div class="step-text">Re-export your <strong>Detail Page Sales and Traffic by Child Item</strong> report from Seller Central → Reports → Business Reports, set the date range to the last 30 days, and upload the fresh CSV. We don\'t show diagnoses when the input has impossible metrics — it would mislead you.</div></div></li>';
+    return;
+  }
 
   // Context line — tone shifts with severity. Healthy listings get a different framing entirely.
   const ctxEl = document.getElementById('resultsContext');
