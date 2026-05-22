@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>asininsight — סקירת מוצר</title>
+<style>
+  :root {
+    --bg: #f7f7f5;
+    --card: #ffffff;
+    --ink: #1a1a1a;
+    --muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-soft: #eff4ff;
+    --line: #e5e5e3;
+    --warn: #b45309;
+    --good: #047857;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", "Helvetica Neue", "Arial Hebrew", "Heebo", Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+  }
+  body { overflow: hidden; }
+  .deck { width: 100vw; height: 100vh; position: relative; }
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 6vh 8vw;
+    display: none;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  h1 {
+    font-size: 56px;
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+  }
+  h2 {
+    font-size: 38px;
+    line-height: 1.15;
+    font-weight: 700;
+    margin-bottom: 28px;
+    letter-spacing: -0.3px;
+  }
+  h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  p { font-size: 20px; color: var(--ink); margin-bottom: 16px; max-width: 80ch; }
+  .lead { font-size: 26px; color: var(--ink); margin-bottom: 24px; max-width: 75ch; line-height: 1.4; }
+  .muted { color: var(--muted); }
+  ul { list-style: none; padding: 0; margin: 0 0 16px 0; }
+  ul li {
+    padding: 8px 0 8px 22px;
+    position: relative;
+    font-size: 19px;
+    border-bottom: 1px solid var(--line);
+  }
+  ul li:last-child { border-bottom: none; }
+  ul li::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 18px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .grid { display: grid; gap: 20px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card h3 { margin-bottom: 10px; }
+  .card p { font-size: 17px; color: var(--muted); margin: 0; }
+  .pill {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    background: var(--card);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  th, td {
+    text-align: right;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    font-size: 17px;
+  }
+  th { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  tr:last-child td { border-bottom: none; }
+  .footer {
+    position: absolute;
+    bottom: 24px;
+    left: 8vw;
+    right: 8vw;
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .nav {
+    position: absolute;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .nav button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 6px;
+  }
+  .nav button:hover { background: var(--accent-soft); color: var(--accent); }
+  .quote {
+    border-right: 4px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 20px 24px;
+    font-size: 22px;
+    border-radius: 0 12px 12px 0;
+    margin: 18px 0;
+    color: var(--ink);
+  }
+  .kpi {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .kpi b { font-size: 36px; font-weight: 700; color: var(--accent); }
+  .kpi span { font-size: 16px; color: var(--muted); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .demo-flow {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 20px;
+  }
+  .demo-flow .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+  .demo-flow .arrow {
+    align-self: center;
+    color: var(--muted);
+    font-size: 26px;
+  }
+  .danger-card { border-right: 4px solid var(--warn); }
+  .good-card { border-right: 4px solid var(--good); }
+  .small { font-size: 15px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1. שער -->
+  <section class="slide active">
+    <div class="eyebrow">סקירת מוצר · מאי 2026</div>
+    <h1>asininsight</h1>
+    <p class="lead">למה ה-ASIN הזה הפסיק לצמוח? <br>כלי אבחון ממוקד למוכרים באמזון.</p>
+    <div style="margin-top: 40px;">
+      <p class="muted">מצגת לרוי — שיחת היכרות וייעוץ מוצרי</p>
+      <p class="muted">מאיר · meir159951@gmail.com</p>
+    </div>
+  </section>
+
+  <!-- 2. מטרת הפגישה -->
+  <section class="slide">
+    <div class="eyebrow">למה אנחנו נפגשים</div>
+    <h2>מה אני מחפש מהשיחה</h2>
+    <p class="lead">אני לא מחפש פידבק על קוד. אני מחפש זווית חיצונית של מהנדס תוכנה ומומחה AI על המוצר עצמו.</p>
+    <div class="grid grid-3" style="margin-top: 24px;">
+      <div class="card">
+        <h3>חשיבה מוצרית</h3>
+        <p>האם הבידול שלי מספיק חד? האם השוק יקנה את זה?</p>
+      </div>
+      <div class="card">
+        <h3>זווית AI</h3>
+        <p>איפה AI באמת מוסיף ערך פה, ואיפה זה רק רעש?</p>
+      </div>
+      <div class="card">
+        <h3>סדרי עדיפויות</h3>
+        <p>מה הצעד הבא הכי חכם — ולא הכי מובן מאליו.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. הבעיה -->
+  <section class="slide">
+    <div class="eyebrow">הבעיה</div>
+    <h2>מוכר באמזון רואה את המכירות עוצרות — ולא יודע למה</h2>
+    <p class="lead">הוא מסתכל על דשבורד עם 40 מטריקות, וכל כלי שיש לו אומר לו עוד נתונים. אף אחד לא אומר לו: <b>זה הדבר השבור, זה הצעד הבא</b>.</p>
+    <div class="two-col" style="margin-top: 24px;">
+      <div>
+        <h3>מה הוא מחפש</h3>
+        <ul>
+          <li>תשובה ברורה, לא עוד גרף</li>
+          <li>סדר עדיפויות — מה לתקן קודם</li>
+          <li>שפה אנושית, לא ז'רגון</li>
+          <li>בלי ללמוד עוד פלטפורמה</li>
+        </ul>
+      </div>
+      <div>
+        <h3>מה הוא מקבל היום</h3>
+        <ul>
+          <li>דשבורדים עמוסים (Helium 10, Jungle Scout)</li>
+          <li>פיצ'רים שהוא לא משתמש ב-80% מהם</li>
+          <li>מחיר חודשי של $100-$400</li>
+          <li>עקומת למידה רצינית</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. המוצר -->
+  <section class="slide">
+    <div class="eyebrow">המוצר</div>
+    <h2>תשובה אחת לשאלה אחת</h2>
+    <div class="quote">"Why Sales Stalled" — מוכר מעלה CSV של ASIN, מקבל אבחון מדורג של חמש סיבות עיקריות לעצירת הצמיחה, ותכנית פעולה ממוקדת.</div>
+    <div class="demo-flow">
+      <div class="step">
+        <h3>1. העלאה</h3>
+        <p class="small">קובץ CSV עם מטריקות ASIN. בלי חשבון, בלי OAuth, בלי Amazon API.</p>
+      </div>
+      <div class="arrow">←</div>
+      <div class="step">
+        <h3>2. אבחון</h3>
+        <p class="small">מנוע חוקים בודק 6 צירים: CTR, conversion, trust, ad waste, inventory, listing quality.</p>
+      </div>
+      <div class="arrow">←</div>
+      <div class="step">
+        <h3>3. תוצאה</h3>
+        <p class="small">ציון צמיחה (0-100), 3-5 חסמים מדורגים, ופעולה מומלצת לכל חסם.</p>
+      </div>
+    </div>
+    <p style="margin-top: 28px;" class="muted">דמו עובד היום, בלי תלות באמזון. אפשר להראות לרוי בלחיצה.</p>
+  </section>
+
+  <!-- 5. סקר שוק -->
+  <section class="slide">
+    <div class="eyebrow">סקר שוק</div>
+    <h2>מי כבר משחק בזירה</h2>
+    <table>
+      <thead>
+        <tr><th>שחקן</th><th>קטגוריה</th><th>חוזק עיקרי</th><th>מחיר חודשי</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Helium 10</b></td><td>Seller suite מקיף</td><td>מחקר מילות מפתח, ניתוח listings</td><td>$39-$279</td></tr>
+        <tr><td><b>Jungle Scout</b></td><td>Seller suite + research</td><td>חיפוש מוצרים חדשים, נתוני שוק</td><td>$49-$129</td></tr>
+        <tr><td><b>SellerApp</b></td><td>Analytics + PPC</td><td>אופטימיזציית פרסום</td><td>$49-$199</td></tr>
+        <tr><td><b>Perpetua / AdLabs</b></td><td>PPC automation</td><td>ניהול קמפיינים אוטומטי</td><td>$250+</td></tr>
+        <tr><td><b>Amazon Seller Central</b></td><td>הפלטפורמה עצמה</td><td>AI helper מובנה הולך וגדל</td><td>חינם</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top: 24px;" class="muted">המסקנה: בניית עוד "סוויטה" היא קרב מפסיד. אמזון עצמה מוסיפה AI מובנה. צריך משהו צר וחד יותר.</p>
+  </section>
+
+  <!-- 6. בידול -->
+  <section class="slide">
+    <div class="eyebrow">בידול</div>
+    <h2>איפה אנחנו שונים — ולמה זה חשוב</h2>
+    <table>
+      <thead>
+        <tr><th>ציר</th><th>הכלים הגדולים</th><th>asininsight</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>היקף</td><td>עשרות workflows</td><td>workflow אחד: אבחון</td></tr>
+        <tr><td>פלט עיקרי</td><td>דשבורד עם מטריקות</td><td>רשימה מדורגת של חסמים + פעולות</td></tr>
+        <tr><td>עקומת למידה</td><td>בינונית-גבוהה</td><td>נמוכה — דקה ראשונה</td></tr>
+        <tr><td>קונה אידאלי</td><td>Power user, סוויטה שלמה</td><td>מוכר קטן-בינוני עם כאב ספציפי</td></tr>
+        <tr><td>אינטגרציית אמזון</td><td>OAuth מלא נדרש</td><td>CSV — בלי חשבון, בלי חיכוך</td></tr>
+        <tr><td>פוזיציה</td><td>"מערכת הפעלה למוכר"</td><td>"רופא אבחון לצמיחה"</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 7. הסיכון שצריך להודות בו -->
+  <section class="slide">
+    <div class="eyebrow">מה שאני לא יודע</div>
+    <h2>הסיכון שצריך להודות בו</h2>
+    <div class="quote">הסיכון הגדול הוא לא טכני. הוא שהמוכר יגיד: "אני כבר מקבל מספיק תובנות מהכלים שיש לי."</div>
+    <div class="grid grid-2" style="margin-top: 24px;">
+      <div class="card danger-card">
+        <h3>שאלות פתוחות</h3>
+        <ul>
+          <li>האם האבחון באמת מרגיש שונה ממה שמוכר רואה בהליום 10?</li>
+          <li>האם מוכרים יעלו CSV ידנית, או שזה חיכוך מת?</li>
+          <li>מי הקונה הראשון בפועל — מוכר חדש או vet?</li>
+        </ul>
+      </div>
+      <div class="card good-card">
+        <h3>מה כבר תקף</h3>
+        <ul>
+          <li>MVP עובד מקצה לקצה</li>
+          <li>אפשר לעשות דמו בלי אינטגרציה</li>
+          <li>הלוגיקה מכוילת מול תרחישים</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. מודל עסקי -->
+  <section class="slide">
+    <div class="eyebrow">מודל עסקי</div>
+    <h2>שלוש מדרגות, מהנמוכה ביותר חיכוך</h2>
+    <div class="grid grid-3" style="margin-top: 16px;">
+      <div class="card">
+        <div class="pill">שלב 1</div>
+        <h3>דוח חד-פעמי</h3>
+        <p>מוכר מעלה CSV, משלם $19-$49 ומקבל אבחון מלא. אפס מחויבות, אפס onboarding.</p>
+      </div>
+      <div class="card">
+        <div class="pill">שלב 2</div>
+        <h3>מעקב חודשי</h3>
+        <p>$29-$79 לחודש על ניטור מתמשך של פורטפוליו ASINs, התראות כשמשהו מתדרדר.</p>
+      </div>
+      <div class="card">
+        <div class="pill">שלב 3</div>
+        <h3>הרחבה לחנות</h3>
+        <p>אינטגרציית Amazon API, התראות חכמות, store-level views. רק אחרי שיש Retention מוכח.</p>
+      </div>
+    </div>
+    <p style="margin-top: 28px;" class="muted">העיקרון: לא משיקים תוכנית שהיא לא בטוחים שלקוחות צריכים. כל שלב מוכיח את הבא.</p>
+  </section>
+
+  <!-- 9. סטטוס נוכחי -->
+  <section class="slide">
+    <div class="eyebrow">איפה אני עכשיו</div>
+    <h2>מה קיים, ומה הצעד הבא</h2>
+    <div class="two-col" style="margin-top: 16px;">
+      <div>
+        <h3>קיים</h3>
+        <ul>
+          <li>MVP עובד בדפדפן (CSV → אבחון → תוצאה)</li>
+          <li>מנוע חוקים ל-6 צירי אבחון</li>
+          <li>landing, pricing, מערכת חיוב (Paddle)</li>
+          <li>דפי השוואה למתחרים</li>
+          <li>תשתית PPC agent + OAuth (לשלב 3)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>הצעד הבא</h3>
+        <ul>
+          <li>Real-data validation על CSVs מלוכלכים</li>
+          <li>5-10 שיחות עם מוכרים אמיתיים</li>
+          <li>החלטה: האם האבחון מספיק חד למכירה?</li>
+          <li>רק אחר כך: אינטגרציית Amazon API</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. שאלות לרוי -->
+  <section class="slide">
+    <div class="eyebrow">השיחה עצמה</div>
+    <h2>השאלות שאני באמת רוצה לשאול אותך</h2>
+    <ul style="font-size: 21px;">
+      <li>אם היית רואה את המוצר בלי לדעת עליו כלום — מה היית חושב שהוא?</li>
+      <li>איפה היית מהמר ש-AI אמיתי (לא רק חוקים) באמת היה משנה משחק?</li>
+      <li>מה הדבר שהכי קל לי לפספס כשאני בונה לבד?</li>
+      <li>האם הייתי צריך להיות מודאג מאמזון עצמה כמתחרה?</li>
+      <li>איזה סוג של מנטורינג היה הכי הגיוני לך — שיחה חודשית? ad-hoc? משהו אחר?</li>
+    </ul>
+  </section>
+
+  <!-- 11. סיכום -->
+  <section class="slide">
+    <div class="eyebrow">סיכום</div>
+    <h2>שורת תחתונה</h2>
+    <p class="lead">אני לא מנסה לבנות עוד סוויטה. אני מנסה לבנות את הכלי הראשון שמוכר באמזון יפתח כשהוא רואה ירידה — ויקבל תשובה תוך דקה.</p>
+    <p class="lead" style="margin-top: 16px;">MVP עובד. הסיפור ברור. השלב הבא הוא ולידציה עם מוכרים אמיתיים — ושם אני שמח לקבל ממך זווית.</p>
+    <div style="margin-top: 40px;">
+      <p>תודה רבה על הזמן.</p>
+    </div>
+  </section>
+
+  <div class="nav">
+    <button id="prev">←</button>
+    <span><span id="cur">1</span> / <span id="tot">11</span></span>
+    <button id="next">→</button>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let i = 0;
+  document.getElementById('tot').textContent = slides.length;
+  function show(n) {
+    slides[i].classList.remove('active');
+    i = (n + slides.length) % slides.length;
+    slides[i].classList.add('active');
+    document.getElementById('cur').textContent = i + 1;
+  }
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === ' ') show(i + 1);
+    else if (e.key === 'ArrowRight') show(i - 1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+</script>
+</body>
+</html>
