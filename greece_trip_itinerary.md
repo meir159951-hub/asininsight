@@ -1,122 +1,167 @@
-# Greece Trip — July 1–10, 2026
+# Greece — 10 Days, July 1–10, 2026
 
-**Route:** Athens → Thessaloniki → Halkidiki (Sithonia) → fly home from Thessaloniki
-**Travelers' brief:** Fly out July 1 to ATH · Athens Jul 2–4 · Thessaloniki Jul 4–6 · Island/beach Jul 6–10
-
----
-
-## TL;DR — the recommendation
-
-You left the last leg open ("Halkidiki or Corfu or Kefalonia or whatever"). The clear winner given your route is **Halkidiki — specifically the Sithonia peninsula.**
-
-Why: Halkidiki is the only one you can reach **without backtracking or a connecting flight.** It's a 1.5–2.5 hr drive straight from Thessaloniki / its airport. Corfu and Kefalonia have **no direct flights from Thessaloniki** — you'd burn most of a vacation day on a connection (usually via Athens) in each direction. Since you're already in the north and ending in the north, Sithonia keeps it tight, maximizes beach time, and lets you fly home straight out of Thessaloniki (SKG).
-
-> If you specifically want the postcard "Ionian island" vibe (Kefalonia's Myrtos, Corfu's old town), see the **Alternative** at the bottom — but it costs you ~1 day of transit and you should reverse the order (island before Thessaloniki).
+**Athens · Thessaloniki · Sithonia (Halkidiki)**
+A north-loop trip: capital → food city → the best beaches you can reach without backtracking.
 
 ---
 
-## Flights to book
+## At a glance
 
-| Leg | Date | Notes |
+| Dates | Base | Nights | The point of it |
+|---|---|---|---|
+| Jul 2–4 | **Athens** | 2 | Acropolis, ancient core, rooftop sunsets |
+| Jul 4–6 | **Thessaloniki** | 2 | Greece's food capital, Byzantine + Ottoman old town |
+| Jul 6–10 | **Sithonia, Halkidiki** | 4 | Pine-backed coves, a private-boat lagoon day |
+| Jul 10 | Fly home from **SKG** | — | Drive ~2 hr from Sithonia to the airport |
+
+**Why Sithonia for the beach leg** (you left it open between Halkidiki / Corfu / Kefalonia): it's the only one reachable from Thessaloniki **without a connecting flight** — a 1.5–2.5 hr drive, no transit day burned. Corfu and Kefalonia have **no direct flights from SKG** (you'd connect via Athens each way). Starting and ending in the north, the northern beach is the clean choice. *(Want the classic Ionian island instead? See the last page — but reverse the trip order.)*
+
+---
+
+## Book-now checklist (July is peak — these sell out)
+
+| Priority | What | When | Rough cost |
+|---|---|---|---|
+| 🔴 1 | **Acropolis timed-entry ticket** | Now | €20 (combo €30) |
+| 🔴 2 | **Sithonia accommodation** (4 nts) | Now | see lodging |
+| 🔴 3 | **Rental car**, pick up SKG/Thess Jul 6, drop SKG Jul 10 | Now | ~€200–260 |
+| 🟠 4 | **ATH → SKG flight**, Jul 4 AM | 2–3 mo out | €50–90 |
+| 🟠 5 | **City hotels** (Athens ×2, Thessaloniki ×2) | 2–3 mo out | see lodging |
+| 🟡 6 | **Weekend dinner reservations** (Thessaloniki books up) | 1 wk out | — |
+| 🟡 7 | **eSIM** (Airalo/Holafly Greece) | Before you fly | €5–15 |
+
+---
+
+## ATHENS · July 2–4
+
+### Where to stay
+| Tier | Hotel | Why |
 |---|---|---|
-| Home → **Athens (ATH)** | Jul 1 | Arrive Jul 1 (overnight transatlantic) or early Jul 2. Itinerary below assumes you land **morning Jul 2**. |
-| Athens → **Thessaloniki (SKG)** | Jul 4 | 55-min flight (Aegean/Sky Express) **or** 4–5 hr train (Hellenic Train) if you want the scenery. Book the flight for a morning departure. |
-| **Thessaloniki (SKG)** → Home | Jul 10 | Big international hub for the north. Drive Sithonia → SKG (~2 hr); leave 4 hr before an international departure. |
+| Comfort | **AthensWas** (Koukaki) | Across from the Acropolis Museum; rooftop arguably the best Acropolis view of any hotel. From ~€160. |
+| Classic 5★ | **Electra Palace** (Plaka) | Rooftop pool + direct Acropolis views from the best suites. From ~€180. |
+| Best value | **Herodion** (Makrigianni) | Steps from the museum, reliable, great location. From ~€130. |
 
-**Car:** Rent in Thessaloniki on Jul 6, drop at SKG on Jul 10. A car is effectively mandatory for Sithonia beach-hopping (bus service is sparse).
+*Stay in **Plaka**, **Koukaki**, or **Makrigianni** — all walkable to the Acropolis.*
 
----
+### Where to eat
+- **Psarras** (Plaka, since 1898) — terraced, grilled octopus & sea bream. The atmospheric classic.
+- **Scholarchio** (Plaka) — local favorite off the tourist drag; tray of mezedes to point at.
+- **Saita** (Plaka) — quiet end of Kydathineon; famous bakaliaros skordalia (salt cod + garlic).
+- **Avli** (Psyrri) — courtyard taverna that fills 10 min after opening. Get there early.
 
-## Day by day
-
-### 🏛️ Athens — Jul 2–4 (2 nights)
-
-**Jul 2 — Arrive & the Acropolis side**
-- Land AM, drop bags (stay in **Plaka** or **Koukaki** — walkable to everything).
-- Afternoon: **Acropolis** (go late, ~5pm, for softer light and smaller crowds; buy the timed ticket online in advance). Walk down through the **Acropolis Slopes** to the **Ancient Agora**.
-- Evening: dinner in **Plaka** or rooftop drinks with an Acropolis view (e.g., a rooftop bar in Monastiraki).
+### Day plan
+**Jul 2 — Arrive & the rock**
+- Land AM, drop bags, light lunch in Plaka.
+- **~17:00 Acropolis** (late = softer light, fewer crowds). Down through the **Acropolis Slopes** → **Ancient Agora**.
+- Sunset rooftop drink in Monastiraki → dinner at **Psarras** or **Avli**.
 
 **Jul 3 — Museum + neighborhoods**
-- Morning: **Acropolis Museum** (do it *after* seeing the rock — it clicks better that way).
-- Midday: **Monastiraki** flea market → **Anafiotika** (tiny Cycladic-style village tucked under the Acropolis).
-- Afternoon: climb **Lycabettus Hill** (funicular option) for the citywide panorama, or chill in the **Plaka/Thissio** cafés.
-- Evening: dinner in **Psyrri** or **Koukaki**.
-- *Optional swap:* If you'd rather have a beach half-day, the **Athens Riviera** (Vouliagmeni, Lake Vouliagmeni) is a 30–40 min taxi south.
+- **09:00 Acropolis Museum** (do it *after* the rock — it lands better).
+- **Monastiraki** flea market → **Anafiotika** (the tiny Cycladic village under the Acropolis).
+- Late afternoon: **Lycabettus Hill** (funicular) for the full-city panorama.
+- Dinner in **Psyrri** or **Koukaki**.
+- *Beach swap:* trade a half-day for the **Athens Riviera** (Vouliagmeni, 35 min taxi).
 
 **Jul 4 — Fly north**
-- Morning flight ATH → SKG. Settle into Thessaloniki by lunch.
-
-> Athens is fast-paced and hot in July — 2 nights is the right amount before you slow down up north.
+- Morning **ATH → SKG**. In Thessaloniki by lunch.
 
 ---
 
-### 🌆 Thessaloniki — Jul 4–6 (2 nights)
+## THESSALONIKI · July 4–6
 
-Greece's relaxed, food-obsessed second city. Walkable waterfront, Byzantine churches, great nightlife.
+Relaxed, food-obsessed, walkable. UNESCO City of Gastronomy. Stay near **Ladadika** or the **Nea Paralia** waterfront.
 
-**Jul 4 — Arrive & the waterfront**
-- Check in near **Ladadika** or the **Nea Paralia** (new waterfront).
-- Evening stroll the **Nea Paralia promenade** to the **White Tower** (the city's landmark) at sunset.
-- Dinner: **Ladadika** district — start the food crawl. Thessaloniki is the food capital of Greece; lean into mezedes and tsipouro.
+### Where to eat (this is the reason to come)
+- **Full tou Meze** (Ladadika) — the reliable all-rounder; traditional, fair prices, lively.
+- **Charoupi** (Ladadika) — refined **Cretan** cooking from an archaeologist-turned-chef.
+- **Mezen Salonica** — never-ending small plates: fried red mullet, octopus, tsipouro.
+- **Sebrico** (Valaoritou) — creative Greek-meets-global small plates.
+- **Bougatsa** for breakfast at **Bantis** or **Giannis** — custard pastry, the local ritual.
 
-**Jul 5 — History + market + rooftop**
-- Morning: **Rotunda**, **Arch of Galerius (Kamara)**, and **Agios Dimitrios** church.
-- Midday: graze the **Modiano** and **Kapani** markets; grab a **bougatsa** (custard pastry).
-- Afternoon: walk up to the **Ano Poli (Upper Town)** — Ottoman-era lanes, the **Byzantine walls**, and the **Trigonion Tower** for the best sunset view over the bay.
-- Evening: drinks in **Valaoritou** (the city's buzziest bar quarter).
+### Day plan
+**Jul 4 — Waterfront evening**
+- Check in. Stroll **Nea Paralia** promenade to the **White Tower** at sunset.
+- Dinner crawl in **Ladadika** (start at Full tou Meze).
 
-**Jul 6 — Pick up car, drive to Sithonia**
-- Collect rental car. Drive to Sithonia (~2–2.5 hr). Grab lunch en route or in **Nikiti** (gateway town).
+**Jul 5 — History → market → sunset**
+- AM: **Rotunda**, **Arch of Galerius (Kamara)**, **Agios Dimitrios** church.
+- Midday: graze **Modiano** + **Kapani** markets; grab a bougatsa.
+- PM: up to **Ano Poli (Upper Town)** — Ottoman lanes, **Byzantine walls**, **Trigonion Tower** for the best sunset over the bay.
+- Night: cocktails in **Valaoritou**, the buzziest bar quarter.
+
+**Jul 6 — Pick up car, drive south**
+- Collect rental. Drive to Sithonia (~2–2.5 hr). Lunch in **Nikiti**, the gateway town.
 
 ---
 
-### 🏖️ Halkidiki / Sithonia — Jul 6–10 (4 nights)
+## SITHONIA, HALKIDIKI · July 6–10
 
-Sithonia is the middle of Halkidiki's three "fingers" — pine forests running down to turquoise coves, far less built-up than the first finger (Kassandra). **Base yourself in Vourvourou or Nikiti** for the best access to both coasts.
+The middle of Halkidiki's three "fingers" — pine forest meeting turquoise water, far less built-up than Kassandra. **Base in Vourvourou or Nikiti.** A car is essential here (bus service is sparse).
 
-**Jul 6 — Settle in (West coast)**
-- Check in, then ease into beach mode at **Trani Ammouda (Livrohio)** near Nikiti — long, shallow, calm, beach bars. Sunset on the west coast.
+### Where to stay
+| Tier | Hotel | Why |
+|---|---|---|
+| Special | **Ekies All Senses Resort** (Vourvourou) | Beachfront on Vourvourou bay, private beach, sunset beach bar — the one to splurge on. |
+| Luxe-beach | **Ergon Beach House** (Nikiti) | Chic beach club, locally-sourced dining, turquoise water. |
+| Suites + pool | **Lagomandra Luxury Suites** (Nikiti) | Private pools, 2 min from Lagomandra Beach. |
+
+### Day plan
+**Jul 6 — Settle in (west coast)**
+- Check in, ease into beach mode at **Trani Ammouda (Livrohio)** near Nikiti — long, shallow, calm, beach bars. West-coast sunset.
 
 **Jul 7 — The iconic ones**
-- **Karidi Beach** (near Vourvourou) — the postcard: pines, white crescent sand, water so clear and shallow you can see the bottom 100 m out.
-- Afternoon: **Vourvourou** cove and beach bars.
+- **Karidi Beach** (Vourvourou) — the postcard: pines, white crescent, water clear enough to see the sand 100 m out.
+- Afternoon at **Vourvourou** cove + beach bars.
 
-**Jul 8 — Diaporos island day (the highlight)**
-- Rent a small **motorboat (no license required)** from Vourvourou and explore the **Diaporos** mini-archipelago — anchor in the **Blue Lagoon / Myrsini** ("the Hawaii of Greece"). Pack a picnic and snorkel gear. This is the day you'll remember.
+**Jul 8 — Diaporos boat day (the highlight)**
+- Rent a small **motorboat — no license needed** — from Vourvourou and explore the **Diaporos** mini-archipelago. Anchor in the **Blue Lagoon / Myrsini** ("the Hawaii of Greece"). Pack a picnic + snorkel gear. This is the day you'll remember.
 
 **Jul 9 — Wild east coast**
-- Drive to the east coast: **Kavourotripes ("Orange Beach")** — sculpted white rock coves near Sarti, with **Mount Athos** rising across the water.
-- Lunch in **Sarti**; late afternoon back west for a final sunset. Pack tonight.
+- Drive east to **Kavourotripes ("Orange Beach")** near Sarti — sculpted white-rock coves with **Mount Athos** rising across the water. Lunch in **Sarti**. Final sunset back west. Pack tonight.
 
 **Jul 10 — Fly home**
-- Early start: Sithonia → SKG (~2 hr) → international flight home. (Leave a generous buffer; July traffic + airport.)
+- Early start: Sithonia → SKG (~2 hr). Leave **4 hr** before an international departure (July traffic + airport).
 
 ---
 
-## Practical notes
+## What it costs (per person, double occupancy, excl. international airfare)
 
-- **July = peak season.** Pre-book the Acropolis timed ticket, both internal flights, the rental car, and Sithonia accommodation **now** — coastal stays fill fast.
-- **Heat:** Athens regularly hits 35°C+. Do sights early/late, siesta midday. The north is a touch milder.
-- **Money:** Cards widely accepted, but carry some cash for beach bars, tavernas, and the Diaporos boat rental.
-- **Driving:** Greek motorways are tolled (cash/card). Sithonia's coastal roads are windy but fine. A car is essential there; you don't need one in Athens or central Thessaloniki.
-- **Swap idea:** If you want a 5th beach night, trim Thessaloniki to 1 night — but 2 nights there is genuinely worth it for the food alone.
+| | Budget | Mid-range | Comfort |
+|---|---|---|---|
+| Lodging (9 nts, ÷2) | €450 | €630 | €1,000+ |
+| Food & drink (10 days) | €300 | €450 | €700 |
+| ATH→SKG flight | €55 | €75 | €120 |
+| Rental car + fuel + tolls (÷2) | €120 | €150 | €200 |
+| Activities (Acropolis, museum, boat) | €90 | €130 | €180 |
+| City transport / taxis | €60 | €90 | €140 |
+| **Total (land only)** | **~€1,075** | **~€1,525** | **~€2,340** |
+
+*Add international airfare to/from your home city (highly origin-dependent).*
 
 ---
 
-## Alternative: classic Ionian island (Kefalonia *or* Corfu)
+## Practical pack
 
-If you'd trade transit time for a true island, **reverse the trip** so the island sits next to Athens, not Thessaloniki:
+- **Heat:** Athens hits 35 °C+ in July. Sights early/late, siesta midday, refill water. The north is a touch milder; sea breeze on the coast.
+- **Money:** Cards everywhere, but carry cash for beach bars, tavernas, tolls, and the **Diaporos boat rental**.
+- **Tipping:** Round up / ~5–10% for good service; not obligatory.
+- **Driving:** Motorways are tolled (cash/card). Sithonia's coast roads are windy but easy. You **don't** need a car in Athens or central Thessaloniki — only for Sithonia (Jul 6–10).
+- **Connectivity:** Grab a Greece **eSIM** before flying (Airalo/Holafly) — instant data on landing.
+- **A few words:** *Yia sas* (hello), *Efharistó* (thank you), *Parakaló* (please/you're welcome), *Ya mas!* (cheers).
+- **Reservations:** Thessaloniki's better tables fill on summer weekends — book ~a week ahead.
+
+---
+
+## Alternative: the classic Ionian island
+
+If you'd rather have a true island (Kefalonia's Myrtos, Corfu's Old Town) and accept a transit day, **reverse the order** so the island sits next to Athens:
 
 > Athens (Jul 2–4) → **fly to the island Jul 4–8** → fly to **Thessaloniki Jul 8–10** → home.
 
-- **Kefalonia:** Myrtos Beach, Melissani Cave, Assos village, Fiskardo. Quieter, dramatic.
-- **Corfu:** Venetian Old Town (UNESCO), Paleokastritsa, lush and green. Easiest island airport-wise.
-- **Catch:** Neither has a *direct* flight to Thessaloniki — expect a connection (usually via Athens), so build in a half-day of transit on Jul 8. This is exactly why Sithonia is the cleaner pick for your stated route.
+- **Kefalonia** — Myrtos Beach, Melissani Cave, Assos, Fiskardo. Dramatic, quieter.
+- **Corfu** — Venetian Old Town (UNESCO), Paleokastritsa, lush and green. Easiest island airport.
+- **Catch:** no *direct* SKG flight either way — expect a connection (usually via Athens) on Jul 8. That single transit day is exactly why Sithonia wins for your stated route.
 
 ---
 
-*Sources used for logistics & beaches:*
-- [How to get to Halkidiki from Thessaloniki — xlnstransfer](https://www.xlnstransfer.com/blog/en/how-to-get-halkidiki-from-thessaloniki/)
-- [Sithonia beaches guide — Thessaloniki Local](https://thessalonikilocal.com/sithonia-beaches-best-beaches-of-sithonia-halkidiki/)
-- [Sithonia beaches — The Wom Travel](https://www.thewomtravel.com/greece/thessaloniki/sithonia-beaches-near-thessaloniki.html)
-- [Flights Thessaloniki → Kefalonia (connections) — FlightConnections](https://www.flightconnections.com/flights-from-skg-to-efl)
+*Sources: hotels & restaurants via Santorini Dave, Travel.gr, This Is Athens, Tripadvisor & Booking; Sithonia beaches & logistics via Thessaloniki Local, The Wom Travel, xlnstransfer; flight connections via FlightConnections. Verify prices and schedules at booking time.*
