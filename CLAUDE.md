@@ -18,12 +18,25 @@ Key files:
 
 ## Agents
 
-### Miro
-Miro is the **lead agent responsible for everything across the company** — the
-top-level agent that oversees and coordinates the other agents and workflows
-(PPC, listing audits, operations).
+### Miro — the lead orchestrator (`miro.py`)
+Miro is the **lead agent responsible for everything across the company.** It
+does not analyze raw data itself; it **coordinates the specialist agents** and
+merges their output into one prioritized briefing — a single "what should I do
+next" view across the whole business.
 
-> TODO (owner: Meir): fill in Miro's exact scope and responsibilities.
-> - What specific tasks does Miro own end-to-end?
-> - Which other agents/modules does Miro coordinate?
-> - How does Miro connect to the existing code (e.g. `ppc_agent.py`, `server.py`)?
+Specialists that run under Miro today:
+- **Listing Audit** — wraps `audit_engine.py` (listing health, conversion)
+- **PPC** — wraps `ppc_suggestions.py` (ad waste to cut, growth upside)
+
+How it works:
+- Each specialist is an agent runner that returns normalized `Finding`s, or
+  `None` when its input isn't present.
+- `default_miro().run(context)` runs the registered agents, merges their
+  findings, and ranks them into one cross-domain priority list (`Briefing`).
+- Run the demo: `python3 miro.py`. Tests: `tests/test_miro.py`.
+
+Adding a new specialist (inventory, pricing, reviews, reports) = write a runner
+that returns `Finding`s and `register()` it. Miro's merge/rank logic is unchanged.
+
+> Next ideas (not built yet): Inventory agent, Pricing agent, Reviews agent,
+> Weekly Reports agent — each plugs into Miro the same way.
