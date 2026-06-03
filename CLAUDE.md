@@ -3,6 +3,13 @@
 This file gives Claude Code persistent context about this project. Claude reads
 it automatically at the start of every session.
 
+## Communication preferences (IMPORTANT)
+
+- **Always reply to the owner (Meir) in Hebrew.** This is a standing preference —
+  the owner has asked for it repeatedly. Default to Hebrew for all chat replies
+  unless explicitly asked otherwise. (Code, identifiers, and commit messages stay
+  in English.)
+
 ## Project
 
 **SellerCopilot / ASIN Insight** — an Amazon seller product that audits ASIN
