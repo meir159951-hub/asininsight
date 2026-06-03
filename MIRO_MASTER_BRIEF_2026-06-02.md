@@ -52,3 +52,22 @@ whether they'd pay for the recurring layer.
 ## Next step
 Decide between the three options, or approve preparing the post + ten warmed-up
 leads for the market test. **Owner's chosen direction: real market test.**
+
+---
+
+## UPDATE 2026-06-03 — fresh competitive research (supersedes assumptions below)
+Full report: **`research/COMPETITIVE_MARKET_RESEARCH_2026-06-03.md`**
+
+- 🚨 **The "no write path = wedge intact" assumption is now CONTESTED.** Amazon's
+  agentic Seller Assistant (Sept 2025) takes actions with seller approval —
+  including generating ad campaigns — and its free "Enhance My Listing" +
+  Ads Agent directly overlap `audit_engine.py` and `ppc_agent.py`. Amazon is
+  filling the write-access moat itself, for free.
+- The private-CSV/no-login audit lane is genuinely open but **copyable** (H10 &
+  SellerApp already ship the identical "upload CSV, no login" mechanic for PPC).
+  Flat pricing is **not** unique; "you're in control" is owned by AdLabs.
+- **Sharpened conclusion:** a me-too free audit + basic PPC suggestions is a dead
+  product. The survivable, defensible position is **Miro itself** — a neutral,
+  profit-first, cross-account, cross-domain orchestration layer that does what
+  Amazon's siloed AI won't. Reposition around the recurring cross-domain
+  briefing; the audit becomes a feature that feeds Miro, not the product.
