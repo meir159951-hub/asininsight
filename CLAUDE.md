@@ -40,3 +40,18 @@ that returns `Finding`s and `register()` it. Miro's merge/rank logic is unchange
 
 > Next ideas (not built yet): Inventory agent, Pricing agent, Reviews agent,
 > Weekly Reports agent — each plugs into Miro the same way.
+
+## Continuity — read this at the start of every session
+
+Latest lead-agent state lives in **`MIRO_MASTER_BRIEF_2026-06-02.md`**. Open it
+first to pick up the current strategic picture.
+
+Headline as of 2026-06-02:
+- Code is healthy (380 tests pass), no write path to Amazon — wedge intact.
+- **Strategic finding:** the free audit is *bait, not a product.* Helium 10
+  gives the same audit free; the paid product must add a **recurring** layer.
+- The five unanswered outreach messages = **zero data** (cold-delivery issue),
+  not market failure.
+- **Owner's chosen direction:** run one **real market test** with warmed-up
+  leads before more code or outreach.
+- Detailed research lives under `research/` (to be added).
