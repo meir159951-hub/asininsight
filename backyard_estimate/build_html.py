@@ -136,10 +136,12 @@ def overview():
     <div class="ibox plain"><b class="ititle">MATERIALS &amp; SELECTIONS</b>
       <div class="mats">{mats}</div></div>
   </div>
-  <div class="ibox navy wide"><b class="ititle">THE FINISHED LOOK</b>
-    <p>Warm Sandstone Copper pavers wrap the pool and run clean to the house, a full Marathon
-    turf lawn stays green year-round, and a row of palms with uplighting and white gravel
-    frames the yard. Every surface sits on a compacted, draining base so it stays flat for years.</p></div>
+  <div class="finlook">
+    <div class="eyebrow gold">THE FINISHED LOOK</div>
+    {('<div class="herophoto" style="background-image:url(' + b64(E.FINISHED['hero']) + ')"></div>') if b64(E.FINISHED['hero']) else ''}
+    <p class="fincap">Sandstone Copper pavers, Marathon turf, palms with uplighting, and clean
+    borders, all wrapping the pool on a compacted, draining base.</p>
+  </div>
   {page_foot(2)}
 </section>"""
 
@@ -298,6 +300,10 @@ padding:14px 18px;margin:12px 0}
 .matrow{margin-bottom:7px;font-size:11.5px;line-height:1.4}
 .matrow b{color:var(--navy);display:block}
 .matrow span{color:var(--grey)}
+.finlook{margin-top:16px}
+.finlook .eyebrow{margin-bottom:8px}
+.herophoto{height:2.35in;border-radius:8px;background-size:cover;background-position:center;background-color:#EEF1F5}
+.fincap{color:var(--grey);font-size:11px;margin-top:8px;line-height:1.4}
 /* scope table */
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
 .scope th,.sched th{background:var(--navy);color:#fff;font-size:8.5px;text-align:left;padding:7px 9px;letter-spacing:.5px}

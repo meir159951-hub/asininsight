@@ -88,7 +88,7 @@ FINISHED = {
               "finished aesthetic we walked through together, followed by the full scope, "
               "pricing, and timeline. Pricing covers labor, materials, equipment, and "
               "on-site management for everything shown."),
-    "hero": None,           # finished/design photos pending upload
+    "hero": ph("hero_lounge.jpg"),
     "grid": [
         ("Paver area (2,720 sq ft)", "Angelus pavers (Sandstone Copper) set across the yard with a clean, level finish.", None),
         ("Turf area (1,230 sq ft)", "Marathon synthetic grass over a compacted, draining base. Low maintenance, year-round green.", None),
@@ -117,17 +117,17 @@ BEFORE_AFTER = {
               "today next to how it will look once the work is complete."),
     "pairs": [
         (("Main patio, today", "Open dirt along the house, AC unit exposed.", ph("before_4.jpg")),
-         ("Main patio, finished", "Sandstone Copper pavers run clean to the house and pool.", None)),
-        (("Pool deck, today", "Graded dirt around the new pool.", ph("before_3.jpg")),
-         ("Pool deck, finished", "A clean paver deck wrapping the pool.", None)),
+         ("Main patio, finished", "Sandstone Copper pavers run clean to the house and pool.", ph("after_mainpatio.jpg"))),
+        (("Pool & lawn, today", "Graded dirt around the new pool.", ph("before_3.jpg")),
+         ("Pool & lawn, finished", "Marathon turf and a clean paver deck wrapping the pool.", ph("after_poollawn.jpg"))),
         (("Pool side, today", "Open dirt beside the pool.", ph("before_2.jpg")),
-         ("Pool side, finished", "Paver deck running neatly to the coping.", None)),
+         ("Pool side, finished", "Turf, palms, and lighting running to the pool.", ph("after_poolside.jpg"))),
         (("Side yard, today", "Bare ground along the fence line.", ph("before_1.jpg")),
-         ("Side yard, finished", "Marathon turf with palms, gravel, and accent lighting.", None)),
+         ("Side yard, finished", "A paver walkway with palms, gravel, and accent lighting.", ph("after_sideyard.jpg"))),
         (("Back patio, today", "Wide dirt area by the fire-pit wall.", ph("before_6.jpg")),
-         ("Back patio, finished", "A paved patio with crisp borders.", None)),
+         ("Back patio, finished", "A full paver patio with the fire pit and crisp borders.", ph("after_backpatio.jpg"))),
         (("Lawn area, today", "Open ground, graded and ready.", ph("before_5.jpg")),
-         ("Lawn area, finished", "Lush Marathon turf, green year-round.", None)),
+         ("Lawn area, finished", "Lush Marathon turf with a paver border, green year-round.", ph("after_lawn.jpg"))),
     ],
     "note": ("How the base goes down",
              "We grade and compact the sub-grade, then lay and compact a draining aggregate base "
