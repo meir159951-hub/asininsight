@@ -75,8 +75,8 @@ MEASURE = [
 
 # Materials & selections
 MATERIALS = [
-    ("Pavers", "Angelus Pavilion / Paseo, color Sandstone Copper &mdash; supplied &amp; installed."),
-    ("Artificial Turf", "Marathon synthetic grass, premium landscape grade &mdash; supplied &amp; installed."),
+    ("Pavers", "Angelus Pavilion / Paseo, color Sandstone Copper. Supplied &amp; installed by Ariel."),
+    ("Artificial Turf", "Marathon synthetic grass, premium landscape grade. Supplied &amp; installed by Ariel."),
     ("Base &amp; Edging", "Compacted, draining aggregate base under both surfaces, with concrete / paver borders."),
 ]
 
@@ -90,8 +90,8 @@ FINISHED = {
               "on-site management for everything shown."),
     "hero": None,           # finished/design photos pending upload
     "grid": [
-        ("Paver area — 2,720 sq ft", "Angelus pavers (Sandstone Copper) set across the yard with a clean, level finish.", None),
-        ("Turf area — 1,230 sq ft", "Marathon synthetic grass over a compacted, draining base. Low maintenance, year-round green.", None),
+        ("Paver area (2,720 sq ft)", "Angelus pavers (Sandstone Copper) set across the yard with a clean, level finish.", None),
+        ("Turf area (1,230 sq ft)", "Marathon synthetic grass over a compacted, draining base. Low maintenance, year-round green.", None),
     ],
 }
 
@@ -106,23 +106,33 @@ SCOPE_ROWS = [
      "Install 1,230 sq ft of Marathon synthetic grass over the prepared base; seam, stake, and infill for a natural look."),
     ("05", "Edging & Borders",
      "Install concrete or paver borders to lock the field in place and keep clean transitions."),
-    ("06", "Final Detailing",
+    ("06", "Palm Pits & Gravel",
+     "Prep the planting infrastructure for the palms and install the decorative gravel. Palm trees are supplied by the client."),
+    ("07", "Final Detailing",
      "Joint sand, power-wash, blow-off, and final walkthrough. Site left clean and punch-list closed."),
 ]
 
 BEFORE_AFTER = {
-    "intro": ("The backyard is structurally sound but unfinished. Below is what each area looks like "
+    "intro": ("The yard is structurally sound but unfinished. Each area below shows how it looks "
               "today next to how it will look once the work is complete."),
     "pairs": [
-        (("Pool deck & lawn — today", "Graded dirt around the new pool, ready for base.", ph("before_3.jpg")),
-         ("Pool deck & lawn — finished", "Turf lawn and a clean pool deck.", None)),
-        (("Main patio — today", "Open dirt along the house, no surfacing yet.", ph("before_4.jpg")),
-         ("Main patio — finished", "Pavers run clean to the pool and house.", None)),
+        (("Main patio, today", "Open dirt along the house, AC unit exposed.", ph("before_4.jpg")),
+         ("Main patio, finished", "Sandstone Copper pavers run clean to the house and pool.", None)),
+        (("Pool deck, today", "Graded dirt around the new pool.", ph("before_3.jpg")),
+         ("Pool deck, finished", "A clean paver deck wrapping the pool.", None)),
+        (("Pool side, today", "Open dirt beside the pool.", ph("before_2.jpg")),
+         ("Pool side, finished", "Paver deck running neatly to the coping.", None)),
+        (("Side yard, today", "Bare ground along the fence line.", ph("before_1.jpg")),
+         ("Side yard, finished", "Marathon turf with palms, gravel, and accent lighting.", None)),
+        (("Back patio, today", "Wide dirt area by the fire-pit wall.", ph("before_6.jpg")),
+         ("Back patio, finished", "A paved patio with crisp borders.", None)),
+        (("Lawn area, today", "Open ground, graded and ready.", ph("before_5.jpg")),
+         ("Lawn area, finished", "Lush Marathon turf, green year-round.", None)),
     ],
     "note": ("How the base goes down",
              "We grade and compact the sub-grade, then lay and compact a draining aggregate base "
              "before any pavers or turf go in. A solid base is what keeps the finished surface flat "
-             "and stops settling over time."),
+             "and stops it settling over time."),
 }
 
 ANGLES = {
@@ -139,24 +149,26 @@ ANGLES = {
 
 PRICING = {
     "total": "$70,300",
-    "total_note": "Full backyard — pavers + turf. Labor, materials, equipment & management included.",
+    "total_note": "Full backyard: pavers + turf. Labor, materials, equipment and management included.",
     "schedule": [
-        ("1", "Contract signing — down payment (CA-capped at $1,000)", "$1,000", "1.4%"),
-        ("2", "Upon commencement / mobilization", "$1,000", "1.4%"),
-        ("3", "Material order & delivery", "$34,150", "48.6%"),
-        ("4", "Upon demolition complete", "$20,490", "29.1%"),
-        ("5", "Upon base complete", "$13,660", "19.4%"),
+        ("1", "Contract signing (down payment, CA cap $1,000)", "$1,000", "1.4%"),
+        ("2", "Upon material", "$34,150", "48.6%"),
+        ("3", "Upon demo", "$20,490", "29.1%"),
+        ("4", "Upon base", "$13,660", "19.4%"),
+        ("5", "Completion", "$1,000", "1.4%"),
     ],
-    "timeline_title": "~2 weeks",
-    "timeline_body": ("From start to final walkthrough for the full project. Schedule depends on "
-                      "weather and material lead times. A weekly schedule is shared at contract signing."),
+    "timeline_title": "2 Weeks",
+    "timeline_body": ("Roughly two weeks from start to final walkthrough for the full project "
+                      "(worst case). Timing depends on weather and material lead times; a weekly "
+                      "schedule is shared at contract signing."),
     # Alternative / phased scopes the client can choose instead of the full project
     "options": [
-        ("Full backyard — pavers + turf", "Recommended · best price", "$70,300"),
-        ("Artificial turf only — 1,230 sq ft", "Marathon synthetic grass", "$14,000"),
-        ("Turf — smaller 600 sq ft area", "Partial turf option", "$8,000"),
+        ("Full backyard: pavers + turf", "Recommended · best price", "$70,300"),
+        ("Artificial turf only (1,230 sq ft)", "Marathon synthetic grass", "$14,000"),
+        ("Turf, smaller 600 sq ft area", "Partial turf option", "$8,000"),
     ],
     "not_included": [
+        "Palm trees (date palms): client-supplied",
         "Permits &amp; HOA fees (if any)",
         "Drainage / utility relocation",
         "Outdoor kitchen, BBQ, gas lines",
