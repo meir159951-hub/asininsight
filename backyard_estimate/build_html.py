@@ -139,8 +139,7 @@ def overview():
   <div class="finlook">
     <div class="eyebrow gold">THE FINISHED LOOK</div>
     {('<div class="herophoto" style="background-image:url(' + b64(E.FINISHED['hero']) + ')"></div>') if b64(E.FINISHED['hero']) else ''}
-    <p class="fincap">Sandstone Copper pavers, Marathon turf, palms with uplighting, and clean
-    borders, all wrapping the pool on a compacted, draining base.</p>
+    <p class="fincap">Sandstone Copper pavers, Marathon turf, and palms with uplighting.</p>
   </div>
   {page_foot(2)}
 </section>"""
@@ -169,9 +168,9 @@ def included():
       <li>Outdoor renovation only: paving, fencing, hardscape.</li>
       <li>General liability and workers' comp on file.</li></ul></div>
   </div>
-  <div class="ibox gold wide"><b class="ititle">CLIENT-SUPPLIED</b>
-    <p>Palm trees (date palms) are purchased by the client. We prepare the planting
-    infrastructure and install the decorative gravel around them.</p></div>
+  <div class="ibox gold wide"><b class="ititle">PALMS &amp; GRAVEL</b>
+    <p>The client purchases the palm trees; <b>Ariel installs them</b> and supplies and installs
+    the decorative gravel around them. Everything else above is fully included.</p></div>
   {page_foot(3)}
 </section>"""
 
@@ -302,8 +301,8 @@ padding:14px 18px;margin:12px 0}
 .matrow span{color:var(--grey)}
 .finlook{margin-top:16px}
 .finlook .eyebrow{margin-bottom:8px}
-.herophoto{height:2.35in;border-radius:8px;background-size:cover;background-position:center;background-color:#EEF1F5}
-.fincap{color:var(--grey);font-size:11px;margin-top:8px;line-height:1.4}
+.herophoto{height:3.05in;border-radius:8px;background-size:cover;background-position:center 32%;background-color:#EEF1F5}
+.fincap{color:var(--grey);font-size:10.5px;margin-top:6px;line-height:1.35}
 /* scope table */
 table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
 .scope th,.sched th{background:var(--navy);color:#fff;font-size:8.5px;text-align:left;padding:7px 9px;letter-spacing:.5px}
