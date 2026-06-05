@@ -124,10 +124,10 @@ BEFORE_AFTER = {
          ("Pool & lawn, finished", "Turf, palms, and lighting wrapping the pool at dusk.", ph("after_poolside.jpg"))),
         (("Side yard, today", "Bare ground along the fence line.", ph("before_1.jpg")),
          ("Side yard, finished", "A paver walkway with palms, gravel, and accent lighting.", ph("after_sideyard.jpg"))),
-        (("Back patio, today", "Wide dirt area by the fire-pit wall.", ph("before_6.jpg")),
+        (("Back patio, today", "Wide dirt area along the house.", ph("before_5.jpg")),
          ("Back patio, finished", "A full paver patio with the fire pit and crisp borders.", ph("after_backpatio.jpg"))),
-        (("Lawn area, today", "Open ground, graded and ready.", ph("before_5.jpg")),
-         ("Lawn area, finished", "Lush Marathon turf with a paver border, green year-round.", ph("after_lawn.jpg"))),
+        (("Side lawn, today", "Open dirt between the houses, ready for finish.", ph("before_7.jpg")),
+         ("Side lawn, finished", "Paver patio with a turf strip and a lavender border.", ph("after_lawn.jpg"))),
     ],
     "note": ("How the base goes down",
              "We grade and compact the sub-grade, then lay and compact a draining aggregate base "
