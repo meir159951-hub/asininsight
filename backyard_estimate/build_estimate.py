@@ -32,6 +32,10 @@ M = 0.85 * inch                      # content side margin
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOGO = os.path.join(HERE, "assets", "ariel_logo.png")
 
+def ph(name):
+    """Resolve a photo filename inside the photos/ folder (None passes through)."""
+    return os.path.join(HERE, "photos", name) if name else None
+
 # ----------------------------------------------------------------------------
 # CONFIG  --  edit this block as real data arrives
 # ----------------------------------------------------------------------------
@@ -84,10 +88,10 @@ FINISHED = {
               "finished aesthetic we walked through together, followed by the full scope, "
               "pricing, and timeline. Pricing covers labor, materials, equipment, and "
               "on-site management for everything shown."),
-    "hero": None,
+    "hero": None,           # finished/design photos pending upload
     "grid": [
-        ("Paver area — 2,720 sq ft", "Angelus pavers (Sandstone Copper) set across the yard with a clean, level finish."),
-        ("Turf area — 1,230 sq ft", "Marathon synthetic grass over a compacted, draining base. Low maintenance, year-round green."),
+        ("Paver area — 2,720 sq ft", "Angelus pavers (Sandstone Copper) set across the yard with a clean, level finish.", None),
+        ("Turf area — 1,230 sq ft", "Marathon synthetic grass over a compacted, draining base. Low maintenance, year-round green.", None),
     ],
 }
 
@@ -110,10 +114,10 @@ BEFORE_AFTER = {
     "intro": ("The backyard is structurally sound but unfinished. Below is what each area looks like "
               "today next to how it will look once the work is complete."),
     "pairs": [
-        (("Backyard today", "Bare/uneven surface, ready for grading.", None),
-         ("Backyard finished", "Pavers and turf installed, clean and level.", None)),
-        (("Side / passage today", "Open ground, no defined finish.", None),
-         ("Side / passage finished", "Paved walkway with crisp borders.", None)),
+        (("Pool deck & lawn — today", "Graded dirt around the new pool, ready for base.", ph("before_3.jpg")),
+         ("Pool deck & lawn — finished", "Turf lawn and a clean pool deck.", None)),
+        (("Main patio — today", "Open dirt along the house, no surfacing yet.", ph("before_4.jpg")),
+         ("Main patio — finished", "Pavers run clean to the pool and house.", None)),
     ],
     "note": ("How the base goes down",
              "We grade and compact the sub-grade, then lay and compact a draining aggregate base "
@@ -124,12 +128,12 @@ BEFORE_AFTER = {
 ANGLES = {
     "intro": "More angles. Each shows the area as it is today next to the same angle once finished.",
     "rows": [
-        (("Right side today", "Bare ground along the wall.", None),
-         ("Right side finished", "Pavers run clean to the edge.", None)),
-        (("Back corner today", "Unfinished, open soil.", None),
-         ("Back corner finished", "Turf and border in place.", None)),
-        (("Entry / gate today", "No defined surface.", None),
-         ("Entry / gate finished", "Paved transition, clean lines.", None)),
+        (("Side yard — today", "Bare ground along the fence.", ph("before_1.jpg")),
+         ("Side yard — finished", "Pavers / turf with accent lighting.", None)),
+        (("Pool side — today", "Open dirt beside the pool.", ph("before_2.jpg")),
+         ("Pool side — finished", "Clean deck running to the coping.", None)),
+        (("Back patio — today", "Wide dirt area by the fire pit.", ph("before_6.jpg")),
+         ("Back patio — finished", "Paved patio, crisp borders.", None)),
     ],
 }
 
@@ -420,9 +424,9 @@ def page_finished(c):
     half = (cw - 18) / 2
     ph_h = 1.32 * inch
     py = gy - ph_h - 6
-    for i, (lead2, body2) in enumerate(FINISHED["grid"]):
+    for i, (lead2, body2, img2) in enumerate(FINISHED["grid"]):
         x = M + i * (half + 18)
-        photo(c, None, x, py, half, ph_h, "PHOTO")
+        photo(c, img2, x, py, half, ph_h, "PHOTO")
         caption(c, x, py - 12, lead2, body2, half)
     content_footer(c, 2)
     c.showPage()
