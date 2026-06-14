@@ -108,6 +108,18 @@ ANTHROPIC_API_KEY  = os.getenv("ANTHROPIC_API_KEY", "")
 LLM_MODEL          = os.getenv("LLM_MODEL", "claude-opus-4-7")
 LLM_TIMEOUT_S      = float(os.getenv("LLM_TIMEOUT_S", "8"))
 
+# Hard global ceiling on Anthropic API calls per UTC day — a spend circuit
+# breaker that is independent of the per-plan gating and the per-IP diagnose
+# limit. It is the backstop for the one failure those guards don't cover: a
+# flood of LLM-eligible requests (a plan-gating bug, leaked Pro sessions, an
+# accidental client loop) that would otherwise turn into an unbounded bill.
+# At the <$0.02/audit cost target, the default 2000 caps worst-case LLM spend
+# near $40/day. Override on Railway via LLM_DAILY_CALL_BUDGET. Set to 0 to
+# disable the breaker. NOTE: this only bounds blast radius in our process —
+# the authoritative cap is the Anthropic Console workspace spend limit, which
+# must be set there as well.
+LLM_DAILY_CALL_BUDGET = int(os.getenv("LLM_DAILY_CALL_BUDGET", "2000"))
+
 # Railway gives postgres:// but psycopg2 requires postgresql://
 DATABASE_URL = os.getenv("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
 
@@ -138,6 +150,12 @@ DIAGNOSE_RATE_WINDOW = 3600
 
 # Free plan: max diagnoses per calendar month per session
 FREE_MONTHLY_LIMIT = 3
+
+# Global LLM spend circuit breaker — process-wide daily call counter, reset on
+# UTC day rollover. Reuses _rate_lock. Enforced in _llm_enhance_pro. See
+# LLM_DAILY_CALL_BUDGET above for the rationale.
+_llm_calls_today = 0
+_llm_calls_day: str | None = None   # "YYYY-MM-DD" of the current counter window
 
 # Hard cap on CSV upload size — prevents memory exhaustion from huge files
 _MAX_CSV_BYTES = 2 * 1024 * 1024  # 2 MB
@@ -883,6 +901,32 @@ def _check_diagnose_rate(ip: str) -> bool:
     return True
 
 
+def _llm_budget_available() -> bool:
+    """
+    Global Anthropic API spend circuit breaker.
+
+    Returns True and consumes one unit of the daily budget when a call is
+    allowed; returns False once LLM_DAILY_CALL_BUDGET calls have been made in
+    the current UTC day. The counter resets at UTC midnight.
+
+    This is the last line of defence against a runaway LLM bill: even if
+    plan-gating or the per-IP diagnose limit are bypassed, total LLM calls per
+    day cannot exceed the budget. A budget of 0 disables the breaker.
+    """
+    if LLM_DAILY_CALL_BUDGET <= 0:
+        return True
+    global _llm_calls_today, _llm_calls_day
+    today = time.strftime("%Y-%m-%d", time.gmtime())
+    with _rate_lock:
+        if _llm_calls_day != today:
+            _llm_calls_day = today
+            _llm_calls_today = 0
+        if _llm_calls_today >= LLM_DAILY_CALL_BUDGET:
+            return False
+        _llm_calls_today += 1
+    return True
+
+
 def _client_ip(req) -> str:
     """Extract real client IP, preferring the first hop of X-Forwarded-For."""
     return req.headers.get("X-Forwarded-For", req.remote_addr).split(",")[0].strip()
@@ -969,6 +1013,15 @@ def _llm_enhance_pro(score: int, headline: str, problems: list, recommendations:
         import anthropic
     except ImportError:
         log.warning("anthropic SDK not installed; skipping LLM enrichment")
+        return []
+
+    # Global spend circuit breaker: once the daily LLM call budget is spent,
+    # degrade to rule-based output instead of issuing another billable call.
+    if not _llm_budget_available():
+        log.warning(
+            "LLM daily call budget (%d) exhausted; degrading to rule-based "
+            "for the rest of the UTC day", LLM_DAILY_CALL_BUDGET,
+        )
         return []
 
     # Build per-audit user message — keep it tight to control cost
