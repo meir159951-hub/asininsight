@@ -128,6 +128,13 @@ LLM_DAILY_CALL_BUDGET = int(os.getenv("LLM_DAILY_CALL_BUDGET", "2000"))
 # alert. Requires OWNER_EMAIL and SENDGRID_API_KEY to be set.
 LLM_SPEND_ALERT_THRESHOLD = int(os.getenv("LLM_SPEND_ALERT_THRESHOLD", "1"))
 
+# Second alert channel (besides email): an instant push to your phone. Set
+# ALERT_WEBHOOK_URL to an incoming-webhook URL from Slack, Discord, Telegram,
+# ntfy, Pushover, Zapier, etc. The same spend alert is POSTed there as JSON
+# carrying both `text` (Slack) and `content` (Discord) so one URL fits the
+# common targets. Leave blank to use email only.
+ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", "").strip()
+
 # Railway gives postgres:// but psycopg2 requires postgresql://
 DATABASE_URL = os.getenv("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
 
@@ -950,16 +957,56 @@ def _llm_budget_available() -> bool:
     return True
 
 
+def _post_alert_webhook(text: str) -> bool:
+    """
+    POST a spend-alert message to ALERT_WEBHOOK_URL — an instant phone push via
+    Slack/Discord/Telegram/ntfy/Pushover/Zapier. The payload carries both
+    `text` (Slack reads this) and `content` (Discord reads this) so one URL
+    fits the common targets; generic receivers can read either. Best-effort:
+    returns False (and never raises) on any failure.
+    """
+    if not ALERT_WEBHOOK_URL:
+        return False
+    try:
+        resp = requests.post(
+            ALERT_WEBHOOK_URL,
+            json={"text": text, "content": text},
+            timeout=10,
+        )
+        if resp.status_code < 300:
+            log.info("Spend alert webhook delivered (%s)", resp.status_code)
+            return True
+        log.warning("Alert webhook error %s: %s", resp.status_code, resp.text[:200])
+        return False
+    except Exception as e:
+        log.warning("Alert webhook exception: %s", e)
+        return False
+
+
+def _send_spend_alert(subject: str, html_body: str, text: str) -> None:
+    """
+    Synchronous fan-out of a spend alert to every configured channel: email
+    (OWNER_EMAIL via SendGrid) and webhook (ALERT_WEBHOOK_URL). Each channel is
+    best-effort and independent — one failing never blocks the other. Runs on a
+    daemon thread (see _dispatch_llm_spend_alert), so it is off the request path.
+    """
+    if OWNER_EMAIL and SENDGRID_API_KEY:
+        _send_drip_email(OWNER_EMAIL, subject, html_body)
+    if ALERT_WEBHOOK_URL:
+        _post_alert_webhook(text)
+
+
 def _dispatch_llm_spend_alert(day: str, count: int) -> None:
     """
     Best-effort, non-blocking heads-up that usage-based LLM charges are
     accruing today. These Anthropic API charges bill per call and are SEPARATE
     from any flat monthly subscription, so the owner gets a same-day warning
-    the moment extra spend starts. Sent on a daemon thread so the request path
-    is never blocked by the email round-trip. Deduplicated to once per UTC day
-    by the caller. No-ops when OWNER_EMAIL or SendGrid are not configured.
+    the moment extra spend starts. Fans out to every configured channel (email
+    + webhook) on a daemon thread so the request path is never blocked by a
+    delivery round-trip. Deduplicated to once per UTC day by the caller.
+    No-ops when no alert channel is configured.
     """
-    if not OWNER_EMAIL or not SENDGRID_API_KEY:
+    if not (OWNER_EMAIL and SENDGRID_API_KEY) and not ALERT_WEBHOOK_URL:
         return
     subject = f"⚠️ ASINInsight: extra (usage-based) LLM charges started today — {day}"
     cap_line = (
@@ -968,12 +1015,17 @@ def _dispatch_llm_spend_alert(day: str, count: int) -> None:
         if LLM_DAILY_CALL_BUDGET > 0
         else "No in-app daily cap is set (LLM_DAILY_CALL_BUDGET=0)."
     )
+    text = (
+        f"⚠️ ASINInsight: paid Anthropic API calls started today ({day}). "
+        f"They bill per use, separate from any flat subscription. "
+        f"Calls so far today: {count}. {cap_line}"
+    )
     html_body = (
         f"<p>Heads up — your ASINInsight app started making paid Anthropic API "
         f"calls today ({day}).</p>"
         f"<p><b>Why this matters:</b> these calls are billed per use and are "
-        f"<b>separate from any flat monthly subscription</b>. This email is your "
-        f"early warning that extra spend is accruing.</p>"
+        f"<b>separate from any flat monthly subscription</b>. This is your early "
+        f"warning that extra spend is accruing.</p>"
         f"<p>Calls so far today: <b>{count}</b>.<br>{cap_line}</p>"
         f"<p>To stop all paid API usage immediately, unset <code>ANTHROPIC_API_KEY</code> "
         f"(the app degrades to free rule-based output). To change when this alert "
@@ -982,8 +1034,8 @@ def _dispatch_llm_spend_alert(day: str, count: int) -> None:
     )
     try:
         threading.Thread(
-            target=_send_drip_email,
-            args=(OWNER_EMAIL, subject, html_body),
+            target=_send_spend_alert,
+            args=(subject, html_body, text),
             daemon=True,
         ).start()
     except Exception as e:   # never let an alert failure break a diagnosis

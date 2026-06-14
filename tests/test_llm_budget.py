@@ -137,14 +137,85 @@ def test_spend_alert_re_fires_after_utc_day_rollover(monkeypatch):
     assert len(calls) == 2
 
 
-def test_dispatch_alert_no_ops_without_owner_email(monkeypatch):
-    """No OWNER_EMAIL configured → no email thread, no crash."""
+def test_dispatch_alert_no_ops_without_any_channel(monkeypatch):
+    """No email and no webhook configured → nothing dispatched, no crash."""
     monkeypatch.setattr(server, "OWNER_EMAIL", "", raising=True)
     monkeypatch.setattr(server, "SENDGRID_API_KEY", "sg-test", raising=True)
+    monkeypatch.setattr(server, "ALERT_WEBHOOK_URL", "", raising=True)
     sent = []
     monkeypatch.setattr(
-        server, "_send_drip_email",
+        server, "_send_spend_alert",
         lambda *a, **k: sent.append(a), raising=True,
     )
     server._dispatch_llm_spend_alert("2026-06-14", 1)
     assert sent == []
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  Webhook channel: instant phone push (Slack/Discord/Telegram/ntfy/...)
+# ──────────────────────────────────────────────────────────────────────────
+
+
+def test_fan_out_hits_both_email_and_webhook(monkeypatch):
+    """Both channels configured → the spend alert reaches both."""
+    monkeypatch.setattr(server, "OWNER_EMAIL", "me@example.com", raising=True)
+    monkeypatch.setattr(server, "SENDGRID_API_KEY", "sg-test", raising=True)
+    monkeypatch.setattr(server, "ALERT_WEBHOOK_URL", "https://hook.example/x", raising=True)
+    emails, hooks = [], []
+    monkeypatch.setattr(server, "_send_drip_email",
+                        lambda *a, **k: emails.append(a), raising=True)
+    monkeypatch.setattr(server, "_post_alert_webhook",
+                        lambda text: hooks.append(text), raising=True)
+
+    server._send_spend_alert("subj", "<p>body</p>", "short text")
+
+    assert len(emails) == 1 and emails[0][0] == "me@example.com"
+    assert hooks == ["short text"]
+
+
+def test_fan_out_webhook_only(monkeypatch):
+    """Webhook set but no email config → only the webhook fires."""
+    monkeypatch.setattr(server, "OWNER_EMAIL", "", raising=True)
+    monkeypatch.setattr(server, "SENDGRID_API_KEY", "", raising=True)
+    monkeypatch.setattr(server, "ALERT_WEBHOOK_URL", "https://hook.example/x", raising=True)
+    emails, hooks = [], []
+    monkeypatch.setattr(server, "_send_drip_email",
+                        lambda *a, **k: emails.append(a), raising=True)
+    monkeypatch.setattr(server, "_post_alert_webhook",
+                        lambda text: hooks.append(text), raising=True)
+
+    server._send_spend_alert("subj", "<p>body</p>", "short text")
+
+    assert emails == []
+    assert hooks == ["short text"]
+
+
+def test_post_alert_webhook_posts_slack_and_discord_keys(monkeypatch):
+    monkeypatch.setattr(server, "ALERT_WEBHOOK_URL", "https://hook.example/x", raising=True)
+    captured = {}
+
+    class _Resp:
+        status_code = 204
+        text = ""
+
+    def _fake_post(url, json=None, timeout=None):
+        captured["url"] = url
+        captured["json"] = json
+        return _Resp()
+
+    monkeypatch.setattr(server.requests, "post", _fake_post, raising=True)
+
+    assert server._post_alert_webhook("hello") is True
+    assert captured["url"] == "https://hook.example/x"
+    # Both keys present so one URL works for Slack and Discord alike.
+    assert captured["json"]["text"] == "hello"
+    assert captured["json"]["content"] == "hello"
+
+
+def test_post_alert_webhook_no_ops_when_unset(monkeypatch):
+    monkeypatch.setattr(server, "ALERT_WEBHOOK_URL", "", raising=True)
+    called = []
+    monkeypatch.setattr(server.requests, "post",
+                        lambda *a, **k: called.append(a), raising=True)
+    assert server._post_alert_webhook("hello") is False
+    assert called == []
