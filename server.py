@@ -120,6 +120,14 @@ LLM_TIMEOUT_S      = float(os.getenv("LLM_TIMEOUT_S", "8"))
 # must be set there as well.
 LLM_DAILY_CALL_BUDGET = int(os.getenv("LLM_DAILY_CALL_BUDGET", "2000"))
 
+# Spend ALERT: email OWNER_EMAIL the first time daily LLM calls reach this
+# count. Anthropic API usage is billed per call — a charge that accrues ON TOP
+# of any flat subscription — so this surfaces "you are starting to spend extra
+# money today" before it grows. Default 1 = warn as soon as the first billable
+# call of the day happens. One email per UTC day, deduplicated. 0 disables the
+# alert. Requires OWNER_EMAIL and SENDGRID_API_KEY to be set.
+LLM_SPEND_ALERT_THRESHOLD = int(os.getenv("LLM_SPEND_ALERT_THRESHOLD", "1"))
+
 # Railway gives postgres:// but psycopg2 requires postgresql://
 DATABASE_URL = os.getenv("DATABASE_URL", "").replace("postgres://", "postgresql://", 1)
 
@@ -156,6 +164,7 @@ FREE_MONTHLY_LIMIT = 3
 # LLM_DAILY_CALL_BUDGET above for the rationale.
 _llm_calls_today = 0
 _llm_calls_day: str | None = None   # "YYYY-MM-DD" of the current counter window
+_llm_alert_sent_day: str | None = None   # UTC day a spend alert was already sent for
 
 # Hard cap on CSV upload size — prevents memory exhaustion from huge files
 _MAX_CSV_BYTES = 2 * 1024 * 1024  # 2 MB
@@ -903,28 +912,82 @@ def _check_diagnose_rate(ip: str) -> bool:
 
 def _llm_budget_available() -> bool:
     """
-    Global Anthropic API spend circuit breaker.
+    Global Anthropic API spend guard: circuit breaker + spend alert.
 
     Returns True and consumes one unit of the daily budget when a call is
     allowed; returns False once LLM_DAILY_CALL_BUDGET calls have been made in
     the current UTC day. The counter resets at UTC midnight.
 
-    This is the last line of defence against a runaway LLM bill: even if
-    plan-gating or the per-IP diagnose limit are bypassed, total LLM calls per
-    day cannot exceed the budget. A budget of 0 disables the breaker.
+    Two protections, both keyed to the same daily counter:
+      1. Circuit breaker — total LLM calls per day cannot exceed
+         LLM_DAILY_CALL_BUDGET, even if plan-gating or the per-IP limit are
+         bypassed. A budget of 0 disables the breaker.
+      2. Spend alert — the first time the day's calls reach
+         LLM_SPEND_ALERT_THRESHOLD, email OWNER_EMAIL that usage-based charges
+         (separate from any flat subscription) are accruing. One email per UTC
+         day. A threshold of 0 disables the alert.
     """
-    if LLM_DAILY_CALL_BUDGET <= 0:
-        return True
-    global _llm_calls_today, _llm_calls_day
+    global _llm_calls_today, _llm_calls_day, _llm_alert_sent_day
     today = time.strftime("%Y-%m-%d", time.gmtime())
+    alert_count: int | None = None
     with _rate_lock:
         if _llm_calls_day != today:
             _llm_calls_day = today
             _llm_calls_today = 0
-        if _llm_calls_today >= LLM_DAILY_CALL_BUDGET:
+        # Circuit breaker: refuse once the hard daily budget is spent.
+        if LLM_DAILY_CALL_BUDGET > 0 and _llm_calls_today >= LLM_DAILY_CALL_BUDGET:
             return False
         _llm_calls_today += 1
+        # Spend alert: fire once per UTC day, the first call to cross the
+        # threshold. Capture the count to report; send outside the lock.
+        if (LLM_SPEND_ALERT_THRESHOLD > 0
+                and _llm_calls_today >= LLM_SPEND_ALERT_THRESHOLD
+                and _llm_alert_sent_day != today):
+            _llm_alert_sent_day = today
+            alert_count = _llm_calls_today
+    if alert_count is not None:
+        _dispatch_llm_spend_alert(today, alert_count)
     return True
+
+
+def _dispatch_llm_spend_alert(day: str, count: int) -> None:
+    """
+    Best-effort, non-blocking heads-up that usage-based LLM charges are
+    accruing today. These Anthropic API charges bill per call and are SEPARATE
+    from any flat monthly subscription, so the owner gets a same-day warning
+    the moment extra spend starts. Sent on a daemon thread so the request path
+    is never blocked by the email round-trip. Deduplicated to once per UTC day
+    by the caller. No-ops when OWNER_EMAIL or SendGrid are not configured.
+    """
+    if not OWNER_EMAIL or not SENDGRID_API_KEY:
+        return
+    subject = f"⚠️ ASINInsight: extra (usage-based) LLM charges started today — {day}"
+    cap_line = (
+        f"Today's hard cap is {LLM_DAILY_CALL_BUDGET} calls; after that the app "
+        f"stops calling the API and falls back to rule-based output."
+        if LLM_DAILY_CALL_BUDGET > 0
+        else "No in-app daily cap is set (LLM_DAILY_CALL_BUDGET=0)."
+    )
+    html_body = (
+        f"<p>Heads up — your ASINInsight app started making paid Anthropic API "
+        f"calls today ({day}).</p>"
+        f"<p><b>Why this matters:</b> these calls are billed per use and are "
+        f"<b>separate from any flat monthly subscription</b>. This email is your "
+        f"early warning that extra spend is accruing.</p>"
+        f"<p>Calls so far today: <b>{count}</b>.<br>{cap_line}</p>"
+        f"<p>To stop all paid API usage immediately, unset <code>ANTHROPIC_API_KEY</code> "
+        f"(the app degrades to free rule-based output). To change when this alert "
+        f"fires, adjust <code>LLM_SPEND_ALERT_THRESHOLD</code>. The authoritative "
+        f"spend cap lives in the Anthropic Console (Settings → Limits).</p>"
+    )
+    try:
+        threading.Thread(
+            target=_send_drip_email,
+            args=(OWNER_EMAIL, subject, html_body),
+            daemon=True,
+        ).start()
+    except Exception as e:   # never let an alert failure break a diagnosis
+        log.warning("LLM spend alert dispatch failed: %s", e)
 
 
 def _client_ip(req) -> str:

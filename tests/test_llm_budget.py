@@ -14,9 +14,12 @@ import server
 
 @pytest.fixture(autouse=True)
 def _reset_llm_counter(monkeypatch):
-    """Each test starts with a clean, deterministic budget window."""
+    """Each test starts with a clean, deterministic budget/alert window."""
     monkeypatch.setattr(server, "_llm_calls_today", 0, raising=True)
     monkeypatch.setattr(server, "_llm_calls_day", None, raising=True)
+    monkeypatch.setattr(server, "_llm_alert_sent_day", None, raising=True)
+    # Disable the spend alert by default; alert-specific tests opt back in.
+    monkeypatch.setattr(server, "LLM_SPEND_ALERT_THRESHOLD", 0, raising=True)
     yield
 
 
@@ -76,3 +79,72 @@ def test_llm_enhance_pro_degrades_to_rule_based_when_budget_exhausted(monkeypatc
         items=[],
     )
     assert out == []
+
+
+# ──────────────────────────────────────────────────────────────────────────
+#  Spend alert: notify the owner the moment usage-based charges start
+# ──────────────────────────────────────────────────────────────────────────
+
+
+def test_spend_alert_fires_once_when_threshold_reached(monkeypatch):
+    monkeypatch.setattr(server, "LLM_DAILY_CALL_BUDGET", 100, raising=True)
+    monkeypatch.setattr(server, "LLM_SPEND_ALERT_THRESHOLD", 1, raising=True)
+    calls = []
+    monkeypatch.setattr(
+        server, "_dispatch_llm_spend_alert",
+        lambda day, count: calls.append((day, count)), raising=True,
+    )
+
+    # First billable call of the day must trigger exactly one alert.
+    assert server._llm_budget_available() is True
+    assert len(calls) == 1
+    assert calls[0][1] == 1
+
+    # Subsequent calls the same day must NOT re-alert (deduplicated).
+    server._llm_budget_available()
+    server._llm_budget_available()
+    assert len(calls) == 1
+
+
+def test_spend_alert_disabled_when_threshold_zero(monkeypatch):
+    monkeypatch.setattr(server, "LLM_DAILY_CALL_BUDGET", 100, raising=True)
+    monkeypatch.setattr(server, "LLM_SPEND_ALERT_THRESHOLD", 0, raising=True)
+    calls = []
+    monkeypatch.setattr(
+        server, "_dispatch_llm_spend_alert",
+        lambda day, count: calls.append((day, count)), raising=True,
+    )
+    for _ in range(5):
+        server._llm_budget_available()
+    assert calls == []
+
+
+def test_spend_alert_re_fires_after_utc_day_rollover(monkeypatch):
+    monkeypatch.setattr(server, "LLM_DAILY_CALL_BUDGET", 100, raising=True)
+    monkeypatch.setattr(server, "LLM_SPEND_ALERT_THRESHOLD", 1, raising=True)
+    calls = []
+    monkeypatch.setattr(
+        server, "_dispatch_llm_spend_alert",
+        lambda day, count: calls.append((day, count)), raising=True,
+    )
+    assert server._llm_budget_available() is True
+    assert len(calls) == 1
+
+    # New UTC day: counter and alert-dedup both reset, so a fresh alert fires.
+    monkeypatch.setattr(server, "_llm_calls_day", "1970-01-01", raising=True)
+    monkeypatch.setattr(server, "_llm_alert_sent_day", "1970-01-01", raising=True)
+    assert server._llm_budget_available() is True
+    assert len(calls) == 2
+
+
+def test_dispatch_alert_no_ops_without_owner_email(monkeypatch):
+    """No OWNER_EMAIL configured → no email thread, no crash."""
+    monkeypatch.setattr(server, "OWNER_EMAIL", "", raising=True)
+    monkeypatch.setattr(server, "SENDGRID_API_KEY", "sg-test", raising=True)
+    sent = []
+    monkeypatch.setattr(
+        server, "_send_drip_email",
+        lambda *a, **k: sent.append(a), raising=True,
+    )
+    server._dispatch_llm_spend_alert("2026-06-14", 1)
+    assert sent == []
