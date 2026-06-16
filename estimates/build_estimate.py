@@ -198,84 +198,54 @@ def page_footer(c, page_no):
 
 def scope_page(c):
     bw = page_chrome(c, "01  ·  SCOPE OF WORK", "How We Build It")
-    intro = ("Every job is built start to finish by our own crews, never subcontracted out. "
-             "Here is exactly how your pavers go in, step by step.")
+    intro = ("Every job is built start to finish by our own crews. Here is how your "
+             "pavers go in, step by step.")
     iy = H - 116
-    for ln in wrap(c, intro, "Helvetica", 9.3, bw):
-        text(c, MARGIN, iy, ln, "Helvetica", 9.3, INK); iy -= 12
+    for ln in wrap(c, intro, "Helvetica", 9.5, bw):
+        text(c, MARGIN, iy, ln, "Helvetica", 9.5, INK); iy -= 13
 
     steps = [
-        ("Demolition & Haul-Off",
-         "Break out and remove the existing concrete and surfacing across the work area, then haul it off and dispose."),
-        ("Base & Gravel Mix",
-         "Apply the gravel base mix across the area, grade it to the right slope, then level and compact it solid."),
-        ("Bedding Sand",
-         "Lay bedding sand over the compacted base, screed it level, and compact again to a true, even surface."),
-        ("Paver Installation",
-         "Install the Gray Moss Charcoal pavers across all 3,215 sq ft, tight and consistent, with proper slope for drainage."),
-        ("Cement-Set Charcoal Border",
-         "Cut a clean edge into the field and set the Charcoal border stones in cement, framing every area in the contrasting color."),
-        ("Polymeric Sand & Compaction",
-         "Sweep in polymeric joint sand, then plate-compact the whole surface again so every joint locks in tight."),
-        ("Clean & Final Walkthrough",
-         "Wash and clean the pavers, blow off the site, and walk the finished job with you before we leave."),
+        "Demolition and removal of the existing surface.",
+        "Apply the gravel base mix over the soil.",
+        "Grade level and compact the base.",
+        "Apply the bedding sand and compact.",
+        "Install the pavers across all 3,215 sq ft.",
+        "Cut the perimeter frame and set the special Charcoal border stones in the contrasting color.",
+        "Apply polymeric joint sand.",
+        "Compact the polymeric sand into the joints.",
+        "Clean all the pavers. The job is complete.",
     ]
-    y = iy - 16
-    name_w = 142
-    desc_x = MARGIN + 28 + name_w
-    desc_w = W - MARGIN - desc_x
-    for i, (name, desc) in enumerate(steps, 1):
-        dlines = wrap(c, desc, "Helvetica", 8.8, desc_w)
-        rh = max(len(dlines) * 11 + 8, 24)
+    txt_x = MARGIN + 34
+    txt_w = W - MARGIN - txt_x
+    y = iy - 18
+    for i, step in enumerate(steps, 1):
+        lines = wrap(c, step, "Helvetica", 10, txt_w)
+        cy = y - 9
         set_fill(c, GOLD)
-        c.circle(MARGIN + 7, y - 7, 8.5, fill=1, stroke=0)
-        text(c, MARGIN + 7, y - 10, str(i), "Helvetica-Bold", 9, WHITE, "center")
-        text(c, MARGIN + 28, y - 10, name, "Helvetica-Bold", 9.4, NAVY)
-        dy = y - 10
-        for ln in dlines:
-            text(c, desc_x, dy, ln, "Helvetica", 8.8, (0.30, 0.32, 0.36))
-            dy -= 11
-        y -= rh
-        if i < len(steps):
-            set_stroke(c, LINE); c.setLineWidth(0.6)
-            c.line(MARGIN, y + 4, W - MARGIN, y + 4)
+        c.circle(MARGIN + 10, cy, 9.5, fill=1, stroke=0)
+        text(c, MARGIN + 10, cy - 3.4, str(i), "Helvetica-Bold", 9.5, WHITE,
+             "center")
+        ty = cy - 3.4 + (len(lines) - 1) * 6
+        for ln in lines:
+            text(c, txt_x, ty, ln, "Helvetica", 10, INK); ty -= 12
+        y -= max(len(lines) * 12, 18) + 19
 
-    # Why Ariel + Yelp boxes
-    box_top = y - 6
-    box_h = box_top - 66
-    gap = 14
-    half = (bw - gap) / 2
-    # left box
+    # About Ariel (single clean box)
+    body = ("Ariel Outdoor Renovation holds a California Class B General Building license, "
+            "but we focus only on outdoor work. That is what makes what we do every day "
+            "different. The crews we build with already bring over 20 years of real "
+            "experience in paver installation.")
+    blines = wrap(c, body, "Helvetica", 9.8, bw - 32)
+    box_h = 30 + len(blines) * 13
+    box_top = y - 8
     set_fill(c, CREAM)
-    c.roundRect(MARGIN, box_top - box_h, half, box_h, 6, fill=1, stroke=0)
-    set_fill(c, NAVY); c.rect(MARGIN, box_top - box_h, 3.5, box_h, fill=1, stroke=0)
-    text(c, MARGIN + 14, box_top - 16, "WHY ARIEL OUTDOOR RENOVATION",
-         "Helvetica-Bold", 8.2, GOLD, tracking=0.8)
-    why = [
-        "California CSLB Class B General Building license.",
-        "We specialize only in outdoor work: pavers, turf, patio covers, and outdoor kitchens.",
-        "Our own crews build every job. We never subcontract the work out like most companies.",
-        "Licensed, insured, and fully self-performed from start to finish.",
-    ]
-    wy = box_top - 30
-    for item in why:
-        set_fill(c, NAVY); c.circle(MARGIN + 16, wy + 3, 1.5, fill=1, stroke=0)
-        for ln in wrap(c, item, "Helvetica", 8.3, half - 30):
-            text(c, MARGIN + 24, wy, ln, "Helvetica", 8.3, INK); wy -= 10
-        wy -= 3
-    # right box
-    rx = MARGIN + half + gap
-    set_fill(c, CREAM)
-    c.roundRect(rx, box_top - box_h, half, box_h, 6, fill=1, stroke=0)
-    set_fill(c, GOLD); c.rect(rx, box_top - box_h, 3.5, box_h, fill=1, stroke=0)
-    text(c, rx + 14, box_top - 16, "SEE OUR REVIEWS", "Helvetica-Bold", 8.2,
-         GOLD, tracking=0.8)
-    yelp = ("Before you decide, look us up on Yelp. Search \"Ariel Outdoor Renovation\" "
-            "to read real reviews from homeowners across Southern California. We are proud "
-            "of our reputation and happy to let our work and our customers speak for us.")
-    ry2 = box_top - 32
-    for ln in wrap(c, yelp, "Helvetica", 8.6, half - 28):
-        text(c, rx + 14, ry2, ln, "Helvetica", 8.6, INK); ry2 -= 11
+    c.roundRect(MARGIN, box_top - box_h, bw, box_h, 7, fill=1, stroke=0)
+    set_fill(c, GOLD); c.rect(MARGIN, box_top - box_h, 4, box_h, fill=1, stroke=0)
+    text(c, MARGIN + 18, box_top - 18, "ABOUT ARIEL", "Helvetica-Bold", 9, GOLD,
+         tracking=1.5)
+    by = box_top - 34
+    for ln in blines:
+        text(c, MARGIN + 18, by, ln, "Helvetica", 9.8, INK); by -= 13
 
     page_footer(c, 2)
 
