@@ -120,7 +120,7 @@ def cover(c):
     y -= 28
     text(c, cx, y, "Paver Installation", "Helvetica-Bold", 25, NAVY, "center")
     y -= 22
-    text(c, cx, y, "Premium Hardscape  ·  Gray Field / Charcoal Border",
+    text(c, cx, y, "Premium Hardscape  ·  Gray Moss Charcoal / Charcoal Border",
          "Helvetica-Oblique", 12, GOLD, "center")
     y -= 18
     set_stroke(c, GOLD); c.setLineWidth(1.4)
@@ -150,7 +150,7 @@ def cover(c):
          "Helvetica", 9, (0.78, 0.81, 0.87))
     by -= 22
     text(c, MARGIN, by,
-         "3,215 SQ FT PAVERS    ·    DRIVEWAY, WALKWAY & BACKYARD    ·    GRAY FIELD / CHARCOAL BORDER",
+         "3,215 SQ FT PAVERS    ·    DRIVEWAY, WALKWAY & BACKYARD    ·    GRAY MOSS CHARCOAL / CHARCOAL BORDER",
          "Helvetica-Bold", 8.5, GOLD, tracking=0.6)
 
     # three meta columns
@@ -248,8 +248,8 @@ def interior(c):
 
     mx = MARGIN + bw / 2 + 6
     mats = [
-        ("Pavers", "Premium interlocking concrete pavers, Gray field finish. Supplied & installed by Ariel."),
-        ("Border", "Charcoal soldier-course banding framing all paved areas."),
+        ("Pavers", "Premium interlocking concrete pavers, Gray Moss Charcoal blend. Supplied & installed by Ariel."),
+        ("Border", "Solid Charcoal soldier-course banding framing all paved areas."),
         ("Base & Edging", "Compacted, free-draining aggregate base with concrete / paver edge restraints."),
         ("Coverage", "3,215 sq ft total across the front entrance, walkway, and backyard."),
     ]
