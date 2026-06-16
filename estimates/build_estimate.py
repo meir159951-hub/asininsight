@@ -1,20 +1,33 @@
 #!/usr/bin/env python3
-"""Ariel Outdoor Renovation - 3-page paver estimate (Mike Irvine, Murrieta)."""
+"""Ariel Outdoor Renovation - paver estimate (Mike Irvine, Murrieta)."""
 import os
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
+from PIL import Image, ImageOps
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LOGO = os.path.join(HERE, "assets", "ariel_logo.png")
 OUT = os.path.join(HERE, "Mike_Irvine_Paver_Estimate.pdf")
+GDIR = os.path.join(HERE, "assets", "gallery")
+CACHE = os.path.join(GDIR, "cells")
 
-# Page 3 gallery — drop the client's 3 before/after photos here.
-GALLERY = [
-    (os.path.join(HERE, "assets", "work1.jpg"), "Recent paver project  ·  before & after"),
-    (os.path.join(HERE, "assets", "work2.jpg"), "Recent paver project  ·  before & after"),
-    (os.path.join(HERE, "assets", "work3.jpg"), "Recent paver project  ·  before & after"),
+# Before / After pairs: (title, before_image, after_image)
+PAIRS = [
+    ("Main Driveway — View Toward the Street",
+     os.path.join(GDIR, "before_1.jpg"), os.path.join(GDIR, "after_1.jpg")),
+    ("Driveway at the Garage",
+     os.path.join(GDIR, "before_2.jpg"), os.path.join(GDIR, "after_2.jpg")),
+    ("Side Walkway — Iron Gate",
+     os.path.join(GDIR, "before_3.jpg"), os.path.join(GDIR, "after_3.jpg")),
+    ("Front Walkway — Rose Bed",
+     os.path.join(GDIR, "before_4.jpg"), os.path.join(GDIR, "after_4.jpg")),
+    ("Entry Landing",
+     os.path.join(GDIR, "before_5.jpg"), os.path.join(GDIR, "after_5.jpg")),
+    ("Side Garden Bed — Paver Edging",
+     os.path.join(GDIR, "before_6.jpg"), os.path.join(GDIR, "after_6.jpg")),
 ]
+TOTAL_PAGES = 4
 
 W, H = letter  # 612 x 792
 
@@ -336,37 +349,36 @@ def interior(c):
     text(c, MARGIN, 32,
          "Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  ·  Sales Rep: Meir Hayon",
          "Helvetica", 8, MUTED)
-    text(c, W - MARGIN, 32, "Page 2 of 3", "Helvetica", 8, MUTED, "right")
+    text(c, W - MARGIN, 32, f"Page 2 of {TOTAL_PAGES}", "Helvetica", 8, MUTED,
+         "right")
 
-# ---------------------------------------------------------------- PAGE 3
-def draw_image_fit(c, path, x, y, w, h):
-    """Fit image inside frame preserving aspect ratio, centered, on a soft bg."""
+# ---------------------------------------------------------------- GALLERY
+def cover_crop(path, cell_w_pt, cell_h_pt):
+    """Return a print-res image cropped (cover) to the cell aspect ratio."""
+    os.makedirs(CACHE, exist_ok=True)
+    px_w, px_h = int(cell_w_pt * 2.6), int(cell_h_pt * 2.6)  # ~190 dpi
+    out = os.path.join(CACHE, os.path.basename(path).replace(".jpg",
+          f"_{px_w}x{px_h}.jpg"))
+    if not os.path.exists(out) and os.path.exists(path):
+        im = Image.open(path).convert("RGB")
+        im = ImageOps.fit(im, (px_w, px_h), Image.LANCZOS, centering=(0.5, 0.45))
+        im.save(out, quality=88)
+    return out
+
+def photo_cell(c, path, x, y, w, h):
+    out = cover_crop(path, w, h)
     set_fill(c, (0.93, 0.94, 0.95))
-    c.roundRect(x, y, w, h, 6, fill=1, stroke=0)
-    if path and os.path.exists(path):
-        try:
-            img = ImageReader(path)
-            iw, ih = img.getSize()
-            scale = min(w / iw, h / ih)
-            dw, dh = iw * scale, ih * scale
-            c.saveState()
-            p = c.beginPath()
-            p.roundRect(x, y, w, h, 6)
-            c.clipPath(p, stroke=0, fill=0)
-            c.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh,
-                        mask='auto')
-            c.restoreState()
-            return True
-        except Exception:
-            pass
-    # placeholder
-    text(c, x + w / 2, y + h / 2 + 4, "BEFORE / AFTER", "Helvetica-Bold", 11,
-         MUTED, "center", tracking=2)
-    text(c, x + w / 2, y + h / 2 - 12, "photo will appear here", "Helvetica",
-         8.5, MUTED, "center")
-    return False
+    c.roundRect(x, y, w, h, 5, fill=1, stroke=0)
+    if out and os.path.exists(out):
+        c.saveState()
+        p = c.beginPath(); p.roundRect(x, y, w, h, 5)
+        c.clipPath(p, stroke=0, fill=0)
+        c.drawImage(ImageReader(out), x, y, w, h, mask='auto')
+        c.restoreState()
+    set_stroke(c, LINE); c.setLineWidth(0.6)
+    c.roundRect(x, y, w, h, 5, fill=0, stroke=1)
 
-def gallery(c):
+def gallery_page(c, pairs, page_no, intro=None):
     set_fill(c, WHITE); c.rect(0, 0, W, H, fill=1, stroke=0)
     set_fill(c, NAVY); c.rect(0, H - 10, W, 10, fill=1, stroke=0)
     set_fill(c, GOLD); c.rect(0, H - 13, W, 3, fill=1, stroke=0)
@@ -376,35 +388,47 @@ def gallery(c):
     text(c, W - MARGIN, H - 38, "Mike Irvine  ·  Project Estimate",
          "Helvetica", 10, MUTED, "right")
 
-    text(c, MARGIN, H - 66, "02  ·  OUR WORK", "Helvetica-Bold", 9, GOLD,
+    sec = "02" if page_no == 3 else "03"
+    text(c, MARGIN, H - 66, f"{sec}  ·  OUR WORK", "Helvetica-Bold", 9, GOLD,
          tracking=2)
-    text(c, MARGIN, H - 90, "Before & After", "Helvetica-Bold", 23, NAVY)
+    title = "Before & After" if page_no == 3 else "Before & After  (continued)"
+    text(c, MARGIN, H - 90, title, "Helvetica-Bold", 23, NAVY)
     set_stroke(c, GOLD); c.setLineWidth(2.2)
     c.line(MARGIN, H - 100, MARGIN + 56, H - 100)
-    bw = W - 2 * MARGIN
-    intro = ("A few recent paver projects from our crews — shown before and after "
-             "completion. This is the quality and finish you can expect on your install.")
-    iy = H - 116
-    for ln in wrap(c, intro, "Helvetica", 9.3, bw):
-        text(c, MARGIN, iy, ln, "Helvetica", 9.3, INK); iy -= 12
 
-    top = iy - 6
-    gap = 16
-    cap_h = 20
-    img_h = (top - 56 - 3 * cap_h - 2 * gap) / 3  # fill down to ~y56 footer
+    bw = W - 2 * MARGIN
+    if intro:
+        iy = H - 116
+        for ln in wrap(c, intro, "Helvetica", 9.3, bw):
+            text(c, MARGIN, iy, ln, "Helvetica", 9.3, INK); iy -= 12
+        top = iy - 8
+    else:
+        top = H - 120
+
+    cell_gap = 14
+    cw = (bw - cell_gap) / 2
+    ch = 172
+    row_gap = 20
     y = top
-    for path, caption in GALLERY:
-        y_img = y - img_h
-        draw_image_fit(c, path, MARGIN, y_img, bw, img_h)
-        text(c, MARGIN, y_img - 14, caption, "Helvetica-Bold", 8.8, NAVY)
-        y = y_img - cap_h - gap
+    for title_, before, after in pairs:
+        # pair title + labels
+        text(c, MARGIN, y, title_, "Helvetica-Bold", 10, NAVY)
+        text(c, MARGIN + cw, y, "BEFORE", "Helvetica-Bold", 7.5, MUTED,
+             "right", tracking=1)
+        text(c, W - MARGIN, y, "AFTER", "Helvetica-Bold", 7.5, GOLD, "right",
+             tracking=1)
+        cy = y - 8 - ch
+        photo_cell(c, before, MARGIN, cy, cw, ch)
+        photo_cell(c, after, MARGIN + cw + cell_gap, cy, cw, ch)
+        y = cy - row_gap
 
     set_stroke(c, LINE); c.setLineWidth(0.8)
     c.line(MARGIN, 44, W - MARGIN, 44)
     text(c, MARGIN, 32,
          "Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  ·  Sales Rep: Meir Hayon",
          "Helvetica", 8, MUTED)
-    text(c, W - MARGIN, 32, "Page 3 of 3", "Helvetica", 8, MUTED, "right")
+    text(c, W - MARGIN, 32, f"Page {page_no} of {TOTAL_PAGES}", "Helvetica", 8,
+         MUTED, "right")
 
 def main():
     c = canvas.Canvas(OUT, pagesize=letter)
@@ -413,7 +437,12 @@ def main():
     c.showPage()
     interior(c)
     c.showPage()
-    gallery(c)
+    intro = ("Six recent projects from our crews — each shown before and after, "
+             "from the same angle. This is the craftsmanship and finish you can "
+             "expect on your driveway, walkway, and backyard.")
+    gallery_page(c, PAIRS[:3], 3, intro=intro)
+    c.showPage()
+    gallery_page(c, PAIRS[3:], 4)
     c.showPage()
     c.save()
     print("wrote", OUT)
