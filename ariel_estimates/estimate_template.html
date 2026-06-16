@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Estimate — Ariel Outdoor Renovation</title>
+<style>
+  :root {
+    --navy: #1f3a8a;
+    --red: #d82b2b;
+    --ink: #111;
+    --muted: #444;
+    --line: #d8dce6;
+    --band: #eef3fb;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #f3f4f6; color: var(--ink);
+    font-family: "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.35; }
+  .page {
+    width: 8.5in; min-height: 11in; margin: 24px auto; padding: 0.45in 0.6in;
+    background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+  /* Header */
+  .header { text-align: center; }
+  .header .logo { width: 150px; height: auto; margin: 0 auto 2px; display: block; }
+  .header .meta { color: var(--muted); font-size: 10pt; margin: 1px 0; }
+  .rule { height: 2px; background: var(--navy); margin: 8px 0 10px; border-radius: 2px; }
+
+  p { margin: 3px 0; }
+
+  /* Prepared for */
+  .label { color: var(--navy); font-weight: 700; margin-bottom: 2px; }
+  .block { margin: 6px 0 10px; }
+  .block p { margin: 1px 0; }
+
+  /* Line items table */
+  table.items { width: 100%; border-collapse: collapse; margin: 8px 0 10px; }
+  table.items th, table.items td {
+    border: 1px solid var(--line); padding: 7px 10px; vertical-align: top; text-align: left;
+  }
+  table.items th { background: var(--band); color: var(--navy); font-weight: 700; }
+  table.items td.total { white-space: nowrap; text-align: right; font-weight: 600; }
+
+  h3 { color: var(--navy); font-size: 11pt; margin: 10px 0 4px; }
+  ul.tight { margin: 2px 0 6px; padding-left: 18px; }
+  ul.tight li { margin: 1px 0; }
+
+  .about { margin-top: 6px; }
+  .about p { margin: 4px 0; }
+
+  .total-price { color: var(--navy); font-weight: 800; font-size: 13pt; margin-top: 10px; }
+
+  /* Print */
+  @page { size: Letter; margin: 0.4in; }
+  @media print {
+    html, body { background: #fff; }
+    .page { box-shadow: none; margin: 0; width: auto; min-height: 0; padding: 0; }
+    .no-print { display: none !important; }
+  }
+
+  /* Toolbar (on-screen only) */
+  .toolbar {
+    position: fixed; top: 16px; right: 16px; background: var(--navy); color: #fff;
+    padding: 10px 14px; border-radius: 8px; box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    font-size: 11pt;
+  }
+  .toolbar button {
+    background: #fff; color: var(--navy); border: 0; padding: 6px 12px; border-radius: 6px;
+    font-weight: 700; cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+  Edit fields below, then
+  <button onclick="window.print()">Save as PDF</button>
+</div>
+
+<div class="page">
+
+  <!-- ── Header ──────────────────────────────────────────────────── -->
+  <div class="header">
+    <img class="logo" src="ariel_logo.svg" alt="Ariel Outdoor Renovation">
+    <div class="meta">16350 Ventura Blvd #149 · Encino, CA 91436</div>
+    <div class="meta">License: CSLB #1129259 · B – General Building Contractor</div>
+  </div>
+  <div class="rule"></div>
+
+  <!-- ── Date + Prepared For ─────────────────────────────────────── -->
+  <p><strong>Date:</strong> <span contenteditable="true">April 18, 2026</span></p>
+
+  <div class="block">
+    <div class="label">Prepared for:</div>
+    <p contenteditable="true">Patrick Meagher</p>
+    <p contenteditable="true">17232 Birch Hill Road, Riverside, CA 92504</p>
+    <p contenteditable="true">Phone: (951) 429-4972</p>
+  </div>
+
+  <!-- ── Line Items ──────────────────────────────────────────────── -->
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width: 22%;">Item</th>
+        <th>Description</th>
+        <th style="width: 18%;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td contenteditable="true">Courtyard Pavers</td>
+        <td contenteditable="true">
+          Courtyard pavers installation<br>
+          Approximate area: 525 square feet
+        </td>
+        <td class="total" contenteditable="true">$10,125</td>
+      </tr>
+      <!-- Duplicate this <tr> block for additional line items -->
+    </tbody>
+  </table>
+
+  <!-- ── Scope of Work ───────────────────────────────────────────── -->
+  <h3>Scope of Work:</h3>
+  <ul class="tight" contenteditable="true">
+    <li>Site preparation and leveling of the work area.</li>
+    <li>Gravel base installation with proper compaction.</li>
+    <li>Bedding sand application.</li>
+    <li>Installation of courtyard pavers.</li>
+    <li>Concrete border installation.</li>
+    <li>Polymeric sand between joints.</li>
+    <li>Final cleaning and job site cleanup.</li>
+  </ul>
+
+  <!-- ── What's Included ─────────────────────────────────────────── -->
+  <h3>What's Included:</h3>
+  <ul class="tight" contenteditable="true">
+    <li>All labor and supervision.</li>
+    <li>All materials and supplies.</li>
+    <li>Equipment and tools.</li>
+    <li>Delivery, hauling, and disposal.</li>
+    <li>Turn-key service from start to finish.</li>
+  </ul>
+
+  <!-- ── About ───────────────────────────────────────────────────── -->
+  <div class="about">
+    <h3>About Ariel Outdoor Renovation:</h3>
+    <p>
+      Ariel Outdoor Renovation is a licensed California contractor holding a B – General
+      Building Contractor license. We specialize exclusively in exterior and outdoor
+      renovation projects, delivering professional workmanship, clear communication, and
+      clean job sites.
+    </p>
+  </div>
+
+  <!-- ── Notes ───────────────────────────────────────────────────── -->
+  <h3>Notes:</h3>
+  <p contenteditable="true">
+    Price includes materials, labor, insurance, and taxes.
+    Permits and any city charges are <strong>not</strong> included and will be billed
+    separately if required.
+  </p>
+
+  <!-- ── Total ───────────────────────────────────────────────────── -->
+  <div class="total-price">
+    Total Price: <span contenteditable="true">$10,125</span>
+  </div>
+
+</div>
+</body>
+</html>
