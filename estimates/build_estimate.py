@@ -14,20 +14,24 @@ CACHE = os.path.join(GDIR, "cells")
 
 # Before / After pairs: (title, before_image, after_image)
 PAIRS = [
-    ("Main Driveway — View Toward the Street",
+    ("Main Driveway (Street View)",
      os.path.join(GDIR, "before_1.jpg"), os.path.join(GDIR, "after_1.jpg")),
     ("Driveway at the Garage",
      os.path.join(GDIR, "before_2.jpg"), os.path.join(GDIR, "after_2.jpg")),
-    ("Side Walkway — Iron Gate",
+    ("Side Walkway & Iron Gate",
      os.path.join(GDIR, "before_3.jpg"), os.path.join(GDIR, "after_3.jpg")),
-    ("Front Walkway — Rose Bed",
+    ("Front Walkway & Rose Bed",
      os.path.join(GDIR, "before_4.jpg"), os.path.join(GDIR, "after_4.jpg")),
     ("Entry Landing",
      os.path.join(GDIR, "before_5.jpg"), os.path.join(GDIR, "after_5.jpg")),
-    ("Side Garden Bed — Paver Edging",
+    ("Side Garden Bed & Paver Edging",
      os.path.join(GDIR, "before_6.jpg"), os.path.join(GDIR, "after_6.jpg")),
 ]
-TOTAL_PAGES = 4
+TOTAL_PAGES = 5
+REP = "Jacob Hayon, Project Manager"
+REP_PHONE = "(323) 513-4865"
+FOOTER = ("Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  ·  "
+          "Jacob Hayon, Project Manager")
 
 W, H = letter  # 612 x 792
 
@@ -169,7 +173,113 @@ def cover(c):
     text(c, W - MARGIN, 40, "16350 Ventura Blvd. D149, Encino, CA 91436",
          "Helvetica", 8.5, (0.72, 0.75, 0.82), "right")
 
-# ---------------------------------------------------------------- PAGE 2
+# ---------------------------------------------------------------- PAGE 2 (SCOPE)
+def page_chrome(c, eyebrow, title):
+    """Shared interior-page header + top bars. Returns bw."""
+    set_fill(c, WHITE); c.rect(0, 0, W, H, fill=1, stroke=0)
+    set_fill(c, NAVY); c.rect(0, H - 10, W, 10, fill=1, stroke=0)
+    set_fill(c, GOLD); c.rect(0, H - 13, W, 3, fill=1, stroke=0)
+    text(c, MARGIN, H - 38, "ARIEL OUTDOOR RENOVATION", "Helvetica-Bold", 10,
+         NAVY)
+    text(c, W - MARGIN, H - 38, "Mike Irvine  ·  Project Estimate",
+         "Helvetica", 10, MUTED, "right")
+    text(c, MARGIN, H - 66, eyebrow, "Helvetica-Bold", 9, GOLD, tracking=2)
+    text(c, MARGIN, H - 90, title, "Helvetica-Bold", 23, NAVY)
+    set_stroke(c, GOLD); c.setLineWidth(2.2)
+    c.line(MARGIN, H - 100, MARGIN + 56, H - 100)
+    return W - 2 * MARGIN
+
+def page_footer(c, page_no):
+    set_stroke(c, LINE); c.setLineWidth(0.8)
+    c.line(MARGIN, 44, W - MARGIN, 44)
+    text(c, MARGIN, 32, FOOTER, "Helvetica", 8, MUTED)
+    text(c, W - MARGIN, 32, f"Page {page_no} of {TOTAL_PAGES}", "Helvetica", 8,
+         MUTED, "right")
+
+def scope_page(c):
+    bw = page_chrome(c, "01  ·  SCOPE OF WORK", "How We Build It")
+    intro = ("Every job is built start to finish by our own crews, never subcontracted out. "
+             "Here is exactly how your pavers go in, step by step.")
+    iy = H - 116
+    for ln in wrap(c, intro, "Helvetica", 9.3, bw):
+        text(c, MARGIN, iy, ln, "Helvetica", 9.3, INK); iy -= 12
+
+    steps = [
+        ("Demolition & Haul-Off",
+         "Break out and remove the existing concrete and surfacing across the work area, then haul it off and dispose."),
+        ("Base & Gravel Mix",
+         "Apply the gravel base mix across the area, grade it to the right slope, then level and compact it solid."),
+        ("Bedding Sand",
+         "Lay bedding sand over the compacted base, screed it level, and compact again to a true, even surface."),
+        ("Paver Installation",
+         "Install the Gray Moss Charcoal pavers across all 3,215 sq ft, tight and consistent, with proper slope for drainage."),
+        ("Cement-Set Charcoal Border",
+         "Cut a clean edge into the field and set the Charcoal border stones in cement, framing every area in the contrasting color."),
+        ("Polymeric Sand & Compaction",
+         "Sweep in polymeric joint sand, then plate-compact the whole surface again so every joint locks in tight."),
+        ("Clean & Final Walkthrough",
+         "Wash and clean the pavers, blow off the site, and walk the finished job with you before we leave."),
+    ]
+    y = iy - 16
+    name_w = 142
+    desc_x = MARGIN + 28 + name_w
+    desc_w = W - MARGIN - desc_x
+    for i, (name, desc) in enumerate(steps, 1):
+        dlines = wrap(c, desc, "Helvetica", 8.8, desc_w)
+        rh = max(len(dlines) * 11 + 8, 24)
+        set_fill(c, GOLD)
+        c.circle(MARGIN + 7, y - 7, 8.5, fill=1, stroke=0)
+        text(c, MARGIN + 7, y - 10, str(i), "Helvetica-Bold", 9, WHITE, "center")
+        text(c, MARGIN + 28, y - 10, name, "Helvetica-Bold", 9.4, NAVY)
+        dy = y - 10
+        for ln in dlines:
+            text(c, desc_x, dy, ln, "Helvetica", 8.8, (0.30, 0.32, 0.36))
+            dy -= 11
+        y -= rh
+        if i < len(steps):
+            set_stroke(c, LINE); c.setLineWidth(0.6)
+            c.line(MARGIN, y + 4, W - MARGIN, y + 4)
+
+    # Why Ariel + Yelp boxes
+    box_top = y - 6
+    box_h = box_top - 66
+    gap = 14
+    half = (bw - gap) / 2
+    # left box
+    set_fill(c, CREAM)
+    c.roundRect(MARGIN, box_top - box_h, half, box_h, 6, fill=1, stroke=0)
+    set_fill(c, NAVY); c.rect(MARGIN, box_top - box_h, 3.5, box_h, fill=1, stroke=0)
+    text(c, MARGIN + 14, box_top - 16, "WHY ARIEL OUTDOOR RENOVATION",
+         "Helvetica-Bold", 8.2, GOLD, tracking=0.8)
+    why = [
+        "California CSLB Class B General Building license.",
+        "We specialize only in outdoor work: pavers, turf, patio covers, and outdoor kitchens.",
+        "Our own crews build every job. We never subcontract the work out like most companies.",
+        "Licensed, insured, and fully self-performed from start to finish.",
+    ]
+    wy = box_top - 30
+    for item in why:
+        set_fill(c, NAVY); c.circle(MARGIN + 16, wy + 3, 1.5, fill=1, stroke=0)
+        for ln in wrap(c, item, "Helvetica", 8.3, half - 30):
+            text(c, MARGIN + 24, wy, ln, "Helvetica", 8.3, INK); wy -= 10
+        wy -= 3
+    # right box
+    rx = MARGIN + half + gap
+    set_fill(c, CREAM)
+    c.roundRect(rx, box_top - box_h, half, box_h, 6, fill=1, stroke=0)
+    set_fill(c, GOLD); c.rect(rx, box_top - box_h, 3.5, box_h, fill=1, stroke=0)
+    text(c, rx + 14, box_top - 16, "SEE OUR REVIEWS", "Helvetica-Bold", 8.2,
+         GOLD, tracking=0.8)
+    yelp = ("Before you decide, look us up on Yelp. Search \"Ariel Outdoor Renovation\" "
+            "to read real reviews from homeowners across Southern California. We are proud "
+            "of our reputation and happy to let our work and our customers speak for us.")
+    ry2 = box_top - 32
+    for ln in wrap(c, yelp, "Helvetica", 8.6, half - 28):
+        text(c, rx + 14, ry2, ln, "Helvetica", 8.6, INK); ry2 -= 11
+
+    page_footer(c, 2)
+
+# ---------------------------------------------------------------- PAGE 3 (INVESTMENT)
 def interior(c):
     set_fill(c, WHITE); c.rect(0, 0, W, H, fill=1, stroke=0)
     # top bars
@@ -183,7 +293,7 @@ def interior(c):
          "Helvetica", 10, MUTED, "right")
 
     # title
-    text(c, MARGIN, H - 66, "01  ·  PROJECT OVERVIEW & INVESTMENT",
+    text(c, MARGIN, H - 66, "02  ·  OVERVIEW & INVESTMENT",
          "Helvetica-Bold", 9, GOLD, tracking=2)
     text(c, MARGIN, H - 90, "Project Overview", "Helvetica-Bold", 23, NAVY)
     set_stroke(c, GOLD); c.setLineWidth(2.2)
@@ -218,9 +328,9 @@ def interior(c):
         text(c, x + cw / 2, sy_top - 40, small, "Helvetica-Bold", 7.6, sub,
              "center", tracking=0.4)
 
-    # two columns: scope + materials
+    # two columns: what's included + materials
     col_top = sy_top - sh - 22
-    text(c, MARGIN, col_top, "SCOPE OF WORK  ·  WHAT'S INCLUDED",
+    text(c, MARGIN, col_top, "WHAT'S INCLUDED",
          "Helvetica-Bold", 9, GOLD, tracking=1.4)
     text(c, MARGIN + bw / 2 + 6, col_top, "MATERIALS & SELECTIONS",
          "Helvetica-Bold", 9, GOLD, tracking=1.4)
@@ -229,12 +339,12 @@ def interior(c):
     c.line(MARGIN + bw / 2 + 6, col_top - 6, W - MARGIN, col_top - 6)
 
     scope = [
-        "Site clearing & demo — remove existing surfacing; haul off & dispose.",
-        "Grading & base prep — cut, fill & compact draining aggregate base to spec.",
-        "Paver install — set 3,215 sq ft over bedding sand, sloped for drainage.",
-        "Charcoal soldier-course border on driveway, walkway & patio edges.",
-        "Edge restraints to lock the field for clean, permanent transitions.",
-        "Final detailing — polymeric joint sand, compaction, wash & walkthrough.",
+        "All labor, materials, and equipment for the full install.",
+        "Demolition and haul-off of the existing surfaces.",
+        "3,215 sq ft of pavers across the driveway, walkway, and backyard.",
+        "Cement-set Charcoal border around every paved area.",
+        "Full base prep, polymeric sand, and final cleaning.",
+        "On-site project management from start to walkthrough.",
     ]
     ly = col_top - 22
     lw = bw / 2 - 16
@@ -336,20 +446,28 @@ def interior(c):
          8, MUTED)
     text(c, W - MARGIN - 150, sigy - 11, "Date", "Helvetica", 8, MUTED)
 
+    # questions / contact callout
+    qy = sigy - 28
+    qh = 22
+    set_fill(c, CREAM); c.roundRect(MARGIN, qy - qh, bw, qh, 6, fill=1, stroke=0)
+    set_fill(c, GOLD); c.rect(MARGIN, qy - qh, 3.5, qh, fill=1, stroke=0)
+    text(c, MARGIN + 14, qy - 14, "Questions?", "Helvetica-Bold", 9, NAVY)
+    text(c, MARGIN + 78, qy - 14,
+         f"Call {REP} directly at {REP_PHONE} anytime.",
+         "Helvetica", 9, INK)
+
     # closing note
     note = ("This is an estimate, not a contract. Pricing valid 30 days from the cover date. "
             "A formal California home-improvement contract supersedes this document upon signing.")
-    ny = sigy - 30
+    ny = qy - qh - 12
     for ln in wrap(c, note, "Helvetica-Oblique", 7.8, bw):
         text(c, MARGIN, ny, ln, "Helvetica-Oblique", 7.8, MUTED); ny -= 10
 
     # footer
     set_stroke(c, LINE); c.setLineWidth(0.8)
     c.line(MARGIN, 44, W - MARGIN, 44)
-    text(c, MARGIN, 32,
-         "Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  ·  Sales Rep: Meir Hayon",
-         "Helvetica", 8, MUTED)
-    text(c, W - MARGIN, 32, f"Page 2 of {TOTAL_PAGES}", "Helvetica", 8, MUTED,
+    text(c, MARGIN, 32, FOOTER, "Helvetica", 8, MUTED)
+    text(c, W - MARGIN, 32, f"Page 3 of {TOTAL_PAGES}", "Helvetica", 8, MUTED,
          "right")
 
 # ---------------------------------------------------------------- GALLERY
@@ -388,10 +506,10 @@ def gallery_page(c, pairs, page_no, intro=None):
     text(c, W - MARGIN, H - 38, "Mike Irvine  ·  Project Estimate",
          "Helvetica", 10, MUTED, "right")
 
-    sec = "02" if page_no == 3 else "03"
+    sec = "03" if page_no == 4 else "04"
     text(c, MARGIN, H - 66, f"{sec}  ·  OUR WORK", "Helvetica-Bold", 9, GOLD,
          tracking=2)
-    title = "Before & After" if page_no == 3 else "Before & After  (continued)"
+    title = "Before & After" if page_no == 4 else "Before & After  (continued)"
     text(c, MARGIN, H - 90, title, "Helvetica-Bold", 23, NAVY)
     set_stroke(c, GOLD); c.setLineWidth(2.2)
     c.line(MARGIN, H - 100, MARGIN + 56, H - 100)
@@ -424,9 +542,7 @@ def gallery_page(c, pairs, page_no, intro=None):
 
     set_stroke(c, LINE); c.setLineWidth(0.8)
     c.line(MARGIN, 44, W - MARGIN, 44)
-    text(c, MARGIN, 32,
-         "Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  ·  Sales Rep: Meir Hayon",
-         "Helvetica", 8, MUTED)
+    text(c, MARGIN, 32, FOOTER, "Helvetica", 8, MUTED)
     text(c, W - MARGIN, 32, f"Page {page_no} of {TOTAL_PAGES}", "Helvetica", 8,
          MUTED, "right")
 
@@ -435,14 +551,16 @@ def main():
     c.setTitle("Mike Irvine - Paver Estimate - Ariel Outdoor Renovation")
     cover(c)
     c.showPage()
+    scope_page(c)
+    c.showPage()
     interior(c)
     c.showPage()
-    intro = ("Six recent projects from our crews — each shown before and after, "
+    intro = ("Six recent projects from our own crews, each shown before and after "
              "from the same angle. This is the craftsmanship and finish you can "
              "expect on your driveway, walkway, and backyard.")
-    gallery_page(c, PAIRS[:3], 3, intro=intro)
+    gallery_page(c, PAIRS[:3], 4, intro=intro)
     c.showPage()
-    gallery_page(c, PAIRS[3:], 4)
+    gallery_page(c, PAIRS[3:], 5)
     c.showPage()
     c.save()
     print("wrote", OUT)
