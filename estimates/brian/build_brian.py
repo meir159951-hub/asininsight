@@ -29,7 +29,15 @@ FOOTER = ("Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  �
           "Jacob Hayon, Project Manager")
 REP = "Jacob Hayon, Project Manager"
 REP_PHONE = "(323) 513-4865"
-TOTAL_PAGES = 3  # cover + scope + investment (gallery added once photos arrive)
+TOTAL_PAGES = 4  # cover + scope + investment + before/after gallery
+
+GD = os.path.join(HERE, "assets", "gallery")
+PAIRS = [
+    ("Driveway", os.path.join(GD, "before_1.jpg"), os.path.join(GD, "after_1.jpg")),
+    ("House Frontage", os.path.join(GD, "before_2.jpg"), os.path.join(GD, "after_2.jpg")),
+    ("Side Walkway", os.path.join(GD, "before_3.jpg"), os.path.join(GD, "after_3.jpg")),
+    ("Main Entrance", os.path.join(GD, "before_4.jpg"), os.path.join(GD, "after_4.jpg")),
+]
 
 
 def sf(c, rgb): c.setFillColorRGB(*rgb)
@@ -342,12 +350,62 @@ def investment_page(c):
     footer(c, 3)
 
 
+def cover_crop(path, cw_pt, ch_pt):
+    os.makedirs(CACHE, exist_ok=True)
+    pw, ph = int(cw_pt * 2.6), int(ch_pt * 2.6)
+    out = os.path.join(CACHE, os.path.basename(path).replace(".jpg", f"_{pw}x{ph}.jpg"))
+    if not os.path.exists(out) and os.path.exists(path):
+        im = Image.open(path).convert("RGB")
+        im = ImageOps.fit(im, (pw, ph), Image.LANCZOS, centering=(0.5, 0.5))
+        im.save(out, quality=88)
+    return out
+
+def photo_cell(c, path, x, y, w, h):
+    out = cover_crop(path, w, h)
+    sf(c, (0.93, 0.94, 0.95)); c.roundRect(x, y, w, h, 5, fill=1, stroke=0)
+    if out and os.path.exists(out):
+        c.saveState()
+        p = c.beginPath(); p.roundRect(x, y, w, h, 5)
+        c.clipPath(p, stroke=0, fill=0)
+        c.drawImage(ImageReader(out), x, y, w, h, mask='auto')
+        c.restoreState()
+    ss(c, LINE); c.setLineWidth(0.6); c.roundRect(x, y, w, h, 5, fill=0, stroke=1)
+
+def gallery_page(c):
+    bw = chrome(c, "03  ·  THE VISION", "Before & After")
+    intro = ("Here is your front yard today next to the proposed design for each area, so you "
+             "can picture exactly what we are building. After images are design renderings of "
+             "the finished result.")
+    iy = H - 116
+    for ln in wrap(c, intro, "Helvetica", 9.3, bw):
+        text(c, MARGIN, iy, ln, "Helvetica", 9.3, INK); iy -= 12
+
+    top = iy - 8
+    cell_gap = 14
+    cw = (bw - cell_gap) / 2
+    n = len(PAIRS)
+    avail = top - 52
+    per_row = avail / n
+    ch = per_row - 30
+    y = top
+    for title_, before, after in PAIRS:
+        text(c, MARGIN, y, title_, "Helvetica-Bold", 10, NAVY)
+        text(c, MARGIN + cw, y, "BEFORE", "Helvetica-Bold", 7.5, MUTED, "right", tracking=1)
+        text(c, W - MARGIN, y, "AFTER", "Helvetica-Bold", 7.5, GOLD, "right", tracking=1)
+        cy = y - 8 - ch
+        photo_cell(c, before, MARGIN, cy, cw, ch)
+        photo_cell(c, after, MARGIN + cw + cell_gap, cy, cw, ch)
+        y = cy - (per_row - ch - 8)
+    footer(c, 4)
+
+
 def main():
     c = canvas.Canvas(OUT, pagesize=letter)
     c.setTitle("Brian Stampley - Front Yard Renovation - Ariel Outdoor Renovation")
     cover(c); c.showPage()
     scope_page(c); c.showPage()
     investment_page(c); c.showPage()
+    gallery_page(c); c.showPage()
     c.save()
     print("wrote", OUT)
 
