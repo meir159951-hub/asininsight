@@ -148,10 +148,11 @@ SECTIONS = [
      "Grade and level the area, then install concrete pads with turf strips in the same grid "
      "style as the driveway."),
     ("Main Staircase", "3 steps",
-     "About 5 ft wide with a 7 ft run, finished with recessed warm white LED strip lighting "
-     "under each step."),
+     "About 5 ft wide with a 7 ft run. The electrical is prepared under each step so warm "
+     "white step lighting is ready to install (fixtures supplied by the client)."),
     ("Second Staircase Area", "~16 ft",
-     "Two to three steps, about 7 ft long, with under step LED step lighting."),
+     "Two to three steps, about 7 ft long, with the electrical prepared for under step "
+     "lighting (fixtures supplied by the client)."),
     ("Block Wall", "75 lf x 4 ft",
      "White smooth stucco finish for a modern look, with provisions for lights and planting "
      "pockets. Includes footing, block, grout, finish, and cap."),
@@ -159,10 +160,12 @@ SECTIONS = [
      "Grade and level, plate compact the base, weed barrier, then install artificial turf with "
      "infill and edging."),
     ("Tree Removal", "3 palms",
-     "Remove 3 palm trees (1 large and 2 medium), pull the stumps, and haul away all debris."),
-    ("Landscape Lighting (Low Voltage)", "throughout",
-     "Under step LED strips on both staircases, path lights, and wall lights, with transformer, "
-     "wiring, and full hookup."),
+     "Remove 3 palm trees (1 large and 2 medium), pull the stumps, and haul away all debris. "
+     "We remove trees only and do not relocate or transplant live trees."),
+    ("Lighting: Electrical Prep Only", "see note",
+     "Conduit, wiring, and transformer hookup made ready for low voltage lighting (under step, "
+     "path, and wall). Ariel does not supply any light fixtures; all fixtures are provided by "
+     "the client."),
     ("Planting Prep", "included",
      "Prepare planting pockets and areas along the block wall and walkways."),
     ("Demo & Disposal", "included",
@@ -193,6 +196,33 @@ def scope_page(c):
         for ln in dlines:
             text(c, txt_x, dy, ln, "Helvetica", 8.6, (0.32, 0.34, 0.38)); dy -= 10.5
         y = dy - 8
+
+    # Important notes box
+    notes = [
+        ("Light fixtures", "Ariel prepares the electrical so the system is ready for low voltage "
+         "lighting. We do not supply any light fixtures and make no commitment or warranty on "
+         "fixtures. All fixtures are provided by the client."),
+        ("Trees", "We do not relocate or transplant live trees. Trees can only be removed and "
+         "hauled away."),
+    ]
+    inner_w = bw - 32
+    nlines = 0
+    for _, b in notes:
+        nlines += len(wrap(c, b, "Helvetica", 8.6, inner_w - 60)) + 1
+    box_h = 24 + nlines * 11
+    btop = y - 4
+    sf(c, CREAM); c.roundRect(MARGIN, btop - box_h, bw, box_h, 7, fill=1, stroke=0)
+    sf(c, GOLD); c.rect(MARGIN, btop - box_h, 4, box_h, fill=1, stroke=0)
+    text(c, MARGIN + 16, btop - 17, "PLEASE NOTE", "Helvetica-Bold", 9, GOLD, tracking=1.5)
+    ny = btop - 32
+    for label, body in notes:
+        text(c, MARGIN + 16, ny, label + ":", "Helvetica-Bold", 8.7, NAVY)
+        lw = c.stringWidth(label + ": ", "Helvetica-Bold", 8.7)
+        first = True
+        for ln in wrap(c, body, "Helvetica", 8.6, inner_w - (lw if first else 0)):
+            text(c, MARGIN + 16 + (lw if first else 0), ny, ln, "Helvetica", 8.6, INK)
+            ny -= 11; first = False
+        ny -= 3
     footer(c, 2)
 
 
@@ -238,7 +268,8 @@ def investment_page(c):
         "Two LED-lit staircases.",
         "75 lf white block wall, footing to cap.",
         "Removal of 3 palm trees and stumps.",
-        "Low voltage landscape lighting and planting prep.",
+        "Electrical prep for low voltage lighting (fixtures by client).",
+        "Planting prep along the wall and walkways.",
     ]
     ly = col_top - 22
     lw = bw / 2 - 16
@@ -254,7 +285,7 @@ def investment_page(c):
         ("Concrete Pads", "Poured concrete pads in a 4 ft grid with 3 inch artificial turf joints."),
         ("Artificial Turf", "Premium landscape grade synthetic turf, supplied and installed."),
         ("Block Wall", "75 lf, 4 ft high, white smooth stucco finish, footing to cap."),
-        ("Lighting", "Low voltage warm white LED: under step strips, path lights, and wall lights."),
+        ("Lighting", "Electrical readied for low voltage lighting. Fixtures supplied by the client, not by Ariel."),
     ]
     my = col_top - 22
     for title_, body in mats:
@@ -318,8 +349,9 @@ def investment_page(c):
     # not included
     foot_top = ry - 14
     text(c, MARGIN, foot_top, "NOT INCLUDED", "Helvetica-Bold", 8, GOLD, tracking=1.2)
-    ni = ("Permits beyond the block wall  ·  HOA fees  ·  drainage / utility relocation  ·  "
-          "furniture & accessories  ·  any work outside this scope.")
+    ni = ("Light fixtures (supplied by client)  ·  tree relocation or transplanting  ·  "
+          "permits beyond the block wall  ·  HOA fees  ·  drainage or utility relocation  ·  "
+          "furniture and accessories  ·  any work outside this scope.")
     niy = foot_top - 11
     for ln in wrap(c, ni, "Helvetica", 8.3, bw):
         text(c, MARGIN, niy, ln, "Helvetica", 8.3, (0.34, 0.36, 0.40)); niy -= 10
