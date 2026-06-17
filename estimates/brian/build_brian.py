@@ -29,7 +29,7 @@ FOOTER = ("Ariel Outdoor Renovation  ·  License #1129259  ·  (818) 390-7639  �
           "Jacob Hayon, Project Manager")
 REP = "Jacob Hayon, Project Manager"
 REP_PHONE = "(323) 513-4865"
-TOTAL_PAGES = 2  # cover + scope (pricing & gallery added once numbers/photos arrive)
+TOTAL_PAGES = 3  # cover + scope + investment (gallery added once photos arrive)
 
 
 def sf(c, rgb): c.setFillColorRGB(*rgb)
@@ -188,11 +188,166 @@ def scope_page(c):
     footer(c, 2)
 
 
+def investment_page(c):
+    bw = chrome(c, "02  ·  INVESTMENT", "Investment & Timeline")
+    bx = MARGIN
+    btop, bh = H - 116, 44
+    sf(c, CREAM); c.roundRect(bx, btop - bh, bw, bh, 6, fill=1, stroke=0)
+    sf(c, GOLD); c.rect(bx, btop - bh, 3.5, bh, fill=1, stroke=0)
+    text(c, bx + 16, btop - 17, "Hi Brian,", "Helvetica-Bold", 11, NAVY)
+    intro = ("Below is the turnkey price for your full front yard renovation. It covers labor, "
+             "materials, equipment, and on-site management for everything in the scope.")
+    iy = btop - 31
+    for ln in wrap(c, intro, "Helvetica", 9.3, bw - 30):
+        text(c, bx + 16, iy, ln, "Helvetica", 9.3, INK); iy -= 12
+
+    # stat cards
+    sy = btop - bh - 14
+    shh, gap = 52, 12
+    cw = (bw - 2 * gap) / 3
+    cards = [(CREAM, NAVY, "940 sf", "Concrete Pads"),
+             (CREAM, NAVY, "870 sf", "Artificial Turf"),
+             (NAVY, WHITE, "$73,800", "Total Investment")]
+    for i, (bg, fg, big, small) in enumerate(cards):
+        x = bx + i * (cw + gap)
+        sf(c, bg); c.roundRect(x, sy - shh, cw, shh, 6, fill=1, stroke=0)
+        text(c, x + cw / 2, sy - 24, big, "Helvetica-Bold", 18, fg, "center")
+        text(c, x + cw / 2, sy - 40, small, "Helvetica-Bold", 7.6, GOLD, "center", tracking=0.4)
+
+    # two columns
+    col_top = sy - shh - 20
+    text(c, MARGIN, col_top, "WHAT'S INCLUDED", "Helvetica-Bold", 9, GOLD, tracking=1.4)
+    text(c, MARGIN + bw / 2 + 6, col_top, "MATERIALS & SELECTIONS", "Helvetica-Bold", 9, GOLD, tracking=1.4)
+    ss(c, LINE); c.setLineWidth(0.8)
+    c.line(MARGIN, col_top - 6, MARGIN + bw / 2 - 10, col_top - 6)
+    c.line(MARGIN + bw / 2 + 6, col_top - 6, W - MARGIN, col_top - 6)
+
+    incl = [
+        "All labor, materials, and equipment.",
+        "Demo and haul-off of the existing surfaces.",
+        "Concrete pads with turf joints (driveway and side area).",
+        "870 sf artificial turf area.",
+        "Two LED-lit staircases.",
+        "75 lf white block wall, footing to cap.",
+        "Removal of 3 palm trees and stumps.",
+        "Low voltage landscape lighting and planting prep.",
+    ]
+    ly = col_top - 22
+    lw = bw / 2 - 16
+    for item in incl:
+        sf(c, GOLD); c.circle(MARGIN + 3, ly + 3, 1.6, fill=1, stroke=0)
+        for ln in wrap(c, item, "Helvetica", 8.5, lw - 12):
+            text(c, MARGIN + 12, ly, ln, "Helvetica", 8.5, INK); ly -= 10.5
+        ly -= 3
+
+    mx = MARGIN + bw / 2 + 6
+    mw = bw / 2 - 12
+    mats = [
+        ("Concrete Pads", "Poured concrete pads in a 4 ft grid with 3 inch artificial turf joints."),
+        ("Artificial Turf", "Premium landscape grade synthetic turf, supplied and installed."),
+        ("Block Wall", "75 lf, 4 ft high, white smooth stucco finish, footing to cap."),
+        ("Lighting", "Low voltage warm white LED: under step strips, path lights, and wall lights."),
+    ]
+    my = col_top - 22
+    for title_, body in mats:
+        text(c, mx, my, title_, "Helvetica-Bold", 9.2, NAVY); my -= 12
+        for ln in wrap(c, body, "Helvetica", 8.5, mw):
+            text(c, mx, my, ln, "Helvetica", 8.5, (0.34, 0.36, 0.40)); my -= 10
+        my -= 5
+
+    # investment band + timeline
+    inv_top = min(ly, my) - 8
+    inv_h = 40
+    sf(c, NAVY); c.roundRect(MARGIN, inv_top - inv_h, bw, inv_h, 7, fill=1, stroke=0)
+    text(c, MARGIN + 18, inv_top - 16, "TOTAL PROJECT INVESTMENT", "Helvetica-Bold", 8.5, GOLD, tracking=1.5)
+    text(c, MARGIN + 18, inv_top - 31, "Turnkey: labor, materials, equipment & management included.",
+         "Helvetica", 8.5, (0.80, 0.83, 0.89))
+    text(c, W - MARGIN - 16, inv_top - 26, "$73,800", "Helvetica-Bold", 24, WHITE, "right")
+
+    tl_top = inv_top - inv_h - 14
+    sf(c, CREAM); c.roundRect(MARGIN, tl_top - 20, bw, 20, 5, fill=1, stroke=0)
+    sf(c, GOLD); c.rect(MARGIN, tl_top - 20, 3.5, 20, fill=1, stroke=0)
+    text(c, MARGIN + 14, tl_top - 13, "TIMELINE", "Helvetica-Bold", 8.5, NAVY, tracking=1)
+    text(c, MARGIN + 74, tl_top - 13,
+         "About 3 weeks from start to final walkthrough, weather permitting.",
+         "Helvetica", 8.8, INK)
+
+    # payment schedule
+    ps_top = tl_top - 20 - 16
+    text(c, MARGIN, ps_top, "PAYMENT SCHEDULE  ·  PER CALIFORNIA CSLB RULES", "Helvetica-Bold", 9, GOLD, tracking=1.2)
+    text(c, MARGIN, ps_top - 12, "Down payment limited to $1,000 by law. Progress payments tied to on-site milestones.",
+         "Helvetica", 8, MUTED)
+    rows = [
+        ("1", "Contract signing (down payment, CA cap $1,000)", "$1,000", "1.4%"),
+        ("2", "Upon material delivery", "$35,000", "47.4%"),
+        ("3", "Upon demo & excavation", "$20,000", "27.1%"),
+        ("4", "Upon base & block wall completion", "$16,800", "22.7%"),
+        ("5", "Completion & final walkthrough", "$1,000", "1.4%"),
+    ]
+    tbl_top = ps_top - 22
+    rh = 15
+    cols_x = [MARGIN + 8, MARGIN + 34, W - MARGIN - 110, W - MARGIN - 14]
+    sf(c, NAVY); c.rect(MARGIN, tbl_top - rh, bw, rh, fill=1, stroke=0)
+    text(c, cols_x[0], tbl_top - 10.5, "#", "Helvetica-Bold", 7.5, WHITE)
+    text(c, cols_x[1], tbl_top - 10.5, "MILESTONE", "Helvetica-Bold", 7.5, WHITE, tracking=0.6)
+    text(c, cols_x[2], tbl_top - 10.5, "AMOUNT", "Helvetica-Bold", 7.5, WHITE, "right", tracking=0.6)
+    text(c, cols_x[3], tbl_top - 10.5, "%", "Helvetica-Bold", 7.5, WHITE, "right")
+    ry = tbl_top - rh
+    for i, (n, ms, amt, pct) in enumerate(rows):
+        if i % 2 == 1:
+            sf(c, ROW); c.rect(MARGIN, ry - rh, bw, rh, fill=1, stroke=0)
+        text(c, cols_x[0], ry - 10.5, n, "Helvetica-Bold", 8.5, GOLD)
+        text(c, cols_x[1], ry - 10.5, ms, "Helvetica", 8.5, INK)
+        text(c, cols_x[2], ry - 10.5, amt, "Helvetica-Bold", 8.5, INK, "right")
+        text(c, cols_x[3], ry - 10.5, pct, "Helvetica", 8.5, MUTED, "right")
+        ry -= rh
+    sf(c, CREAM); c.rect(MARGIN, ry - rh, bw, rh, fill=1, stroke=0)
+    text(c, cols_x[1], ry - 10.5, "TOTAL", "Helvetica-Bold", 8.5, NAVY)
+    text(c, cols_x[2], ry - 10.5, "$73,800", "Helvetica-Bold", 8.5, NAVY, "right")
+    text(c, cols_x[3], ry - 10.5, "100%", "Helvetica-Bold", 8.5, NAVY, "right")
+    ry -= rh
+
+    # not included
+    foot_top = ry - 14
+    text(c, MARGIN, foot_top, "NOT INCLUDED", "Helvetica-Bold", 8, GOLD, tracking=1.2)
+    ni = ("Permits beyond the block wall  ·  HOA fees  ·  drainage / utility relocation  ·  "
+          "furniture & accessories  ·  any work outside this scope.")
+    niy = foot_top - 11
+    for ln in wrap(c, ni, "Helvetica", 8.3, bw):
+        text(c, MARGIN, niy, ln, "Helvetica", 8.3, (0.34, 0.36, 0.40)); niy -= 10
+
+    # questions callout
+    qy = niy - 8
+    qh = 22
+    sf(c, CREAM); c.roundRect(MARGIN, qy - qh, bw, qh, 6, fill=1, stroke=0)
+    sf(c, GOLD); c.rect(MARGIN, qy - qh, 3.5, qh, fill=1, stroke=0)
+    text(c, MARGIN + 14, qy - 14, "Questions?", "Helvetica-Bold", 9, NAVY)
+    text(c, MARGIN + 78, qy - 14, f"Call {REP} directly at {REP_PHONE} anytime.",
+         "Helvetica", 9, INK)
+
+    # signature
+    sigy = qy - qh - 22
+    ss(c, INK); c.setLineWidth(0.8)
+    c.line(MARGIN, sigy, MARGIN + 210, sigy)
+    c.line(W - MARGIN - 150, sigy, W - MARGIN, sigy)
+    text(c, MARGIN, sigy - 11, "Accepted by (client signature)", "Helvetica", 8, MUTED)
+    text(c, W - MARGIN - 150, sigy - 11, "Date", "Helvetica", 8, MUTED)
+
+    note = ("This is an estimate, not a contract. Pricing valid 30 days from the cover date. "
+            "A formal California home-improvement contract supersedes this document upon signing.")
+    ny = sigy - 26
+    for ln in wrap(c, note, "Helvetica-Oblique", 7.8, bw):
+        text(c, MARGIN, ny, ln, "Helvetica-Oblique", 7.8, MUTED); ny -= 10
+
+    footer(c, 3)
+
+
 def main():
     c = canvas.Canvas(OUT, pagesize=letter)
     c.setTitle("Brian Stampley - Front Yard Renovation - Ariel Outdoor Renovation")
     cover(c); c.showPage()
     scope_page(c); c.showPage()
+    investment_page(c); c.showPage()
     c.save()
     print("wrote", OUT)
 
