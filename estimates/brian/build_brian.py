@@ -204,6 +204,9 @@ def scope_page(c):
          "fixtures. All fixtures are provided by the client."),
         ("Trees", "We do not relocate or transplant live trees. Trees can only be removed and "
          "hauled away."),
+        ("Permits & approvals", "This estimate does not include any city permits, approvals, "
+         "surveys, inspections, or related fees. If the project requires them, they are handled "
+         "separately and are not part of this price."),
     ]
     inner_w = bw - 32
     nlines = 0
@@ -350,8 +353,8 @@ def investment_page(c):
     foot_top = ry - 14
     text(c, MARGIN, foot_top, "NOT INCLUDED", "Helvetica-Bold", 8, GOLD, tracking=1.2)
     ni = ("Light fixtures (supplied by client)  ·  tree relocation or transplanting  ·  "
-          "permits beyond the block wall  ·  HOA fees  ·  drainage or utility relocation  ·  "
-          "furniture and accessories  ·  any work outside this scope.")
+          "city permits, approvals, surveys, inspections and fees  ·  HOA fees  ·  "
+          "drainage or utility relocation  ·  furniture and accessories  ·  any work outside this scope.")
     niy = foot_top - 11
     for ln in wrap(c, ni, "Helvetica", 8.3, bw):
         text(c, MARGIN, niy, ln, "Helvetica", 8.3, (0.34, 0.36, 0.40)); niy -= 10
